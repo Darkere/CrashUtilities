@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class ClearItemTask extends TimerTask {
 
-    public boolean scheduled = false;
+    public static boolean scheduled = false;
     public boolean enabled;
     int maxItems;
     List<Integer> list;

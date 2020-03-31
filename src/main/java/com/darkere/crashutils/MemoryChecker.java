@@ -27,7 +27,7 @@ public class MemoryChecker extends TimerTask {
         double used = inMegaBytes(count.getMaximum()- count.getFree());
         double delta = used -lastUsed;
         if(delta > warnDelta){
-            CrashUtils.LOGGER.info("Memory Spike" + delta + " MB");
+            CrashUtils.LOGGER.info("Memory Spike " + delta + " MB");
         }
         lastUsed = used;
 

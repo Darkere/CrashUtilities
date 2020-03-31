@@ -34,7 +34,7 @@ public class CommandUtils {
         style.setHoverEvent(hoverEvent);
 
         source.sendFeedback( text.setStyle(style),false);
-        LOGGER.info(text.getUnformattedComponentText() + " " + command);
+        LOGGER.info(text.getString() + " " + command);
     }
     public static void sendTEMessage(CommandSource source, TileEntity te, boolean runDirectly) {
         BlockPos pos = te.getPos();
