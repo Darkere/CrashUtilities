@@ -3,7 +3,6 @@ package com.darkere.crashutils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
-import java.util.logging.LogManager;
 
 public class MemoryChecker extends TimerTask {
     public List<MemoryCount> counts = new ArrayList<>();
@@ -26,8 +25,9 @@ public class MemoryChecker extends TimerTask {
         }
         double used = inMegaBytes(count.getMaximum()- count.getFree());
         double delta = used -lastUsed;
+        String deltaString = String.format("%.2f",delta);
         if(delta > warnDelta){
-            CrashUtils.LOGGER.info("Memory Spike " + delta + " MB");
+            CrashUtils.LOGGER.info("Memory Spike " + deltaString + " MB");
         }
         lastUsed = used;
 

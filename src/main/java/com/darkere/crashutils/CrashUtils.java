@@ -13,6 +13,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ExtensionPoint;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -23,7 +24,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.Timer;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(CrashUtils.MODID)
@@ -35,6 +36,7 @@ public class CrashUtils {
     public static final ServerConfig SERVER_CONFIG = new ServerConfig();
     ClearItemTask task;
     public static MemoryChecker memoryChecker = null;
+    public static boolean curiosLoaded = false;
     public CrashUtils() {
 
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> MinecraftForge.EVENT_BUS.register(new ClientEvents()));
@@ -54,6 +56,7 @@ public class CrashUtils {
 
     @SubscribeEvent
     public void serverStarting(FMLServerStartingEvent event) {
+        curiosLoaded = ModList.get().isLoaded("curios");
         CommandDispatcher<CommandSource> dispatcher = event.getCommandDispatcher();
         LiteralCommandNode<CommandSource> cmd = dispatcher.register(LiteralArgumentBuilder.<CommandSource>literal(MODID)
             .requires(x-> x.hasPermissionLevel(4))
@@ -66,6 +69,10 @@ public class CrashUtils {
             .then(UnstuckCommand.register())
             .then(MemoryCommand.register())
             .then(ItemClearCommand.register())
+            .then(InventoryRemovalCommand.register())
+            .then(InventoryLookCommand.register())
+            .then(RemoveFromInventorySlotCommand.register())
+
         );
         dispatcher.register(Commands.literal("cu").redirect(cmd));
     }
