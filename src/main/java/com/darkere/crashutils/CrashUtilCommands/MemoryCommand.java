@@ -29,7 +29,7 @@ public class MemoryCommand {
         if(full.size() < count){
             count = full.size();
         }
-        for (int i = full.size() - count- 1; i < full.size() -1; i++) { //last count elements
+        for (int i = full.size() - count; i < full.size() ; i++) { //last count elements
             context.getSource().sendFeedback(createVisualMemoryText(full.get(i)),true);
         }
         return Command.SINGLE_SUCCESS;
