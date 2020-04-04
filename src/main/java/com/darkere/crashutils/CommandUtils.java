@@ -75,7 +75,7 @@ public class CommandUtils {
         try {
             player = source.asPlayer();
         } catch (CommandSyntaxException e) {
-            e.printStackTrace();
+
         }
         sendCommandMessage(source, text, "/cu tp " + player.getName().getString() + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + type.getRegistryName(), runDirectly);
     }
@@ -97,5 +97,40 @@ public class CommandUtils {
         text.appendSibling(itemStack.getTextComponent());
         String Command = "/cu removeItemFromInventorySlot " + name + " " + inventoryType + " " + i;
         sendCommandMessage(source, text, Command, false);
+    }
+
+    public static ITextComponent createURLComponent(String display, String url) {
+        ITextComponent text = new StringTextComponent(display);
+        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.OPEN_URL, url);
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Go to " + url));
+        Style style = new Style();
+        style.setClickEvent(clickEvent);
+        style.setHoverEvent(hoverEvent);
+        text.setStyle(style);
+        return text;
+    }
+
+    public static ITextComponent createCopyComponent(String display, String toCopy) {
+        ITextComponent text = new StringTextComponent(display);
+        Style style = new Style();
+        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, toCopy);
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Copy Contents to Clipboard"));
+        style.setClickEvent(clickEvent);
+        style.setHoverEvent(hoverEvent);
+        style.setColor(TextFormatting.GREEN);
+        text.setStyle(style);
+        return text;
+    }
+
+    public static ITextComponent getCommandTextComponent(String display, String command) {
+        ITextComponent text = new StringTextComponent(display);
+        Style style = new Style();
+        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, command);
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Click to execute \u00A76" + command + "\u00A7r"));
+        style.setClickEvent(clickEvent);
+        style.setHoverEvent(hoverEvent);
+        style.setColor(TextFormatting.GOLD);
+        text.setStyle(style);
+        return text;
     }
 }

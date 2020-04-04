@@ -34,6 +34,7 @@ public class MemoryCommand {
         }
         return Command.SINGLE_SUCCESS;
     }
+
     private static ITextComponent createVisualMemoryText(MemoryChecker.MemoryCount count){
         ITextComponent text = new StringTextComponent("[");
         double maximum =  (Math.ceil(MemoryChecker.inGigaBytes(count.getMaximum())));

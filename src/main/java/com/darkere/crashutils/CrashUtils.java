@@ -46,6 +46,8 @@ public class CrashUtils {
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SERVER_CONFIG.getSpec());
     }
 
+
+
     @SubscribeEvent
     public void configReload(ModConfig.Reloading event){
         task.setup();
@@ -72,6 +74,7 @@ public class CrashUtils {
             .then(InventoryRemovalCommand.register())
             .then(InventoryLookCommand.register())
             .then(RemoveFromInventorySlotCommand.register())
+            .then(GetLogCommand.register())
 
         );
         dispatcher.register(Commands.literal("cu").redirect(cmd));
