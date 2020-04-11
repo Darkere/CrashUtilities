@@ -8,12 +8,16 @@ buildscript {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
     }
 }
+plugins {
+    id 'com.github.johnrengelman.shadow' version '4.0.2'
+    id 'java'
+}
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '2.1'
+version = '2.2'
 group = 'com.darkere.crashutilities' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'crashutilities'
 
@@ -91,6 +95,13 @@ repositories {
     repositories {
         mavenCentral()
     }
+    maven {
+        url = "https://mvnrepository.com/artifact/"
+    }
+}
+
+shadowJar {
+    configurations = [project.configurations.compile]
 }
 dependencies {
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
@@ -115,8 +126,14 @@ dependencies {
     // For more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
-    compile 'fr.minuskube:jpastee:1.0.2'
-
+    compile('fr.minuskube:jpastee:1.0.2') { transitive = false }
+    compile('com.mashape.unirest:unirest-java:1.4.9'){ transitive = false }
+    compile group: 'org.apache.httpcomponents', name: 'httpasyncclient', version: '4.1.4'
+    compile group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.12'
+    compile group: 'org.apache.httpcomponents', name: 'httpcore-nio', version: '4.4.13'
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.12'
+    compile group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.13'
+    compile group: 'org.json', name: 'json', version: '20190722'
     runtimeOnly fg.deobf("top.theillusivec4.curios:curios:FORGE-1.15.2-2.0.2.1")
     compileOnly fg.deobf("top.theillusivec4.curios:curios:FORGE-1.15.2-2.0.2.1:api")
 }
@@ -131,7 +148,7 @@ jar {
                 "Implementation-Title"    : project.name,
                 "Implementation-Version"  : "${version}",
                 "Implementation-Vendor"   : "examplemodsareus",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
         ])
     }
 }
@@ -145,6 +162,11 @@ def reobfArtifact = artifacts.add('default', reobfFile) {
     type 'jar'
     builtBy 'reobfJar'
 }
+reobf {
+    shadowJar {
+
+    }
+}
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -156,4 +178,20 @@ publishing {
             url "file:///${project.projectDir}/mcmodsrepo"
         }
     }
+}
+shadowJar {
+    from sourceSets.main.output
+
+    dependencies {
+        include(dependency('fr.minuskube:jpastee:1.0.2'))
+        include(dependency('com.mashape.unirest:unirest-java:1.4.9'))
+        include(dependency(group: 'org.apache.httpcomponents', name: 'httpasyncclient', version: '4.1.4'))
+        include(dependency(group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.12'))
+        include(dependency(group: 'org.apache.httpcomponents', name: 'httpcore-nio', version: '4.4.13'))
+        include(dependency(group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.13'))
+        include(dependency(group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.12'))
+        include(dependency(group: 'org.json', name: 'json', version: '20190722'))
+    }
+    relocate 'org.apache.http', 'dark.org.http'
+    relocate 'org.json', 'dark.org.json'
 }

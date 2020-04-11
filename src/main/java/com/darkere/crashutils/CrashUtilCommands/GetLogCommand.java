@@ -68,7 +68,6 @@ public class GetLogCommand {
 
 
     private static int getLogOverview(CommandContext<CommandSource> ctx) {
-        //ctx.getSource().sendFeedback(new StringTextComponent("############################").applyTextStyle(TextFormatting.RED), true);
         ITextComponent latestlogText = new StringTextComponent("Log from current Game").applyTextStyle(TextFormatting.YELLOW);
         latestlogText.appendSibling(CommandUtils.getCommandTextComponent(" [Upload]", "/cu getLog uploadLatestLog"));
         latestlogText.appendSibling(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getFileAsStringFromPath(LogHandler.latestlog)));
@@ -87,7 +86,6 @@ public class GetLogCommand {
             archivedText.appendSibling(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getStringFromArchive(archivedLog)));
             ctx.getSource().sendFeedback(archivedText, true);
         }
-       // ctx.getSource().sendFeedback(new StringTextComponent("############################").applyTextStyle(TextFormatting.RED), true);
         return 1;
 
     }
