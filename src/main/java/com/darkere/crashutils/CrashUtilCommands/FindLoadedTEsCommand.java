@@ -1,6 +1,6 @@
 package com.darkere.crashutils.CrashUtilCommands;
 
-import com.darkere.crashutils.TileEntityList;
+import com.darkere.crashutils.DataStructures.TileEntityData;
 import com.darkere.crashutils.WorldUtils;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -13,7 +13,6 @@ import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.DimensionArgument;
 import net.minecraft.command.arguments.ResourceLocationArgument;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -36,7 +35,7 @@ public class FindLoadedTEsCommand implements Command<CommandSource> {
 
     @Override
     public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-        TileEntityList list = new TileEntityList();
+        TileEntityData list = new TileEntityData();
         List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
         list.createLists(worlds);
         ResourceLocation res = ResourceLocationArgument.getResourceLocation(context,"res");

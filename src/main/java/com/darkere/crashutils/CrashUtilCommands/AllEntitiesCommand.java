@@ -1,7 +1,6 @@
 package com.darkere.crashutils.CrashUtilCommands;
 
-import com.darkere.crashutils.EntityList;
-import com.darkere.crashutils.TileEntityList;
+import com.darkere.crashutils.DataStructures.EntityData;
 import com.darkere.crashutils.WorldUtils;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -10,7 +9,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.DimensionArgument;
-import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
 import java.util.List;
@@ -26,7 +24,7 @@ public class AllEntitiesCommand implements Command<CommandSource>{
 
     @Override
     public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-        EntityList list = new EntityList();
+        EntityData list = new EntityData();
         List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
         list.createLists(worlds);
         list.reply(null,context.getSource());

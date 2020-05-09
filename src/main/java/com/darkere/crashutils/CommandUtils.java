@@ -1,10 +1,10 @@
 package com.darkere.crashutils;
 
+import com.darkere.crashutils.DataStructures.WorldPos;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -42,19 +42,17 @@ public class CommandUtils {
         LOGGER.info(text.getString() + " " + command);
     }
 
-    public static void sendTEMessage(CommandSource source, TileEntity te, boolean runDirectly) {
-        BlockPos pos = te.getPos();
-        StringBuilder builder = new StringBuilder();
-        builder.append(" - ");
-        builder.append("[").append(pos.getX()).append(",").append(pos.getY()).append(",").append(pos.getZ()).append("]");
-        ITextComponent text = new StringTextComponent(builder.toString()).setStyle(new Style().setColor(TextFormatting.GREEN));
+    public static void sendTEMessage(CommandSource source, WorldPos worldPos, boolean runDirectly) {
+        BlockPos pos = worldPos.pos;
+        String position = " - " + "[" + pos.getX() + "," + pos.getY() + "," + pos.getZ() + "]";
+        ITextComponent text = new StringTextComponent(position).setStyle(new Style().setColor(TextFormatting.GREEN));
         ServerPlayerEntity player = null;
         try {
             player = source.asPlayer();
         } catch (CommandSyntaxException e) {
             e.printStackTrace();
         }
-        sendCommandMessage(source, text, "/cu tp " + player.getName().getString() + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + te.getWorld().getDimension().getType().getRegistryName(), runDirectly);
+        sendCommandMessage(source, text, "/cu tp " + player.getName().getString() + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + worldPos.type.getRegistryName(), runDirectly);
     }
 
     public static void sendFindTEMessage(CommandSource source, ResourceLocation res, int count, boolean ticking) {

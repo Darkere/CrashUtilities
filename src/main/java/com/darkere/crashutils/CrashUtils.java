@@ -1,6 +1,7 @@
 package com.darkere.crashutils;
 
 import com.darkere.crashutils.CrashUtilCommands.*;
+import com.darkere.crashutils.Network.Network;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -17,8 +18,11 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.network.FMLNetworkConstants;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -37,8 +41,9 @@ public class CrashUtils {
     ClearItemTask task;
     public static MemoryChecker memoryChecker = null;
     public static boolean curiosLoaded = false;
-    public CrashUtils() {
 
+    public CrashUtils() {
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::common);
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> MinecraftForge.EVENT_BUS.register(new ClientEvents()));
         MinecraftForge.EVENT_BUS.register(new DeleteBlocks());
         MinecraftForge.EVENT_BUS.register(this);
@@ -46,14 +51,14 @@ public class CrashUtils {
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SERVER_CONFIG.getSpec());
     }
 
-
-
+    public void common(FMLCommonSetupEvent event){
+        Network.register();
+    }
     @SubscribeEvent
-    public void configReload(ModConfig.Reloading event){
+    public void configReload(ModConfig.Reloading event) {
         task.setup();
         memoryChecker.setup();
     }
-
 
 
     @SubscribeEvent
@@ -61,10 +66,9 @@ public class CrashUtils {
         curiosLoaded = ModList.get().isLoaded("curios");
         CommandDispatcher<CommandSource> dispatcher = event.getCommandDispatcher();
         LiteralCommandNode<CommandSource> cmd = dispatcher.register(LiteralArgumentBuilder.<CommandSource>literal(MODID)
-            .requires(x-> x.hasPermissionLevel(4))
+            .requires(x -> x.hasPermissionLevel(4))
             .then(AllLoadedTEsCommand.register())
             .then(FindLoadedTEsCommand.register())
-            .then(CrashCommand.register())
             .then(AllEntitiesCommand.register())
             .then(FindEntitiesCommand.register())
             .then(TeleportCommand.register())
@@ -75,22 +79,31 @@ public class CrashUtils {
             .then(InventoryLookCommand.register())
             .then(RemoveFromInventorySlotCommand.register())
             .then(GetLogCommand.register())
+            .then(ProfilingCommands.register())
+            .then(LoadedChunksCommand.register())
 
         );
         dispatcher.register(Commands.literal("cu").redirect(cmd));
+
     }
     @SubscribeEvent
-    public void ServerStarted(FMLServerStartedEvent event){
+    public void ServerStopped(FMLServerStoppedEvent event){
+        task.cancel();
+        memoryChecker.cancel();
+    }
+
+    @SubscribeEvent
+    public void ServerStarted(FMLServerStartedEvent event) {
         Timer timer = new Timer();
         task = new ClearItemTask();
         task.setup();
-        int time = SERVER_CONFIG.getTimer()* 60 * 1000;
-        timer.scheduleAtFixedRate(task,5,time);
-        if(SERVER_CONFIG.getMemoryChecker()){
+        int time = SERVER_CONFIG.getTimer() * 60 * 1000;
+        timer.scheduleAtFixedRate(task, 5, time);
+        if (SERVER_CONFIG.getMemoryChecker()) {
             memoryChecker = new MemoryChecker();
             memoryChecker.setup();
             time = SERVER_CONFIG.getMemoryTimer() * 1000;
-            timer.scheduleAtFixedRate(memoryChecker,5,time);
+            timer.scheduleAtFixedRate(memoryChecker, 5, time);
         }
 
     }
@@ -98,7 +111,8 @@ public class CrashUtils {
     @SubscribeEvent
     public void onWorldTick(TickEvent.WorldTickEvent event) {
         if (event.world.isRemote) return;
-        task.checkItemCounts((ServerWorld)event.world);
+        task.checkItemCounts((ServerWorld) event.world);
 
     }
+
 }

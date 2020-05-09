@@ -37,7 +37,7 @@ public class ServerConfig {
         builder.pop();
         builder.push("Memory Checker");
         builder.comment("Adds a Memory checker that reads currently used Memory. A command that reads out the last logged memory values, and a warning in logs when large amounts of memory get used in a small amount of time");
-        memoryChecker = builder.comment("Enable the Memory checker").define("enabled",true);
+        memoryChecker = builder.comment("Enable the Memory checker").define("enabled",false);
         memoryTimer = builder.comment("Check memory every (in seconds)").defineInRange("timer",10,0,Integer.MAX_VALUE);
         memoryLogTimer = builder.comment("Time between Memory Checks that will get saved for display(in seconds)").defineInRange( "timer",300,0,Integer.MAX_VALUE);
         memoryWarnDelta = builder.comment("Threshold at which the Memory checker will diplay a warning in the Log (in MB)").defineInRange("threshold", 500,0 ,Integer.MAX_VALUE );

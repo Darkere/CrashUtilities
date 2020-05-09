@@ -1,6 +1,6 @@
 package com.darkere.crashutils.CrashUtilCommands;
 
-import com.darkere.crashutils.TileEntityList;
+import com.darkere.crashutils.DataStructures.TileEntityData;
 import com.darkere.crashutils.WorldUtils;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -24,7 +24,7 @@ public class AllLoadedTEsCommand implements Command<CommandSource> {
 
     @Override
     public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-        TileEntityList list = new TileEntityList();
+        TileEntityData list = new TileEntityData();
         List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
         list.createLists(worlds);
         list.reply(null,context.getSource());

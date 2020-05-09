@@ -1,8 +1,6 @@
 package com.darkere.crashutils;
 
-import net.minecraft.block.AirBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.chunk.IChunk;
@@ -37,6 +35,7 @@ public class DeleteBlocks {
     private void deleteBlock(BlockPos pos,IChunk chunk){
         IWorld world = chunk.getWorldForge();
         if(world != null){
+            world.setBlockState(pos, Blocks.AIR.getDefaultState(),01);
           //  BlockState block = world.getBlockState(pos);
         //    world.removeBlock(pos,false);
             chunk.removeTileEntity(pos);
