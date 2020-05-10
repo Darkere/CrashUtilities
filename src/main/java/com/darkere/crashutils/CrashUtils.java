@@ -21,7 +21,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
-import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
+import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.network.FMLNetworkConstants;
 import org.apache.commons.lang3.tuple.Pair;
@@ -41,6 +41,7 @@ public class CrashUtils {
     ClearItemTask task;
     public static MemoryChecker memoryChecker = null;
     public static boolean curiosLoaded = false;
+    Timer timer;
 
     public CrashUtils() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::common);
@@ -87,23 +88,22 @@ public class CrashUtils {
 
     }
     @SubscribeEvent
-    public void ServerStopped(FMLServerStoppedEvent event){
-        task.cancel();
-        memoryChecker.cancel();
+    public void ServerStopping(FMLServerStoppingEvent event){
+        timer.cancel();
     }
 
     @SubscribeEvent
     public void ServerStarted(FMLServerStartedEvent event) {
-        Timer timer = new Timer();
+        timer = new Timer();
         task = new ClearItemTask();
         task.setup();
         int time = SERVER_CONFIG.getTimer() * 60 * 1000;
-        timer.scheduleAtFixedRate(task, 5, time);
+        timer.scheduleAtFixedRate(task, time, time);
         if (SERVER_CONFIG.getMemoryChecker()) {
             memoryChecker = new MemoryChecker();
             memoryChecker.setup();
             time = SERVER_CONFIG.getMemoryTimer() * 1000;
-            timer.scheduleAtFixedRate(memoryChecker, 5, time);
+            timer.scheduleAtFixedRate(memoryChecker, time, time);
         }
 
     }
