@@ -40,7 +40,7 @@ public abstract class CUContentPane extends AbstractGui {
     }
 
     public boolean isMouseOver(double mx, double my, int centerX, int centerY) {
-        return (mx > centerX + defaultRenderOffsetX && mx < centerX - defaultRenderOffsetX && my > centerY + defaultRenderOffsetY && my < centerY - defaultRenderOffsetY);
+        return (mx >= centerX + defaultRenderOffsetX && mx <= centerX - defaultRenderOffsetX && my >= centerY + defaultRenderOffsetY && my <= centerY - defaultRenderOffsetY);
     }
 
     public void render(int centerX, int centerY) {

@@ -30,12 +30,12 @@ public class GridChunkGUI extends CUContentPane {
     CUDropDown TICKETS;
     CUDropDown ENTITIES;
     CUDropDown TILEENTITIES;
+    int hoveringX, hoveringY = 0;
+    long blinkTime = 0;
 
-
-
-    GridChunkGUI(CUScreen  screen, DimensionType dim) {
-        super(dim,screen);
-        DataHolder.requestUpdates(DataRequestType.LOADEDCHUNKDATA, 0,dim , true);
+    GridChunkGUI(CUScreen screen, DimensionType dim) {
+        super(dim, screen);
+        DataHolder.requestUpdates(DataRequestType.LOADEDCHUNKDATA, 0, dim, true);
         colormap.put(null, 0x686868 + 0xFF000000); // GRAY
         colormap.put("PARTIALLYGENERATED", 0x66ff99 + 0xff000000); //GREEN
         colormap.put("BORDER", 0xffff99 + 0xff000000); //YELLOW
@@ -48,7 +48,7 @@ public class GridChunkGUI extends CUContentPane {
         RENDERTYPES = new CUDropDown(DropDownType.RENDERTYPES, screen, Arrays.stream(GridRenderType.values()).map(x -> x.type).collect(Collectors.toList()), GridRenderType.LOCATIONTYPE.type, -190, -102, 75);
         TICKETS = new CUDropDown(DropDownType.TICKETS, screen, DataHolder.getLatestChunkData() == null ? new ArrayList<>() : new ArrayList<>(DataHolder.getLatestChunkData().getChunksByTicketName().keySet()), "All", -106, -102, 0);
         ENTITIES = new CUDropDown(DropDownType.ENTITIES, screen, DataHolder.getLatestEntityData() == null ? new ArrayList<>() : DataHolder.getLatestEntityData().getMap().keySet().stream().map(ResourceLocation::toString).collect(Collectors.toList()), "All", -106, -102, 0);
-        TILEENTITIES = new CUDropDown(DropDownType.TILEENTITIES, screen, DataHolder.getLatestTileEntityData() == null ? new ArrayList<>() : DataHolder.getLatestTileEntityData().getMap().keySet().stream().map(ResourceLocation::toString).collect(Collectors.toList()), "All", -106 , -102, 0);
+        TILEENTITIES = new CUDropDown(DropDownType.TILEENTITIES, screen, DataHolder.getLatestTileEntityData() == null ? new ArrayList<>() : DataHolder.getLatestTileEntityData().getMap().keySet().stream().map(ResourceLocation::toString).collect(Collectors.toList()), "All", -106, -102, 0);
         screen.dropDowns.add(RENDERTYPES);
         screen.dropDowns.add(TICKETS);
         screen.dropDowns.add(ENTITIES);
@@ -90,6 +90,12 @@ public class GridChunkGUI extends CUContentPane {
         int newj = Math.round(((float) j) / zoom);
         int posX = newi + XOffset;
         int posY = newj + YOffset;
+        if (posX == this.hoveringX && posY == this.hoveringY && System.currentTimeMillis() - blinkTime > 300) {
+            if (System.currentTimeMillis() - blinkTime > 600) {
+                blinkTime = System.currentTimeMillis();
+            }
+            return 0xFFFFFF;
+        }
         String loc = null;
         int counts = 0;
         switch (type) {
@@ -103,20 +109,20 @@ public class GridChunkGUI extends CUContentPane {
                 break;
             case ENTITIES:
                 if (DataHolder.getLatestEntityData() == null) return -1;
-                counts = DataHolder.getLatestEntityData().getEntityCountForChunk(new ChunkPos(posX,posY));
+                counts = DataHolder.getLatestEntityData().getEntityCountForChunk(new ChunkPos(posX, posY));
                 break;
             case TILEENTITIES:
                 if (DataHolder.getLatestTileEntityData() == null) return -1;
-                counts = DataHolder.getLatestTileEntityData().getTileEntityCountForChunk(new ChunkPos(posX,posY));
+                counts = DataHolder.getLatestTileEntityData().getTileEntityCountForChunk(new ChunkPos(posX, posY));
                 break;
 
         }
-        if(counts != 0) {
+        if (counts != 0) {
             float hue = 0;
-            if(counts > 100){
-                  hue = 0.4f;
+            if (counts > 100) {
+                hue = 0.4f;
             } else {
-                  hue =  (1 - (counts / 100f)) * 0.4f;
+                hue = (1 - (counts / 100f)) * 0.4f;
             }
             final float saturation = 0.9f;//1.0 for brilliant, 0.0 for dull
             final float luminance = 1.0f; //1.0 for brighter, 0.0 for black
@@ -140,27 +146,27 @@ public class GridChunkGUI extends CUContentPane {
 
     @Override
     public void addOffset(double x, double y) {
-        XOffset += (x / zoom);
-        YOffset += (y / zoom);
+        XOffset += Math.round(x / zoom);
+        YOffset += Math.round(y / zoom);
 
     }
 
     @Override
     public void zoom(double x, double y, double delta, int centerX, int centerY) {
-        double distX =  x - (centerX + defaultRenderOffsetX);
-        double distY =  y - (centerY + defaultRenderOffsetY);
+        double distX = x - (centerX + defaultRenderOffsetX);
+        double distY = y - (centerY + defaultRenderOffsetY);
         distX /= zoom;
         distY /= zoom;
 
         if (delta > 0) {
-            zoom *= 2;
+            zoom *= 3;
             XOffset += distX / 2;
             YOffset += distY / 2;
 
         } else {
-            zoom /= 2;
-            XOffset -= distX;
-            YOffset -= distY;
+            zoom /= 3;
+            XOffset -= distX / 2;
+            YOffset -= distY / 2;
 
         }
     }
@@ -177,30 +183,49 @@ public class GridChunkGUI extends CUContentPane {
         return DataHolder.getLatestChunkData().getTickets(pos);
     }
 
+    public String getEntityCountFor(int x, int y) {
+        ChunkPos pos = getChunkFor(x, y);
+        if (DataHolder.getLatestEntityData() == null) return null;
+        return String.valueOf(DataHolder.getLatestEntityData().getEntityCountForChunk(pos));
+    }
+
+    public String getTileEntityCountFor(int x, int y) {
+        ChunkPos pos = getChunkFor(x, y);
+        if (DataHolder.getLatestTileEntityData() == null) return null;
+        return String.valueOf(DataHolder.getLatestTileEntityData().getTileEntityCountForChunk(pos));
+    }
+
     public ChunkPos getChunkFor(int x, int y) {
         double xPos = x - XTopLeft + (XOffset * zoom);
         double yPos = y - YTopLeft + (YOffset * zoom);
-        xPos /= zoom;
-        yPos /= zoom;
-        return new ChunkPos((int) xPos, (int) yPos);
+        int xiPos = (int) Math.round(xPos / zoom);
+        int yiPos = (int) Math.round(yPos / zoom);
+        this.hoveringX = xiPos;
+        this.hoveringY = yiPos;
+        return new ChunkPos(xiPos, yiPos);
     }
-    public String getNameForLocationType(String s){
-        if(s == null) return "Nothing yet";
-        switch (s){
-            case "ENTITY_TICKING": return "Fully loaded and ticking";
-            case "TICKING": return "Loaded but not ticking entities";
+
+    public String getNameForLocationType(String s) {
+        if (s == null) return "Nothing yet";
+        switch (s) {
+            case "ENTITY_TICKING":
+                return "Fully loaded and ticking";
+            case "TICKING":
+                return "Loaded but not ticking entities";
             case "BORDER":
             case "INACCESSIBLE":
             case "FULL":
                 return "Loaded but not ticking";
-            case "PRIMED": return "Prepared for loading";
-            case "PARTIALLYGENERATED": return "Partially generated";
+            case "PRIMED":
+                return "Prepared for loading";
+            case "PARTIALLYGENERATED":
+                return "Partially generated";
         }
         return "???";
     }
 
 
-    public void updateSelection(DropDownType ddtype, String s){
+    public void updateSelection(DropDownType ddtype, String s) {
         if (s.equals("All")) s = null;
         switch (ddtype) {
             case RENDERTYPES:

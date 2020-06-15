@@ -80,7 +80,7 @@ public class CrashUtils {
             .then(InventoryLookCommand.register())
             .then(RemoveFromInventorySlotCommand.register())
             .then(GetLogCommand.register())
-            .then(ProfilingCommands.register())
+            //.then(ProfilingCommands.register())
             .then(LoadedChunksCommand.register())
 
         );

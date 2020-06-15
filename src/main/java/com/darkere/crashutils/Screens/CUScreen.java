@@ -32,6 +32,7 @@ public class CUScreen extends Screen {
     public List<CUDropDown> dropDowns = new ArrayList<>();
     public List<CUDropDown> topDropDowns = new ArrayList<>();
     ExtendedButton button;
+    boolean dragging;
 
     public CUScreen(DimensionType dimension) {
         super(new StringTextComponent("CUScreen"));
@@ -88,11 +89,27 @@ public class CUScreen extends Screen {
                 String loc = gui.getLocFor(mx, my);
                 tooltips.add("State: " + gui.getNameForLocationType(loc));
                 StringBuilder builder = new StringBuilder();
-                builder.append("Tickets: ");
-                String tickets = gui.getTicketsFor(mx, my);
-                builder.append(tickets == null ? "None" : tickets);
+                switch(gui.type){
+                    case TICKET:
+                    case LOCATIONTYPE:
+                        builder.append("Tickets: ");
+                        String tickets = gui.getTicketsFor(mx, my);
+                        builder.append(tickets == null ? "None" : tickets);
+                        break;
+                    case ENTITIES:
+                        builder.append("Entities: ");
+                        String entities = gui.getEntityCountFor(mx, my);
+                        builder.append(entities == null ? "None" : entities);
+                        break;
+                    case TILEENTITIES:
+                        builder.append("Tileentities: ");
+                        String tileEntities = gui.getTileEntityCountFor(mx, my);
+                        builder.append(tileEntities == null ? "None" : tileEntities);
+                        break;
+                }
+
                 tooltips.add(builder.toString());
-                tooltips.add("Double click to teleport");
+                tooltips.add("(Double click to teleport)");
             } else if(contentGUI instanceof DataListGUI){
                 DataListGUI gui = (DataListGUI) contentGUI;
                 gui.addToToolTip(tooltips,mx,my);
@@ -145,7 +162,7 @@ public class CUScreen extends Screen {
 
     @Override
     public boolean mouseDragged(double XStart, double YStart, int Button, double XDif, double YDif) {
-        if (contentGUI.isMouseOver(XStart,YStart,centerX,centerY)) {
+        if (dragging) {
             contentGUI.addOffset(-XDif, -YDif);
             return true;
         }
@@ -153,8 +170,19 @@ public class CUScreen extends Screen {
     }
 
     @Override
+    public boolean mouseReleased(double p_mouseReleased_1_, double p_mouseReleased_3_, int p_mouseReleased_5_) {
+        if(p_mouseReleased_5_ == 0){
+            dragging = false;
+        }
+        return super.mouseReleased(p_mouseReleased_1_,p_mouseReleased_3_,p_mouseReleased_5_);
+    }
+
+    @Override
     public boolean mouseClicked(double mx, double my, int mouseButton) {
         if (mouseButton != 0) return false;
+        if(contentGUI.isMouseOver(mx,my,centerX,centerY)){
+            dragging = true;
+        }
         for (CUDropDown dropDown : topDropDowns) {
             if (dropDown.checkClick((int) mx, (int) my)) {
                 return true;
