@@ -26,6 +26,11 @@ public class MemoryChecker extends TimerTask {
         MemoryCount count = new MemoryCount(r.maxMemory(), r.freeMemory(), r.totalMemory());
         if (shouldLog()) {
             counts.add(count);
+            if(counts.size() > 100){
+                for(int i = 0; i< 20;i++){
+                    counts.remove(counts.size()-1);
+                }
+            }
         }
 
         double used = inMegaBytes(count.getMaximum() - count.getFree());
