@@ -22,6 +22,7 @@ public class ServerConfig {
     private ForgeConfigSpec.IntValue memoryWarnDelta;
     private ForgeConfigSpec.IntValue memoryTimer;
     private ForgeConfigSpec.BooleanValue memoryChecker;
+    private ForgeConfigSpec.BooleanValue heapDump;
 
     ServerConfig(){
 
@@ -38,9 +39,11 @@ public class ServerConfig {
         builder.push("Memory Checker");
         builder.comment("Adds a Memory checker that reads currently used Memory. A command that reads out the last logged memory values, and a warning in logs when large amounts of memory get used in a small amount of time");
         memoryChecker = builder.comment("Enable the Memory checker").define("enabled",false);
-        memoryTimer = builder.comment("Check memory every (in seconds)").defineInRange("timer",10,0,Integer.MAX_VALUE);
-        memoryLogTimer = builder.comment("Time between Memory Checks that will get saved for display(in seconds)").defineInRange( "timer",300,0,Integer.MAX_VALUE);
-        memoryWarnDelta = builder.comment("Threshold at which the Memory checker will diplay a warning in the Log (in MB)").defineInRange("threshold", 500,0 ,Integer.MAX_VALUE );
+        memoryTimer = builder.comment("Check memory every (in seconds)").defineInRange("timer",5,0,Integer.MAX_VALUE);
+        memoryLogTimer = builder.comment("Time between Memory Checks that will get saved for display(in seconds)").defineInRange( "timer",30,0,Integer.MAX_VALUE);
+        memoryWarnDelta = builder.comment("Threshold at which the Memory checker will diplay a warning in the Log (in MB)").defineInRange("threshold", 1000,0 ,Integer.MAX_VALUE );
+        heapDump = builder.comment("Run /spark heapdump when memory fills up more than 95 % the first time").define("heapdump",false);
+        builder.pop();
 
     }
 
@@ -92,5 +95,9 @@ public class ServerConfig {
 
     public boolean getMemoryChecker() {
         return memoryChecker.get();
+    }
+
+    public boolean getHeapDump() {
+        return heapDump.get();
     }
 }

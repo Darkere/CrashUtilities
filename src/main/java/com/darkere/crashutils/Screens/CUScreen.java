@@ -26,7 +26,7 @@ public class CUScreen extends Screen {
     int centerX;
     int centerY;
     int activeTab = 0;
-    int tabs = 2;
+    int tabs = 3;
     private static final ResourceLocation WINDOW = new ResourceLocation(CrashUtils.MODID, "textures/gui/cuscreen.png");
     private static final ResourceLocation TABS = new ResourceLocation(CrashUtils.MODID, "textures/gui/tabs.png");
     public List<CUDropDown> dropDowns = new ArrayList<>();
@@ -44,7 +44,7 @@ public class CUScreen extends Screen {
         centerY = height / 2;
         centerX = width / 2;
         contentGUI = new GridChunkGUI(this, dim);
-        button = new ExtendedButton(centerX + 174, centerY - 101, 20, 10, String.valueOf(contentGUI.updateSpeed), (x) -> {
+        button = new ExtendedButton(centerX + 174, centerY - 103, 20, 10, String.valueOf(contentGUI.updateSpeed), (x) -> {
             contentGUI.shouldUpdate = !contentGUI.shouldUpdate;
             contentGUI.setUpdateSpeed();
         });
@@ -55,24 +55,24 @@ public class CUScreen extends Screen {
     public void renderBackground() {
         assert this.minecraft != null;
         this.minecraft.getTextureManager().bindTexture(WINDOW);
-        int i = (this.width - 400) / 2;
-        int j = (this.height - 215) / 2;
-        blit(i, j, 0, 0, 420, 240, 512, 512);
+        int i = centerX - (400 / 2);
+        int j = centerY - (216 / 2);
+        blit(i, j, 0, 0, 400, 216, 512, 512);
         renderTabs();
 
     }
 
     @Override
     public void render(int mx, int my, float p_render_3_) {
+        contentGUI.render(centerX, centerY);
+        dropDowns.forEach(x -> x.render(centerX, centerY));
         renderBackground();
         centerX = width / 2;
         centerY = height / 2;
-        fill(centerX + 173, centerY - 102, centerX + 195, centerY - 90, contentGUI.shouldUpdate ? 0xff51f542 : 0xfff54242);
+        fill(centerX + 173, centerY - 105, centerX + 195, centerY - 93, contentGUI.shouldUpdate ? 0xff51f542 : 0xfff54242);
         button.x = centerX + 174;
-        button.y = centerY -101;
+        button.y = centerY - 104;
         button.renderButton(mx, my, p_render_3_);
-        contentGUI.render(centerX, centerY);
-        dropDowns.forEach(x -> x.render(centerX, centerY));
         topDropDowns.forEach(x -> x.render(centerX, centerY));
         renderToolTips(mx, my);
         super.render(mx, my, p_render_3_);
@@ -81,7 +81,7 @@ public class CUScreen extends Screen {
     private void renderToolTips(int mx, int my) {
         List<String> tooltips = new ArrayList<>();
         //tooltips.add(mx+ " " + my);
-        if(contentGUI.isMouseOver(mx,my,centerX,centerY)) {
+        if (contentGUI.isMouseOver(mx, my, centerX, centerY)) {
             if (contentGUI instanceof GridChunkGUI) {
                 GridChunkGUI gui = (GridChunkGUI) contentGUI;
                 ChunkPos chunkPos = gui.getChunkFor(mx, my);
@@ -89,7 +89,7 @@ public class CUScreen extends Screen {
                 String loc = gui.getLocFor(mx, my);
                 tooltips.add("State: " + gui.getNameForLocationType(loc));
                 StringBuilder builder = new StringBuilder();
-                switch(gui.type){
+                switch (gui.type) {
                     case TICKET:
                     case LOCATIONTYPE:
                         builder.append("Tickets: ");
@@ -110,14 +110,14 @@ public class CUScreen extends Screen {
 
                 tooltips.add(builder.toString());
                 tooltips.add("(Double click to teleport)");
-            } else if(contentGUI instanceof DataListGUI){
+            } else if (contentGUI instanceof DataListGUI) {
                 DataListGUI gui = (DataListGUI) contentGUI;
-                gui.addToToolTip(tooltips,mx,my);
+                gui.addToToolTip(tooltips, mx, my);
             }
         }
-        if(button.isMouseOver(mx,my)){
+        if (button.isMouseOver(mx, my)) {
             tooltips.add("Requesting data every " + contentGUI.updateSpeed + " seconds");
-            tooltips.add("Currently "+ (contentGUI.shouldUpdate ? "enabled" : "disabled"));
+            tooltips.add("Currently " + (contentGUI.shouldUpdate ? "enabled" : "disabled"));
             tooltips.add("Scroll to change update Speed");
             tooltips.add("(It may be possible to lag a server using this)");
         }
@@ -125,22 +125,27 @@ public class CUScreen extends Screen {
     }
 
     private void renderTabs() {
-        int x = (this.width - 398) / 2;
-        int y = (this.height - 257) / 2;
+        int x = centerX - (400 / 2);
+        int y = centerY - (216 / 2) - 22;
         assert this.minecraft != null;
         this.minecraft.getTextureManager().bindTexture(TABS);
+        float iconScale = 3.75f;
+        List<CUTab> tabIcons = new ArrayList<>();
+        tabIcons.add(CUTab.MAPTABICON);
+        tabIcons.add(CUTab.LISTTABICON);
+        tabIcons.add(CUTab.INVSEETABICON);
         for (int i = 0; i < tabs; i++) {
             if (i == 0) {
                 if (i == activeTab) {
-                    CUTab.ATL.drawTab(this, x + (i * 27), y);
+                    CUTab.ATL.drawTab(this, x + (i * 27), y, tabIcons.get(i), iconScale);
                 } else {
-                    CUTab.ITL.drawTab(this, x + (i * 27), y);
+                    CUTab.ITL.drawTab(this, x + (i * 27), y, tabIcons.get(i), iconScale);
                 }
             } else {
                 if (i == activeTab) {
-                    CUTab.ATC.drawTab(this, x + (i * 27), y);
+                    CUTab.ATC.drawTab(this, x + (i * 27), y, tabIcons.get(i), iconScale);
                 } else {
-                    CUTab.ITC.drawTab(this, x + (i * 27), y);
+                    CUTab.ITC.drawTab(this, x + (i * 27), y, tabIcons.get(i), iconScale);
                 }
             }
         }
@@ -171,16 +176,16 @@ public class CUScreen extends Screen {
 
     @Override
     public boolean mouseReleased(double p_mouseReleased_1_, double p_mouseReleased_3_, int p_mouseReleased_5_) {
-        if(p_mouseReleased_5_ == 0){
+        if (p_mouseReleased_5_ == 0) {
             dragging = false;
         }
-        return super.mouseReleased(p_mouseReleased_1_,p_mouseReleased_3_,p_mouseReleased_5_);
+        return super.mouseReleased(p_mouseReleased_1_, p_mouseReleased_3_, p_mouseReleased_5_);
     }
 
     @Override
     public boolean mouseClicked(double mx, double my, int mouseButton) {
         if (mouseButton != 0) return false;
-        if(contentGUI.isMouseOver(mx,my,centerX,centerY)){
+        if (contentGUI.isMouseOver(mx, my, centerX, centerY)) {
             dragging = true;
         }
         for (CUDropDown dropDown : topDropDowns) {
@@ -193,11 +198,11 @@ public class CUScreen extends Screen {
                 return true;
             }
         }
-        if (my > centerY -126 && my < centerY -107) {
+        if (my > centerY - 126 && my < centerY - 107) {
             return clickedTabArea(mx, my, mouseButton);
         }
         if (Instant.now().getEpochSecond() - doubleClickTimer < 1) {
-            if (contentGUI.isMouseOver(mx,my,centerX,centerY)) {
+            if (contentGUI.isMouseOver(mx, my, centerX, centerY)) {
                 if (Math.sqrt(((oldClickX - mx) * (oldClickX - mx)) + ((OldClickY - my) * (OldClickY - my))) > 5)
                     return super.mouseClicked(mx, my, mouseButton);
                 if (contentGUI instanceof GridChunkGUI) {
@@ -217,7 +222,7 @@ public class CUScreen extends Screen {
     }
 
     private boolean clickedTabArea(double mx, double my, int mouseButton) {
-        int x = (int) mx - (centerX -198 );
+        int x = (int) mx - (centerX - 198);
         int tab = x / 27;
         if (tab >= tabs) return false;
         activeTab = tab;
@@ -235,6 +240,9 @@ public class CUScreen extends Screen {
                 break;
             case 1:
                 contentGUI = new DataListGUI(this, dim);
+                break;
+            case 2:
+                contentGUI = new PlayerListGUI(this, dim);
                 break;
         }
 

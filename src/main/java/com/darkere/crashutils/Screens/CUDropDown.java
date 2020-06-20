@@ -34,17 +34,20 @@ public class CUDropDown extends AbstractGui {
     private final int defaultXRenderOffset;
     private final int defaultYRenderOffset;
     boolean sortByname = false;
+    boolean allOption;
 
     public CUDropDown(DropDownType type, CUScreen parent, List<String> options, String selected, int defaultXRenderOffset, int defaultYRenderOffset, int width) {
         this.type = type;
         this.parent = parent;
+        if (options == null) options = new ArrayList<>();
         this.allOptions = options;
         if (!allOptions.contains(selected)) allOptions.add(selected);
         this.selected = selected;
+        allOption = selected.equals("all");
         this.defaultXRenderOffset = defaultXRenderOffset;
         this.defaultYRenderOffset = defaultYRenderOffset;
-        this.posX = parent.centerX + defaultXRenderOffset;
-        this.posY = parent.centerY + defaultYRenderOffset;
+        this.posX = parent.centerX + defaultXRenderOffset + 1;
+        this.posY = parent.centerY + defaultYRenderOffset + 1;
         this.options.addAll(options);
         this.options.remove(selected);
         if (width == 0) {
@@ -53,7 +56,7 @@ public class CUDropDown extends AbstractGui {
         } else {
             this.width = width;
         }
-        widget = new TextFieldWidget(Minecraft.getInstance().fontRenderer, this.posX, this.posY, width, height, selected);
+        widget = new TextFieldWidget(Minecraft.getInstance().fontRenderer, this.posX, this.posY, this.width, height, selected);
         widget.setText(selected);
         widget.setCursorPositionZero();
         maxOffset = options.size() - fitOnScreen;
@@ -66,8 +69,8 @@ public class CUDropDown extends AbstractGui {
     }
 
     public void render(int centerX, int centerY) {
-        posX = centerX + defaultXRenderOffset;
-        posY = centerY + defaultYRenderOffset;
+        posX = centerX + defaultXRenderOffset + 1;
+        posY = centerY + defaultYRenderOffset + 1;
         if (!isEnabled) return;
         List<FillMany.ColoredRectangle> list = new ArrayList<>();
         strings = new ArrayList<>();
@@ -94,7 +97,7 @@ public class CUDropDown extends AbstractGui {
 
     }
 
-    public void setSortByname(boolean sortByname) {
+    public void setSortByName(boolean sortByname) {
         this.sortByname = sortByname;
     }
 
@@ -103,14 +106,17 @@ public class CUDropDown extends AbstractGui {
         String f = widget.getText();
         options.clear();
         options.addAll(allOptions);
-        options.removeIf(option -> {
-            if(option.startsWith("[")){
-                option = option.substring(option.indexOf("]")+ 2);
-            }
-            return !option.startsWith(f) && !StringUtils.substringAfter(option, ":").startsWith(f);
-        });
+        if (allOption) options.add("all");
+        if (!f.equals("all")) {
+            options.removeIf(option -> {
+                if (option.startsWith("[")) {
+                    option = option.substring(option.indexOf("]") + 2);
+                }
+                return !option.startsWith(f) && !StringUtils.substringAfter(option, ":").startsWith(f);
+            });
+        }
         maxOffset = options.size() - fitOnScreen;
-        if(sortByname){
+        if (sortByname) {
             options.sort(String::compareTo);
         }
         if (maxOffset < 0) maxOffset = 0;
@@ -127,11 +133,13 @@ public class CUDropDown extends AbstractGui {
 
     private void updateWidth() {
         if (!allOptions.isEmpty()) {
-            String longest = allOptions.stream().max(Comparator.comparingInt(String::length)).orElseGet(() -> "minecraft:baselenght");
+            String longest = allOptions.stream().max(Comparator.comparingInt(String::length)).orElseGet(() -> "minecraft:baselength");
             width = Minecraft.getInstance().fontRenderer.getStringWidth(longest) + 4;
+        } else {
+            width = 30;
         }
-        if(widget != null)
-        widget.setWidth(width);
+        if (widget != null)
+            widget.setWidth(width);
     }
 
     public void updateOptions(List<String> strings) {
@@ -150,19 +158,20 @@ public class CUDropDown extends AbstractGui {
             widget.setFocused2(expanded);
             widget.setEnabled(expanded);
         } else {
-            this.expanded =true;
+            this.expanded = true;
             widget.setFocused2(true);
             widget.setEnabled(true);
         }
 
     }
-    public boolean isMouseOver(int mx, int my){
+
+    public boolean isMouseOver(int mx, int my) {
         return GuiTools.inArea(mx, my, posX, posY + height, posX + width, posY + strings.size() * height + height);
     }
 
     public boolean checkClick(int x, int y) {
         if (!isEnabled) return false;
-        if(alwaysExpanded){
+        if (alwaysExpanded) {
             if (GuiTools.inArea(x, y, posX, posY, posX + width, posY + height)) {
                 setExpanded(true);
                 oldFilter = widget.getText();
@@ -175,14 +184,14 @@ public class CUDropDown extends AbstractGui {
                 setExpanded(false);
                 this.currentOffset = 0;
                 if (widget.getText().isEmpty()) widget.setText(oldFilter);
-                if(alwaysExpanded)return false;
+                if (alwaysExpanded) return false;
                 return true;
             } else {
                 int se = y - posY;
                 se /= 11;
                 if (options.size() >= se) {
-                    if(!alwaysExpanded){
-                        if(!selected.isEmpty()){
+                    if (!alwaysExpanded) {
+                        if (!selected.isEmpty()) {
                             options.add(selected);
                         }
                         selected = options.get(se - 1);
@@ -220,7 +229,7 @@ public class CUDropDown extends AbstractGui {
 
 
     public boolean scroll(double mx, double my, double delta) {
-        if(!isEnabled)return false;
+        if (!isEnabled) return false;
         if (GuiTools.inArea((int) mx, (int) my, posX, posY + height, posX + width, posY + strings.size() * height + height)) {
             if (maxOffset > 0) {
                 if (delta < 0) {

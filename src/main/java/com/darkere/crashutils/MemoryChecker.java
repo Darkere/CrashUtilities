@@ -10,9 +10,13 @@ public class MemoryChecker extends TimerTask {
     int logTimer;
     double lastUsed;
     long warnDelta;
-    public void setup(){
+    boolean ranHeapDump = false;
+    boolean heapDumpEnabled;
+
+    public void setup() {
         logTimer = CrashUtils.SERVER_CONFIG.getMemoryLogTimer() * 1000;
         warnDelta = CrashUtils.SERVER_CONFIG.getMemoryWarnDelta();
+        heapDumpEnabled = CrashUtils.SERVER_CONFIG.getHeapDump();
 
     }
 
@@ -20,32 +24,41 @@ public class MemoryChecker extends TimerTask {
     public void run() {
         Runtime r = Runtime.getRuntime();
         MemoryCount count = new MemoryCount(r.maxMemory(), r.freeMemory(), r.totalMemory());
-        if(shouldLog()){
+        if (shouldLog()) {
             counts.add(count);
         }
-        double used = inMegaBytes(count.getMaximum()- count.getFree());
-        double delta = used -lastUsed;
-        String deltaString = String.format("%.2f",delta);
-        if(delta > warnDelta){
+
+        double used = inMegaBytes(count.getMaximum() - count.getFree());
+        double delta = used - lastUsed;
+        String deltaString = String.format("%.2f", delta);
+        if (delta > warnDelta) {
             CrashUtils.LOGGER.info("Memory Spike " + deltaString + " MB");
         }
         lastUsed = used;
+        double usedPerc = (float)count.getFree()/(float)count.getMaximum();
+        if(usedPerc > 0.95F){
+            if(!ranHeapDump && CrashUtils.sparkLoaded){
+                CrashUtils.runHeapDump =true;
+            }
+            CrashUtils.LOGGER.info("Memory full, using" + usedPerc + "% of memory");
+        }
 
     }
 
     private boolean shouldLog() {
-        if((lastlog + logTimer) < System.currentTimeMillis()){
+        if ((lastlog + logTimer) < System.currentTimeMillis()) {
             lastlog = System.currentTimeMillis();
             return true;
         }
         return false;
     }
 
-    public static double inMegaBytes(long x){
+    public static double inMegaBytes(long x) {
         double y = (double) x;
         return y / 1024 / 1024;
     }
-    public static double inGigaBytes(long x){
+
+    public static double inGigaBytes(long x) {
         double y = (double) x;
         return y / 1024 / 1024 / 1024;
     }

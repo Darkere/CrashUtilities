@@ -31,9 +31,10 @@ public class LoadedChunkData {
         return chunksByTicketName;
     }
 
+
     public Map<ChunkPos, String> getLocationTypeByChunk() {
         if(!filter.isEmpty()){
-            return  locationTypeByChunk.entrySet().stream().filter(e->e.getValue().contains(filter)).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            return  locationTypeByChunk.entrySet().stream().filter(e->e.getValue().equals(filter)).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
 
         return locationTypeByChunk;

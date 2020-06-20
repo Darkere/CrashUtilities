@@ -7,8 +7,8 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.world.dimension.DimensionType;
 
 public abstract class CUContentPane extends AbstractGui {
-    int defaultRenderOffsetX = -190;
-    int defaultRenderOffsetY = -88;
+    int defaultRenderOffsetX = -191;
+    int defaultRenderOffsetY = -90;
     int centerX;
     int centerY;
     DataRequestType currentType = DataRequestType.LOADEDCHUNKDATA;
@@ -19,6 +19,10 @@ public abstract class CUContentPane extends AbstractGui {
     boolean shouldUpdate = false;
     DimensionType dim;
     CUScreen screen;
+    int XTopLeft;
+    int YTopLeft;
+    int XAcross = 383;
+    int YAcross = 190;
 
     public CUContentPane(DimensionType dim, CUScreen screen) {
         this.dim = dim;
@@ -40,12 +44,15 @@ public abstract class CUContentPane extends AbstractGui {
     }
 
     public boolean isMouseOver(double mx, double my, int centerX, int centerY) {
-        return (mx >= centerX + defaultRenderOffsetX && mx <= centerX - defaultRenderOffsetX && my >= centerY + defaultRenderOffsetY && my <= centerY - defaultRenderOffsetY);
+        return (mx >= XTopLeft  && mx <= XTopLeft + XAcross && my >= YTopLeft && my <= YTopLeft + YAcross);
     }
 
     public void render(int centerX, int centerY) {
         this.centerX = centerX;
         this.centerY = centerY;
+        XTopLeft = centerX + defaultRenderOffsetX;
+        YTopLeft = centerY + defaultRenderOffsetY;
+        fill(XTopLeft, YTopLeft, XAcross + XTopLeft, YAcross + YTopLeft, 0xFF000000);
     }
 
     public abstract void updateSelection(DropDownType ddtype, String s);

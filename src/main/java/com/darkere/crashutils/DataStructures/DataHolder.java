@@ -14,12 +14,26 @@ public class DataHolder {
     private static final LinkedList<LoadedChunkData> LOADED_CHUNK_DATA_HOLDER = new LinkedList<>();
     private static final LinkedList<EntityData> ENTITY_DATA_HOLDER = new LinkedList<>();
     private static final LinkedList<TileEntityData> TILE_ENTITY_DATA_HOLDER = new LinkedList<>();
+    private static final LinkedList<PlayerData> PLAYER_DATA_HOLDER = new LinkedList<>();
     private static Timer timer = new Timer();
     private static ResourceLocation entityFilter = null;
     private static ResourceLocation tileEntityFilter = null;
     private static Runnable listener = null;
     private static String ChunkDataFilter = "";
 
+    public static void addPlayerData(PlayerData data){
+        if(PLAYER_DATA_HOLDER.size() > 3){
+            PLAYER_DATA_HOLDER.removeLast();
+        }
+        PLAYER_DATA_HOLDER.addFirst(data);
+        notifyListener();
+    }
+
+    public static PlayerData getLatestPlayerData(){
+        return(PlayerData)getLatestData(PLAYER_DATA_HOLDER);
+    }
+
+//----------------------------------------------------------------------------------------------------------------
     public static void addLoadedChunkData(LoadedChunkData data) {
         if (LOADED_CHUNK_DATA_HOLDER.size() > 3) {
             LOADED_CHUNK_DATA_HOLDER.removeLast();

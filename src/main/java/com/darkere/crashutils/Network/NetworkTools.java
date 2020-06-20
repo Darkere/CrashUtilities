@@ -92,9 +92,9 @@ public class NetworkTools {
 //        );
 //    }
 //
-//    public static void handle(XXXXXXXXXXXXXXXXXX data, Supplier<NetworkEvent.Context> ctx) {
+//    public static boolean handle(XXXXXXXXXXXXXXXXXX data, Supplier<NetworkEvent.Context> ctx) {
 //        ctx.get().enqueueWork(() -> {
 //
 //        });
-//        ctx.get().setPacketHandled(true);
+//        return true;
 //    }

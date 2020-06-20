@@ -19,11 +19,7 @@ public class GridChunkGUI extends CUContentPane {
     int YOffset = -50;
     Map<String, Integer> colormap = new HashMap<>();
     Random random = new Random();
-    int XTopLeft;
-    int YTopLeft;
     float zoom = 1;
-    int XAcross = 383;
-    int YAcross = 190;
     GridRenderType type = GridRenderType.LOCATIONTYPE;
     String renderFilter = null;
     CUDropDown RENDERTYPES;
@@ -42,17 +38,17 @@ public class GridChunkGUI extends CUContentPane {
         colormap.put("PRIMED", 0x6600ff + 0xff000000); //BLUE
         colormap.put("ENTITY_TICKING", 0xff0000 + 0xff000000); //RED
         colormap.put("TICKING", 0xff00ff + 0xff000000); //PINK
-        colormap.put("INACCESSIBLE", 0xff000000); //BLACK
-        colormap.put("FULL", 0xff000000); //BLACK
+        colormap.put("INACCESSIBLE", 0xff686868); //BLACK
+        colormap.put("FULL", 0xff686868); //BLACK
         colormap.put("no_ticket", -6250336);//lighter Gray
-        RENDERTYPES = new CUDropDown(DropDownType.RENDERTYPES, screen, Arrays.stream(GridRenderType.values()).map(x -> x.type).collect(Collectors.toList()), GridRenderType.LOCATIONTYPE.type, -190, -102, 75);
-        TICKETS = new CUDropDown(DropDownType.TICKETS, screen, DataHolder.getLatestChunkData() == null ? new ArrayList<>() : new ArrayList<>(DataHolder.getLatestChunkData().getChunksByTicketName().keySet()), "All", -106, -102, 0);
-        ENTITIES = new CUDropDown(DropDownType.ENTITIES, screen, DataHolder.getLatestEntityData() == null ? new ArrayList<>() : DataHolder.getLatestEntityData().getMap().keySet().stream().map(ResourceLocation::toString).collect(Collectors.toList()), "All", -106, -102, 0);
-        TILEENTITIES = new CUDropDown(DropDownType.TILEENTITIES, screen, DataHolder.getLatestTileEntityData() == null ? new ArrayList<>() : DataHolder.getLatestTileEntityData().getMap().keySet().stream().map(ResourceLocation::toString).collect(Collectors.toList()), "All", -106, -102, 0);
-        screen.dropDowns.add(RENDERTYPES);
-        screen.dropDowns.add(TICKETS);
-        screen.dropDowns.add(ENTITIES);
-        screen.dropDowns.add(TILEENTITIES);
+        RENDERTYPES = new CUDropDown(DropDownType.RENDERTYPES, screen, Arrays.stream(GridRenderType.values()).map(x -> x.type).collect(Collectors.toList()), GridRenderType.LOCATIONTYPE.type, -192, -105, 75);
+        TICKETS = new CUDropDown(DropDownType.TICKETS, screen, DataHolder.getLatestChunkData() == null ? new ArrayList<>() : new ArrayList<>(DataHolder.getLatestChunkData().getChunksByTicketName().keySet()), "all", -106, -105, 0);
+        ENTITIES = new CUDropDown(DropDownType.ENTITIES, screen, DataHolder.getLatestEntityData() == null ? new ArrayList<>() : DataHolder.getLatestEntityData().getMap().keySet().stream().map(ResourceLocation::toString).collect(Collectors.toList()), "all", -106, -105, 0);
+        TILEENTITIES = new CUDropDown(DropDownType.TILEENTITIES, screen, DataHolder.getLatestTileEntityData() == null ? new ArrayList<>() : DataHolder.getLatestTileEntityData().getMap().keySet().stream().map(ResourceLocation::toString).collect(Collectors.toList()), "all", -106, -105, 0);
+        screen.topDropDowns.add(RENDERTYPES);
+        screen.topDropDowns.add(TICKETS);
+        screen.topDropDowns.add(ENTITIES);
+        screen.topDropDowns.add(TILEENTITIES);
         RENDERTYPES.setEnabled(true);
         DataHolder.registerListener(() -> {
             TICKETS.updateOptions(DataHolder.getLatestChunkData() == null ? new ArrayList<>() : new ArrayList<>(DataHolder.getLatestChunkData().getChunksByTicketName().keySet()));
@@ -63,10 +59,7 @@ public class GridChunkGUI extends CUContentPane {
 
     public void render(int centerX, int centerY) {
         super.render(centerX, centerY);
-        XTopLeft = centerX + defaultRenderOffsetX;
-        YTopLeft = centerY + defaultRenderOffsetY;
         List<FillMany.ColoredRectangle> list = new ArrayList<>();
-        fill(XTopLeft, YTopLeft, XAcross + XTopLeft, YAcross + YTopLeft, 0xFF686868);
         for (int i = 0; i < XAcross; i++) {
             for (int j = 0; j < YAcross; j++) {
                 int x = getColorForPixel(i, j);
@@ -226,15 +219,14 @@ public class GridChunkGUI extends CUContentPane {
 
 
     public void updateSelection(DropDownType ddtype, String s) {
-        if (s.equals("All")) s = null;
+        if (s.equals("all")) s = "";
         switch (ddtype) {
             case RENDERTYPES:
-                assert s != null;
                 GridRenderType type = GridRenderType.getTypeByName(s);
                 if (type == null) return;
                 setRenderType(type);
                 setRenderFilter(null);
-                screen.dropDowns.forEach(x -> x.setEnabled(false));
+                screen.topDropDowns.forEach(x -> x.setEnabled(false));
                 RENDERTYPES.setEnabled(true);
                 switch (type) {
                     case LOCATIONTYPE:

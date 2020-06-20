@@ -2,6 +2,7 @@ package com.darkere.crashutils.Network;
 
 import com.darkere.crashutils.DataStructures.EntityData;
 import com.darkere.crashutils.DataStructures.LoadedChunkData;
+import com.darkere.crashutils.DataStructures.PlayerData;
 import com.darkere.crashutils.DataStructures.TileEntityData;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
@@ -61,6 +62,12 @@ public class UpdateDataRequestMessage {
                     TileEntityData tileEntityData = new TileEntityData();
                     tileEntityData.createLists(worlds);
                     Network.sendToPlayer(ctx.get().getSender(),new TileEntityDataMessage(tileEntityData));
+                    break;
+                }
+                case PLAYERDATA:{
+                    PlayerData playerData = new PlayerData();
+                    playerData.createLists(worlds);
+                    Network.sendToPlayer(ctx.get().getSender(),new PlayerDataMessage(playerData));
                     break;
                 }
             }

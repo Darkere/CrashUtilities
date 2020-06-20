@@ -19,7 +19,13 @@ displayName="Crash Utilities" #mandatory
 # A URL for the "homepage" for this mod, displayed in the mod UI
 # A file name (in the root of the mod JAR) containing a logo for display
 # A text field displayed in the mod UI
-credits="Thanks for this example mod goes to Java" #optional
+credits='''
+treasure map by Alex Furgiuele from the Noun Project,
+Backpack by Timofey Rostilov from the Noun Project"
+List by Gregor Cresnar from the Noun Project
+
+'''
+
 # A text field displayed in the mod UI
 authors="Darkere" #optional
 # The description text for the mod (multi line!) (#mandatory)
