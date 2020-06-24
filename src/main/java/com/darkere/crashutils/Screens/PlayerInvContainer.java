@@ -2,6 +2,7 @@ package com.darkere.crashutils.Screens;
 
 import com.darkere.crashutils.CURegistry;
 import com.darkere.crashutils.CrashUtils;
+import com.darkere.crashutils.WorldUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -198,7 +199,7 @@ public class PlayerInvContainer extends Container {
         @Nullable
         @Override
         public Container createMenu(int id, PlayerInventory inventory, PlayerEntity player) {
-            return new PlayerInvContainer(CURegistry.PLAYER_INV_CONTAINER.get(), player, CURegistry.getRelatedContainer((ServerPlayerEntity) player), id, null);
+            return new PlayerInvContainer(CURegistry.PLAYER_INV_CONTAINER.get(), player, WorldUtils.getRelatedContainer((ServerPlayerEntity) player), id, null);
         }
     }
 

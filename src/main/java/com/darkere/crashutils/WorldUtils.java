@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.arguments.DimensionArgument;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
@@ -20,12 +21,22 @@ import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.common.util.ITeleporter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class WorldUtils{
 
+    private static Map<PlayerEntity,PlayerEntity> playerToContainer = new HashMap<>();
+
+    public static void addPlayerContainerRel(PlayerEntity player1, PlayerEntity containerPlayer){
+        playerToContainer.put(player1,containerPlayer);
+    }
+    public static PlayerEntity getRelatedContainer(PlayerEntity player){
+        return playerToContainer.get(player);
+    }
 
     public static List<ServerWorld> getWorldsFromDimensionArgument(CommandContext<CommandSource> context){
         DimensionType type = null;

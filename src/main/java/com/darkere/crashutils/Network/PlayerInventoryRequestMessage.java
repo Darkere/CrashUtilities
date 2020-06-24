@@ -1,8 +1,8 @@
 package com.darkere.crashutils.Network;
 
-import com.darkere.crashutils.CURegistry;
 import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.Screens.PlayerInvContainer;
+import com.darkere.crashutils.WorldUtils;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -48,7 +48,7 @@ public class PlayerInventoryRequestMessage {
                 overworld.getSaveHandler().readPlayerData(otherPlayer);
             }
 
-            CURegistry.addPlayerContainerRel(player,otherPlayer);
+            WorldUtils.addPlayerContainerRel(player,otherPlayer);
             Map<String,Integer> curios = new LinkedHashMap<>();
             if(CrashUtils.curiosLoaded){
                 CuriosAPI.getCuriosHandler(otherPlayer).orElse(null).getCurioMap().forEach((s,handler)->{

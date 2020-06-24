@@ -33,17 +33,19 @@ public class CUScreen extends Screen {
     public List<CUDropDown> topDropDowns = new ArrayList<>();
     ExtendedButton button;
     boolean dragging;
+    BlockPos initial = null;
 
-    public CUScreen(DimensionType dimension) {
+    public CUScreen(DimensionType dimension, BlockPos position) {
         super(new StringTextComponent("CUScreen"));
         dim = dimension;
+        initial = position;
     }
 
     @Override
     protected void init() {
         centerY = height / 2;
         centerX = width / 2;
-        contentGUI = new GridChunkGUI(this, dim);
+        contentGUI = new GridChunkGUI(this, dim,initial);
         button = new ExtendedButton(centerX + 174, centerY - 103, 20, 10, String.valueOf(contentGUI.updateSpeed), (x) -> {
             contentGUI.shouldUpdate = !contentGUI.shouldUpdate;
             contentGUI.setUpdateSpeed();
@@ -236,7 +238,7 @@ public class CUScreen extends Screen {
         topDropDowns.clear();
         switch (activeTab) {
             case 0:
-                contentGUI = new GridChunkGUI(this, dim);
+                contentGUI = new GridChunkGUI(this, dim, initial);
                 break;
             case 1:
                 contentGUI = new DataListGUI(this, dim);

@@ -49,7 +49,7 @@ public class ClientEvents {
                 return;
             }
             if(Minecraft.getInstance().player.hasPermissionLevel(4)){
-                Minecraft.getInstance().displayGuiScreen(new CUScreen(dim));
+                Minecraft.getInstance().displayGuiScreen(new CUScreen(dim,Minecraft.getInstance().player.getPosition()));
             } else {
                 if(!Minecraft.getInstance().isSingleplayer()){
                     Minecraft.getInstance().ingameGUI.setOverlayMessage("You need to be OP to use the Crash Utils GUI",false);

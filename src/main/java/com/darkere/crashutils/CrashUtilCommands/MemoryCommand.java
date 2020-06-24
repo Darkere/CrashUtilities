@@ -25,6 +25,9 @@ public class MemoryCommand {
     }
 
     private static int run(CommandContext<CommandSource> context, int count){
+        if(!CrashUtils.SERVER_CONFIG.getMemoryChecker()){
+            context.getSource().sendFeedback(new StringTextComponent("Memory Checker not enabled in Config"),true);
+        }
         List<MemoryChecker.MemoryCount> full = CrashUtils.memoryChecker.counts;
         if(full.size() < count){
             count = full.size();

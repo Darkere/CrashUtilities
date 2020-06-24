@@ -6,6 +6,7 @@ import com.darkere.crashutils.Screens.Types.DropDownType;
 import com.darkere.crashutils.Screens.Types.GridRenderType;
 import net.minecraft.client.renderer.TransformationMatrix;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.dimension.DimensionType;
 
@@ -29,8 +30,9 @@ public class GridChunkGUI extends CUContentPane {
     int hoveringX, hoveringY = 0;
     long blinkTime = 0;
 
-    GridChunkGUI(CUScreen screen, DimensionType dim) {
+    GridChunkGUI(CUScreen screen, DimensionType dim, BlockPos initial) {
         super(dim, screen);
+        goTo(initial);
         DataHolder.requestUpdates(DataRequestType.LOADEDCHUNKDATA, 0, dim, true);
         colormap.put(null, 0x686868 + 0xFF000000); // GRAY
         colormap.put("PARTIALLYGENERATED", 0x66ff99 + 0xff000000); //GREEN
@@ -68,6 +70,11 @@ public class GridChunkGUI extends CUContentPane {
             }
         }
         FillMany.fillMany(TransformationMatrix.identity().getMatrix(), list);
+    }
+    private void goTo(BlockPos pos){
+      ChunkPos chunkPos = new ChunkPos(pos);
+        XOffset = -50 + chunkPos.x;
+        YOffset = -50 + chunkPos.z;
     }
 
     public void setRenderType(GridRenderType type) {
