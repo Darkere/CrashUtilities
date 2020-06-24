@@ -52,7 +52,8 @@ public class CrashUtils {
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::common);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::client);
-        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> () -> MinecraftForge.EVENT_BUS.register(new ClientEvents()));
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> MinecraftForge.EVENT_BUS.register(new ClientEvents()));
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT ,()-> CURegistry::init);
         MinecraftForge.EVENT_BUS.register(new DeleteBlocks());
         MinecraftForge.EVENT_BUS.register(this);
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
@@ -62,7 +63,6 @@ public class CrashUtils {
 
     public void client(FMLClientSetupEvent event){
         ScreenManager.registerFactory(CURegistry.PLAYER_INV_CONTAINER.get(), PlayerInvScreen::new);
-        CURegistry.init();
     }
 
     public void common(FMLCommonSetupEvent event){

@@ -73,8 +73,8 @@ public class GridChunkGUI extends CUContentPane {
     }
     private void goTo(BlockPos pos){
       ChunkPos chunkPos = new ChunkPos(pos);
-        XOffset = -50 + chunkPos.x;
-        YOffset = -50 + chunkPos.z;
+        XOffset = -170 + chunkPos.x;
+        YOffset = -90 + chunkPos.z;
     }
 
     public void setRenderType(GridRenderType type) {
@@ -159,14 +159,14 @@ public class GridChunkGUI extends CUContentPane {
         distY /= zoom;
 
         if (delta > 0) {
-            zoom *= 3;
+            zoom *= 2;
             XOffset += distX / 2;
             YOffset += distY / 2;
 
         } else {
-            zoom /= 3;
-            XOffset -= distX / 2;
-            YOffset -= distY / 2;
+            zoom /= 2;
+            XOffset -= distX ;
+            YOffset -= distY ;
 
         }
     }
