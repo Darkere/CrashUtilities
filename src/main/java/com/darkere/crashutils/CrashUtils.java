@@ -2,11 +2,9 @@ package com.darkere.crashutils;
 
 import com.darkere.crashutils.CrashUtilCommands.*;
 import com.darkere.crashutils.Network.Network;
-import com.darkere.crashutils.Screens.PlayerInvScreen;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.util.text.StringTextComponent;
@@ -21,7 +19,6 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
@@ -51,9 +48,7 @@ public class CrashUtils {
     public CrashUtils() {
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::common);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::client);
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> MinecraftForge.EVENT_BUS.register(new ClientEvents()));
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT ,()-> CURegistry::init);
         MinecraftForge.EVENT_BUS.register(new DeleteBlocks());
         MinecraftForge.EVENT_BUS.register(this);
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
@@ -61,9 +56,6 @@ public class CrashUtils {
 
     }
 
-    public void client(FMLClientSetupEvent event){
-        ScreenManager.registerFactory(CURegistry.PLAYER_INV_CONTAINER.get(), PlayerInvScreen::new);
-    }
 
     public void common(FMLCommonSetupEvent event){
         Network.register();

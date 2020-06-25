@@ -1,20 +1,11 @@
 package com.darkere.crashutils.Screens;
 
-import com.darkere.crashutils.CURegistry;
 import com.darkere.crashutils.CrashUtils;
-import com.darkere.crashutils.WorldUtils;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.FakePlayer;
@@ -25,7 +16,6 @@ import top.theillusivec4.curios.api.CuriosAPI;
 import top.theillusivec4.curios.api.inventory.CurioStackHandler;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -38,11 +28,13 @@ public class PlayerInvContainer extends Container {
     PlayerEntity player;
     PlayerEntity otherPlayer;
 
-    public Map<String, Integer> slotAmounts = new LinkedHashMap<>();
+    public Map<String, Integer> slotAmounts;
 
-    public PlayerInvContainer(@Nullable ContainerType<?> type, PlayerEntity player, PlayerEntity otherPlayer, int id, PacketBuffer data) {
-        super(type, id);
-        world = player.getEntityWorld();
+
+    public PlayerInvContainer(PlayerEntity player, PlayerEntity otherPlayer, int id,String otherPlayerName,Map<String, Integer> slotAmounts, int curioSlotcount) {
+        super(null,id);
+        this.otherPlayerName = otherPlayerName;
+        this.world = player.getEntityWorld();
         this.player = player;
         this.playerInventory = new InvWrapper(player.inventory);
         if (otherPlayer == null) {
@@ -62,7 +54,6 @@ public class PlayerInvContainer extends Container {
                 }
             };
             otherPlayerInventory = new InvWrapper(i);
-            otherPlayerName = data.readString();
         } else {
             this.otherPlayer = otherPlayer;
             otherPlayerInventory = new InvWrapper(otherPlayer.inventory);
@@ -75,14 +66,13 @@ public class PlayerInvContainer extends Container {
         layoutArmorAndOffhandSlots(otherPlayerInventory, -10, -21);
         if (CrashUtils.curiosLoaded) {
             IItemHandler curiosInv = null;
-            if (data != null) {
-                int size = data.readInt();
-                for (int i = 0; i < size; i++) {
-                    slotAmounts.put(data.readString(), data.readInt());
-                }
-                curiosInv = new InvWrapper(new Inventory(slotAmounts.values().stream().mapToInt(x -> x).sum()));
+            if (slotAmounts != null) {
+                curiosInv = new InvWrapper(new Inventory(curioSlotcount));
+                this.slotAmounts = slotAmounts;
             } else {
-                CuriosAPI.getCuriosHandler(player).ifPresent(x -> x.getCurioMap().forEach((s, h) -> slotAmounts.put(s, h.getSlots())));
+                slotAmounts = new LinkedHashMap<>();
+                Map<String, Integer> finalSlotAmounts = slotAmounts;
+                CuriosAPI.getCuriosHandler(player).ifPresent(x -> x.getCurioMap().forEach((s, h) -> finalSlotAmounts.put(s, h.getSlots())));
             }
             layoutCurioSlots(otherPlayer, 204, -35, slotAmounts.values(), curiosInv);
             layoutCurioSlots(player,204,85,slotAmounts.values(),null);
@@ -114,9 +104,7 @@ public class PlayerInvContainer extends Container {
         addSlot(new SlotItemHandler(playerInventory, 40, x, y + 18 * 5 + 4));
     }
 
-    public PlayerInvContainer(@Nullable ContainerType<?> type, PlayerEntity player, PacketBuffer data, int id) {
-        this(type, player, null, id, data);
-    }
+
 
     private void layoutCurioSlots(PlayerEntity player, int x, int y, Collection<Integer> curioSlots, IItemHandler curiosInv) {
         if (player != null) {
@@ -188,19 +176,6 @@ public class PlayerInvContainer extends Container {
         // Hotbar
         topRow += 58;
         addSlotRange(playerInventory, 0, leftCol, topRow, 9, 18);
-    }
-
-    public static class ContainerProvider implements INamedContainerProvider {
-        @Override
-        public ITextComponent getDisplayName() {
-            return new StringTextComponent("Player Inventory");
-        }
-
-        @Nullable
-        @Override
-        public Container createMenu(int id, PlayerInventory inventory, PlayerEntity player) {
-            return new PlayerInvContainer(CURegistry.PLAYER_INV_CONTAINER.get(), player, WorldUtils.getRelatedContainer((ServerPlayerEntity) player), id, null);
-        }
     }
 
     @Override

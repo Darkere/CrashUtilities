@@ -1,13 +1,19 @@
 package com.darkere.crashutils;
 
 import com.darkere.crashutils.Screens.CUScreen;
+import com.darkere.crashutils.Screens.PlayerInvContainer;
+import com.darkere.crashutils.Screens.PlayerInvScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.Map;
 
 public class ClientEvents {
 
@@ -60,5 +66,13 @@ public class ClientEvents {
             }
 
         }
+    }
+
+    public static void openContainerAndScreen(int id, String playerName, Map<String, Integer> curios){
+        PlayerEntity player = Minecraft.getInstance().player;
+        if(player == null)return;
+        PlayerInvContainer c = new PlayerInvContainer(player,null,id,playerName,curios,curios.values().stream().mapToInt(x->x).sum());
+        player.openContainer = c;
+        Minecraft.getInstance().displayGuiScreen(new PlayerInvScreen(c,player.inventory,new StringTextComponent("cuinventoryscreen")));
     }
 }

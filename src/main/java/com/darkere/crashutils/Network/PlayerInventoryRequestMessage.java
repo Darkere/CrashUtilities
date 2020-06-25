@@ -12,7 +12,6 @@ import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.NetworkHooks;
 import top.theillusivec4.curios.api.CuriosAPI;
 
 import java.util.LinkedHashMap;
@@ -55,14 +54,16 @@ public class PlayerInventoryRequestMessage {
                     curios.put(s,handler.getSlots());
                 });
             }
-            NetworkHooks.openGui(player, new PlayerInvContainer.ContainerProvider(),buf->{
-                buf.writeString(data.playerName);
-                buf.writeInt(curios.size());
-                curios.forEach((s,i)->{
-                    buf.writeString(s);
-                    buf.writeInt(i);
-                });
-            });
+
+            player.closeContainer();
+            player.getNextWindowId();
+            int id = player.currentWindowId;
+
+            Network.sendToPlayer(player,new OpenPlayerInvMessage(id,data.playerName,curios));
+            player.openContainer = new PlayerInvContainer(player,otherPlayer,id,null,null,0);
+            player.openContainer.addListener(player);
+
+
         });
         return true;
     }

@@ -23,6 +23,7 @@ public class Network {
         INSTANCE.registerMessage(ID++, TileEntityDataMessage.class, TileEntityDataMessage::encode, TileEntityDataMessage::decode, TileEntityDataMessage::handle);
         INSTANCE.registerMessage(ID++, PlayerInventoryRequestMessage.class, PlayerInventoryRequestMessage::encode, PlayerInventoryRequestMessage::decode, PlayerInventoryRequestMessage::handle);
         INSTANCE.registerMessage(ID++, PlayerDataMessage.class, PlayerDataMessage::encode, PlayerDataMessage::decode, PlayerDataMessage::handle);
+        INSTANCE.registerMessage(ID++, OpenPlayerInvMessage.class, OpenPlayerInvMessage::encode, OpenPlayerInvMessage::decode, OpenPlayerInvMessage::handle);
 
     }
 
