@@ -89,6 +89,7 @@ public class CrashUtils {
             .then(GetLogCommand.register())
             //.then(ProfilingCommands.register())
             .then(LoadedChunksCommand.register())
+            .then(RemoveEntitiesCommand.register())
 
         );
         dispatcher.register(Commands.literal("cu").redirect(cmd));
