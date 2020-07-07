@@ -31,17 +31,16 @@ public class ClientEvents {
     @SubscribeEvent
     public void GUIKeyEvent(GuiScreenEvent.KeyboardKeyPressedEvent.Post event) {
         if (Minecraft.getInstance().player == null || !(event.getGui() instanceof ContainerScreen)) return;
-        if (event.getKeyCode() == GLFW.GLFW_KEY_U && event.getModifiers() == GLFW.GLFW_MOD_CONTROL) {
+        if (event.getKeyCode() == GLFW.GLFW_KEY_P && event.getModifiers() == GLFW.GLFW_MOD_CONTROL) {
             if (Minecraft.getInstance().player.openContainer != null) {
                 CrashUtils.renderslotnumbers = true;
                 String toCopy = Minecraft.getInstance().player.openContainer.getClass().getName();
                 Minecraft.getInstance().keyboardListener.setClipboardString(toCopy);
             }
         }
-        if (event.getKeyCode() == GLFW.GLFW_KEY_P && event.getModifiers() == GLFW.GLFW_MOD_CONTROL) {
+        if (event.getKeyCode() == GLFW.GLFW_KEY_O && event.getModifiers() == GLFW.GLFW_MOD_CONTROL) {
             CrashUtils.renderslotnumbers = false;
         }
-
     }
 
     @SubscribeEvent

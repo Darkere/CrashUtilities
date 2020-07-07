@@ -22,7 +22,7 @@ import java.util.List;
 
 public class RemoveEntitiesCommand {
     private static final SuggestionProvider<CommandSource> sugg = (ctx, builder) -> ISuggestionProvider.func_212476_a(ForgeRegistries.ENTITIES.getKeys().stream(), builder);
-    private static final SuggestionProvider<CommandSource> boolsugg = (ctx, builder) -> ISuggestionProvider.suggest(Arrays.asList("byForce (not recommended)", "nextTick"), builder);
+    private static final SuggestionProvider<CommandSource> boolsugg = (ctx, builder) -> ISuggestionProvider.suggest(Arrays.asList("byForce", "normally"), builder);
     private static int counter = 0;
 
     public static ArgumentBuilder<CommandSource, ?> register() {
@@ -39,7 +39,7 @@ public class RemoveEntitiesCommand {
                     .then(Commands.argument("name", StringArgumentType.word())
                         .executes(ctx -> removeItems(ctx, StringArgumentType.getString(ctx, "name")))))
                 .then(Commands.literal("hostile")
-                    .executes(ctx -> removeMonsters(ctx, "hostile"))));
+                    .executes(RemoveEntitiesCommand::removeMonsters)));
 
 
     }
@@ -47,18 +47,16 @@ public class RemoveEntitiesCommand {
     private static int removeEntities(CommandContext<CommandSource> context, ResourceLocation type) {
         counter = 0;
         List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
-        worlds.forEach(world -> {
-            world.getEntities().filter(x -> {
-                if (type == null) {
-                    return !x.hasCustomName();
-                } else {
-                    if(x.getType().getRegistryName() != null){
-                        return x.getType().getRegistryName().equals(type);
-                    }
+        worlds.forEach(world -> world.getEntities().filter(x -> {
+            if (type == null) {
+                return !x.hasCustomName();
+            } else {
+                if (x.getType().getRegistryName() != null) {
+                    return x.getType().getRegistryName().equals(type);
                 }
-                return false;
-            }).forEach(x -> removeEntity(context, world, x));
-        });
+            }
+            return false;
+        }).forEach(x -> removeEntity(context, world, x)));
         respond(context);
         return 1;
     }
@@ -66,26 +64,22 @@ public class RemoveEntitiesCommand {
     private static int removeItems(CommandContext<CommandSource> context, String type) {
         counter = 0;
         List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
-        worlds.forEach(world -> {
-            world.getEntities().filter(x -> x instanceof ItemEntity).map(x -> (ItemEntity) x).filter(x -> type == null ? !x.hasCustomName() : x.getName().getString().contains(type)).forEach(Entity::remove);
-        });
+        worlds.forEach(world -> world.getEntities().filter(x -> x instanceof ItemEntity).map(x -> (ItemEntity) x).filter(x -> type == null ? !x.hasCustomName() : x.getName().getString().contains(type)).forEach(x -> removeEntity(context, world, x)));
         respond(context);
         return 1;
     }
 
-    private static int removeMonsters(CommandContext<CommandSource> context, String type) {
+    private static int removeMonsters(CommandContext<CommandSource> context) {
         counter = 0;
         List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
-        worlds.forEach(world -> {
-            world.getEntities().filter(x -> x.getType().getClassification() == EntityClassification.MONSTER).forEach(x -> removeEntity(context, world, x));
-        });
+        worlds.forEach(world -> world.getEntities().filter(x -> x.getType().getClassification() == EntityClassification.MONSTER).forEach(x -> removeEntity(context, world, x)));
         respond(context);
         return 1;
     }
 
     private static void removeEntity(CommandContext<CommandSource> context, ServerWorld world, Entity x) {
         String forced = StringArgumentType.getString(context, "force");
-        boolean force = forced.equals("byForce (not recommended)");
+        boolean force = forced.equals("byForce");
         if (force) {
             world.removeEntityComplete(x, false);
         } else {
