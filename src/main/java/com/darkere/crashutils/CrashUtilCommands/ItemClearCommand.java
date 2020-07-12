@@ -1,12 +1,14 @@
 package com.darkere.crashutils.CrashUtilCommands;
 
 import com.darkere.crashutils.ClearItemTask;
+import com.darkere.crashutils.CrashUtils;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
+import net.minecraft.util.text.StringTextComponent;
 
 public class ItemClearCommand implements Command<CommandSource> {
 
@@ -19,7 +21,11 @@ public class ItemClearCommand implements Command<CommandSource> {
 
     @Override
     public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-        ClearItemTask.scheduled = true;
+        if(CrashUtils.SERVER_CONFIG.getEnabled()){
+            ClearItemTask.scheduled = true;
+        } else {
+            context.getSource().sendFeedback(new StringTextComponent("ItemClears are not enabled in the config"),false);
+        }
         return 1;
     }
 }

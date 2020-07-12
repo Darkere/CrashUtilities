@@ -91,8 +91,10 @@ public class CrashUtils {
             .then(LoadedChunksCommand.register())
             .then(RemoveEntitiesCommand.register())
             .then(ActivityCommand.register())
+            .then(AliasCommand.register())
 
         );
+        AliasRegistry.registerAliases(dispatcher);
         dispatcher.register(Commands.literal("cu").redirect(cmd));
 
     }
