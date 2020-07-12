@@ -14,12 +14,12 @@ public class WorldPos {
         this.type = type;
     }
 
-    public static WorldPos getPosFromEntity(Entity entity){
-        return new WorldPos(entity.getPosition(),entity.getEntityWorld().getDimension().getType());
+    public static WorldPos getPosFromEntity(Entity entity) {
+        return new WorldPos(entity.getPosition(), entity.getEntityWorld().getDimension().getType());
     }
 
-    public static WorldPos getPosFromTileEntity(TileEntity entity){
-        if(entity.getWorld() == null) return null;
-        return new WorldPos(entity.getPos(),entity.getWorld().getDimension().getType());
+    public static WorldPos getPosFromTileEntity(TileEntity entity) {
+        if (entity.getWorld() == null) return null;
+        return new WorldPos(entity.getPos(), entity.getWorld().getDimension().getType());
     }
 }

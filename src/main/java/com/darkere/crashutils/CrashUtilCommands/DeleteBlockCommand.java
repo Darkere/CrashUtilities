@@ -12,16 +12,14 @@ import net.minecraft.command.arguments.BlockPosArgument;
 public class DeleteBlockCommand implements Command<CommandSource> {
 
 
-
-
     public static ArgumentBuilder<CommandSource, ?> register() {
-        return Commands.literal("deleteTE").then(Commands.argument("pos",BlockPosArgument.blockPos()).executes(new DeleteBlockCommand()));
+        return Commands.literal("deleteTE").then(Commands.argument("pos", BlockPosArgument.blockPos()).executes(new DeleteBlockCommand()));
 
     }
 
     @Override
     public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-        DeleteBlocks.addBlockToRemove(BlockPosArgument.getLoadedBlockPos(context,"pos"));
+        DeleteBlocks.addBlockToRemove(BlockPosArgument.getLoadedBlockPos(context, "pos"));
         return Command.SINGLE_SUCCESS;
     }
 }

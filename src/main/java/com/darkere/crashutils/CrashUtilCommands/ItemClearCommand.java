@@ -13,6 +13,7 @@ import net.minecraft.util.text.StringTextComponent;
 public class ItemClearCommand implements Command<CommandSource> {
 
     private static final ItemClearCommand cmd = new ItemClearCommand();
+
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("callItemClear").
             executes(cmd);
@@ -21,10 +22,10 @@ public class ItemClearCommand implements Command<CommandSource> {
 
     @Override
     public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-        if(CrashUtils.SERVER_CONFIG.getEnabled()){
+        if (CrashUtils.SERVER_CONFIG.getEnabled()) {
             ClearItemTask.scheduled = true;
         } else {
-            context.getSource().sendFeedback(new StringTextComponent("ItemClears are not enabled in the config"),false);
+            context.getSource().sendFeedback(new StringTextComponent("ItemClears are not enabled in the config"), false);
         }
         return 1;
     }

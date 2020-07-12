@@ -45,21 +45,21 @@ public class ClientEvents {
 
     @SubscribeEvent
     public void keyEvent(InputEvent.KeyInputEvent event) {
-        if(Minecraft.getInstance().player == null || Minecraft.getInstance().world == null) return;
-        if(event.getAction()!= GLFW.GLFW_PRESS) return;
+        if (Minecraft.getInstance().player == null || Minecraft.getInstance().world == null) return;
+        if (event.getAction() != GLFW.GLFW_PRESS) return;
         if (event.getKey() == GLFW.GLFW_KEY_U && event.getModifiers() == GLFW.GLFW_MOD_CONTROL) {
             DimensionType dim = Minecraft.getInstance().player.dimension;
-            if(dim == null){
+            if (dim == null) {
                 CrashUtils.LOGGER.warn("Player has no dimension :/");
                 return;
             }
-            if(Minecraft.getInstance().player.hasPermissionLevel(4)){
-                Minecraft.getInstance().displayGuiScreen(new CUScreen(dim,Minecraft.getInstance().player.getPosition()));
+            if (Minecraft.getInstance().player.hasPermissionLevel(4)) {
+                Minecraft.getInstance().displayGuiScreen(new CUScreen(dim, Minecraft.getInstance().player.getPosition()));
             } else {
-                if(!Minecraft.getInstance().isSingleplayer()){
-                    Minecraft.getInstance().ingameGUI.setOverlayMessage("You need to be OP to use the Crash Utils GUI",false);
+                if (!Minecraft.getInstance().isSingleplayer()) {
+                    Minecraft.getInstance().ingameGUI.setOverlayMessage("You need to be OP to use the Crash Utils GUI", false);
                 } else {
-                    Minecraft.getInstance().ingameGUI.setOverlayMessage("Cheats need to be enabled to use the Crash Utils GUI",false);
+                    Minecraft.getInstance().ingameGUI.setOverlayMessage("Cheats need to be enabled to use the Crash Utils GUI", false);
                 }
 
             }
@@ -67,11 +67,11 @@ public class ClientEvents {
         }
     }
 
-    public static void openContainerAndScreen(int id, String playerName, Map<String, Integer> curios){
+    public static void openContainerAndScreen(int id, String playerName, Map<String, Integer> curios) {
         PlayerEntity player = Minecraft.getInstance().player;
-        if(player == null)return;
-        PlayerInvContainer c = new PlayerInvContainer(player,null,id,playerName,curios,curios.values().stream().mapToInt(x->x).sum());
+        if (player == null) return;
+        PlayerInvContainer c = new PlayerInvContainer(player, null, id, playerName, curios, curios.values().stream().mapToInt(x -> x).sum());
         player.openContainer = c;
-        Minecraft.getInstance().displayGuiScreen(new PlayerInvScreen(c,player.inventory,new StringTextComponent("cuinventoryscreen")));
+        Minecraft.getInstance().displayGuiScreen(new PlayerInvScreen(c, player.inventory, new StringTextComponent("cuinventoryscreen")));
     }
 }

@@ -19,31 +19,31 @@ public class LoadedChunksCommand {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("loadedChunks")
-            .then(Commands.argument("dim", DimensionArgument.getDimension()).executes(x-> run(x,0,null)))
-            .executes(x-> run(x,0,null))
+            .then(Commands.argument("dim", DimensionArgument.getDimension()).executes(x -> run(x, 0, null)))
+            .executes(x -> run(x, 0, null))
             .then(Commands.literal("byLocation")
-            .then(Commands.argument("loc", StringArgumentType.word())
-            .executes(x-> run(x,1,StringArgumentType.getString(x,"loc")))))
+                .then(Commands.argument("loc", StringArgumentType.word())
+                    .executes(x -> run(x, 1, StringArgumentType.getString(x, "loc")))))
             .then(Commands.literal("byTicket")
-            .then(Commands.argument("tic", StringArgumentType.word())
-            .executes(x->run(x,2,StringArgumentType.getString(x,"tic")))));
+                .then(Commands.argument("tic", StringArgumentType.word())
+                    .executes(x -> run(x, 2, StringArgumentType.getString(x, "tic")))));
     }
 
 
     public static int run(CommandContext<CommandSource> context, int type, String word) throws CommandSyntaxException {
         List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
         LoadedChunkData loadedChunkData = new LoadedChunkData(worlds);
-        switch (type){
+        switch (type) {
             case 0: {
                 loadedChunkData.reply(context.getSource());
                 break;
             }
             case 1: {
-                loadedChunkData.replyWithLocation(context.getSource(),word);
+                loadedChunkData.replyWithLocation(context.getSource(), word);
                 break;
             }
-            case 2:{
-                loadedChunkData.replyWithTicket(context.getSource(),word);
+            case 2: {
+                loadedChunkData.replyWithTicket(context.getSource(), word);
                 break;
             }
         }

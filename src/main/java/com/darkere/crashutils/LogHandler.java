@@ -21,7 +21,7 @@ public class LogHandler {
     private static final JPastee pastee = new JPastee("aleMUU8QFQiuh9q9UnK737FoM5v08v2cZOkl1f1p7");
     public static final Path latestlog = Paths.get("logs/latest.log");
 
-    public static String uploadLog(String description,String name , String content) {
+    public static String uploadLog(String description, String name, String content) {
 
         Paste.Builder paste = Paste.builder();
         paste.description(description);
@@ -40,7 +40,7 @@ public class LogHandler {
 
     public static String getRelativePathDateInMin(Path path) {
         long last = path.toFile().lastModified();
-        last = Instant.now().getEpochSecond() - (last/1000);
+        last = Instant.now().getEpochSecond() - (last / 1000);
         return Long.toString(last / 60);
     }
 
@@ -65,7 +65,8 @@ public class LogHandler {
         }
         return String.join(System.lineSeparator(), strings);
     }
-    public static String getStringFromArchive(Path path){
+
+    public static String getStringFromArchive(Path path) {
         GZIPInputStream gzip = null;
         try {
             gzip = new GZIPInputStream(new FileInputStream(String.valueOf(path)));
@@ -74,7 +75,7 @@ public class LogHandler {
         }
         BufferedReader br = new BufferedReader(new InputStreamReader(gzip));
         List<String> strings = br.lines().collect(Collectors.toList());
-        return String.join(System.lineSeparator(),strings);
+        return String.join(System.lineSeparator(), strings);
     }
 
     public static Path getLatestArchivedLogPath() {

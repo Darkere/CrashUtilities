@@ -18,7 +18,7 @@ public class Network {
 
         INSTANCE.registerMessage(ID++, UpdateDataRequestMessage.class, UpdateDataRequestMessage::encode, UpdateDataRequestMessage::decode, UpdateDataRequestMessage::handle);
         INSTANCE.registerMessage(ID++, LoadedChunkDataMessage.class, LoadedChunkDataMessage::encode, LoadedChunkDataMessage::decode, LoadedChunkDataMessage::handle);
-        INSTANCE.registerMessage(ID++,TeleportMessage.class,TeleportMessage::encode,TeleportMessage::decode,TeleportMessage::handle);
+        INSTANCE.registerMessage(ID++, TeleportMessage.class, TeleportMessage::encode, TeleportMessage::decode, TeleportMessage::handle);
         INSTANCE.registerMessage(ID++, EntityDataMessage.class, EntityDataMessage::encode, EntityDataMessage::decode, EntityDataMessage::handle);
         INSTANCE.registerMessage(ID++, TileEntityDataMessage.class, TileEntityDataMessage::encode, TileEntityDataMessage::decode, TileEntityDataMessage::handle);
         INSTANCE.registerMessage(ID++, PlayerInventoryRequestMessage.class, PlayerInventoryRequestMessage::encode, PlayerInventoryRequestMessage::decode, PlayerInventoryRequestMessage::handle);
@@ -27,12 +27,13 @@ public class Network {
 
     }
 
-    public static void sendToPlayer(ServerPlayerEntity playerEntity, Object Message){
-        if(!(playerEntity instanceof FakePlayer)){
-            Network.INSTANCE.send(PacketDistributor.PLAYER.with(()->  playerEntity),Message);
+    public static void sendToPlayer(ServerPlayerEntity playerEntity, Object Message) {
+        if (!(playerEntity instanceof FakePlayer)) {
+            Network.INSTANCE.send(PacketDistributor.PLAYER.with(() -> playerEntity), Message);
         }
     }
-    public static void sendToServer(Object Message){
+
+    public static void sendToServer(Object Message) {
         Network.INSTANCE.sendToServer(Message);
     }
 }

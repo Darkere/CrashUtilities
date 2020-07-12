@@ -21,19 +21,19 @@ public class DataHolder {
     private static Runnable listener = null;
     private static String ChunkDataFilter = "";
 
-    public static void addPlayerData(PlayerData data){
-        if(PLAYER_DATA_HOLDER.size() > 3){
+    public static void addPlayerData(PlayerData data) {
+        if (PLAYER_DATA_HOLDER.size() > 3) {
             PLAYER_DATA_HOLDER.removeLast();
         }
         PLAYER_DATA_HOLDER.addFirst(data);
         notifyListener();
     }
 
-    public static PlayerData getLatestPlayerData(){
-        return(PlayerData)getLatestData(PLAYER_DATA_HOLDER);
+    public static PlayerData getLatestPlayerData() {
+        return (PlayerData) getLatestData(PLAYER_DATA_HOLDER);
     }
 
-//----------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------
     public static void addLoadedChunkData(LoadedChunkData data) {
         if (LOADED_CHUNK_DATA_HOLDER.size() > 3) {
             LOADED_CHUNK_DATA_HOLDER.removeLast();
@@ -104,31 +104,34 @@ public class DataHolder {
         timer.cancel();
     }
 
- //--------------------------------------------------------------------------------
-    public static void setChunkDataFilter(String s){
-        if(getLatestChunkData() == null)return;
+    //--------------------------------------------------------------------------------
+    public static void setChunkDataFilter(String s) {
+        if (getLatestChunkData() == null) return;
         ChunkDataFilter = s;
         getLatestChunkData().applyFilter(ChunkDataFilter);
     }
 
     public static void setEntityFilter(String s) {
-        if(getLatestEntityData() == null)return;
+        if (getLatestEntityData() == null) return;
         entityFilter = s == null ? null : new ResourceLocation(s);
         getLatestEntityData().fillChunkMap(entityFilter);
     }
 
     public static void setTileEntityFilter(String s) {
-        if(getLatestTileEntityData() == null)return;
+        if (getLatestTileEntityData() == null) return;
         tileEntityFilter = s == null ? null : new ResourceLocation(s);
         getLatestTileEntityData().fillChunkMap(tileEntityFilter);
     }
-    public static void registerListener(Runnable run){
+
+    public static void registerListener(Runnable run) {
         listener = run;
     }
-    public static void notifyListener(){
+
+    public static void notifyListener() {
         listener.run();
     }
-    public static void stopListening(){
+
+    public static void stopListening() {
         listener = null;
     }
 }

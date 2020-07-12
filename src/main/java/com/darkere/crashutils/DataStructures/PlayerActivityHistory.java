@@ -32,15 +32,15 @@ public class PlayerActivityHistory {
                     e.printStackTrace();
                 }
                 long diff = current - fileTime;
-                if(diff < monthTime){
+                if (diff < monthTime) {
                     String uuid = FilenameUtils.removeExtension(x.getFileName().toString());
                     GameProfile profile = world.getServer().getPlayerProfileCache().getProfileByUUID(UUID.fromString(uuid));
-                    if(profile ==  null) return;
-                    String playerName =profile.getName();
+                    if (profile == null) return;
+                    String playerName = profile.getName();
                     month.add(playerName);
-                    if(diff < weekTime){
+                    if (diff < weekTime) {
                         week.add(playerName);
-                        if(diff < dayTime){
+                        if (diff < dayTime) {
                             day.add(playerName);
                         }
                     }

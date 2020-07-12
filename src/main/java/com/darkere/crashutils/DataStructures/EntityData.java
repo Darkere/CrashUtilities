@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class EntityData {
     Map<ResourceLocation, List<WorldPos>> map = new HashMap<>();
-    Map<ChunkPos,Integer> chunkMap = new HashMap<>();
+    Map<ChunkPos, Integer> chunkMap = new HashMap<>();
     Map<ChunkPos, WorldPos> tpPos = new HashMap<>();
     int total = 0;
 
@@ -24,7 +24,8 @@ public class EntityData {
             map.put(entry.getKey(), new ArrayList<>());
         }
     }
-    public EntityData(Map<ResourceLocation, List<WorldPos>> map){
+
+    public EntityData(Map<ResourceLocation, List<WorldPos>> map) {
         this.map = map;
     }
 
@@ -47,28 +48,30 @@ public class EntityData {
 
     public void reply(ResourceLocation res, CommandSource source) {
         if (res == null) {
-            map.entrySet().stream().filter(x->x.getValue().size() != 0).sorted(Comparator.comparingInt(e -> e.getValue().size())).forEach((e) -> {
-                CommandUtils.sendFindEMessage(source, e.getKey(),e.getValue().size());
+            map.entrySet().stream().filter(x -> x.getValue().size() != 0).sorted(Comparator.comparingInt(e -> e.getValue().size())).forEach((e) -> {
+                CommandUtils.sendFindEMessage(source, e.getKey(), e.getValue().size());
             });
-            CommandUtils.sendNormalMessage(source,total + " Entities" , TextFormatting.DARK_AQUA);
+            CommandUtils.sendNormalMessage(source, total + " Entities", TextFormatting.DARK_AQUA);
 
         } else {
-           createEntityChunkMap(source, res);
+            createEntityChunkMap(source, res);
         }
     }
-    public void fillChunkMap(ResourceLocation rl){
+
+    public void fillChunkMap(ResourceLocation rl) {
         TileEntityData.fillChunkMaps(rl, map, chunkMap, tpPos);
     }
-    private void createEntityChunkMap(CommandSource source, ResourceLocation res){
+
+    private void createEntityChunkMap(CommandSource source, ResourceLocation res) {
         fillChunkMap(res);
-        CommandUtils.sendNormalMessage(source,res.toString(), TextFormatting.DARK_BLUE);
-        chunkMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Integer::compareTo)).forEach((k) -> CommandUtils.sendChunkEntityMessage(source,k.getValue(),tpPos.get(k.getKey()).pos,tpPos.get(k.getKey()).type,true));
+        CommandUtils.sendNormalMessage(source, res.toString(), TextFormatting.DARK_BLUE);
+        chunkMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Integer::compareTo)).forEach((k) -> CommandUtils.sendChunkEntityMessage(source, k.getValue(), tpPos.get(k.getKey()).pos, tpPos.get(k.getKey()).type, true));
 
 
     }
 
     public int getEntityCountForChunk(ChunkPos chunkPos) {
-        if(chunkMap == null) return 0;
+        if (chunkMap == null) return 0;
         Integer i = chunkMap.get(chunkPos);
         return i == null ? 0 : i;
     }

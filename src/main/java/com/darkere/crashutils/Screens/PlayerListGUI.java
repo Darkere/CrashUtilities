@@ -16,13 +16,13 @@ public class PlayerListGUI extends CUContentPane {
     public PlayerListGUI(CUScreen screen, DimensionType dim) {
         super(dim, screen);
         String playerName = Minecraft.getInstance().player.getName().getString();
-        DataHolder.requestUpdates(DataRequestType.PLAYERDATA,0,dim,true);
-        PLAYERLIST = new CUDropDown(DropDownType.PLAYERLIST,screen, DataHolder.getLatestPlayerData() == null ? new ArrayList<>() : DataHolder.getLatestPlayerData().getPlayerNames(playerName),"",defaultRenderOffsetX,defaultRenderOffsetY,0 );
+        DataHolder.requestUpdates(DataRequestType.PLAYERDATA, 0, dim, true);
+        PLAYERLIST = new CUDropDown(DropDownType.PLAYERLIST, screen, DataHolder.getLatestPlayerData() == null ? new ArrayList<>() : DataHolder.getLatestPlayerData().getPlayerNames(playerName), "", defaultRenderOffsetX, defaultRenderOffsetY, 0);
         screen.dropDowns.add(PLAYERLIST);
         PLAYERLIST.setEnabled(true);
         PLAYERLIST.setAlwaysExpanded();
         PLAYERLIST.setFitOnScreen(17);
-        DataHolder.registerListener(()->{
+        DataHolder.registerListener(() -> {
             PLAYERLIST.updateOptions(DataHolder.getLatestPlayerData() == null ? new ArrayList<>() : DataHolder.getLatestPlayerData().getPlayerNames(playerName));
         });
 

@@ -19,10 +19,10 @@ public class TeleportCommand implements Command<CommandSource> {
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("tp")
             .then(Commands.argument("player", EntityArgument.player())
-            .then(Commands.argument("pos", BlockPosArgument.blockPos())
-                .executes(cmd)
-            .then(Commands.argument("dim", DimensionArgument.getDimension())
-                .executes(cmd))));
+                .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                    .executes(cmd)
+                    .then(Commands.argument("dim", DimensionArgument.getDimension())
+                        .executes(cmd))));
 
 
     }

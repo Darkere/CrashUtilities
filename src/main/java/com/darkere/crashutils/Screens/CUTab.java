@@ -10,9 +10,9 @@ public enum CUTab {
     ATL(0, 26, 27, 26),
     ATC(28, 26, 27, 26),
     ATR(56, 26, 27, 26),
-    INVSEETABICON(0,52,63,115),
-    LISTTABICON(64,52,127,115),
-    MAPTABICON(128,52,191,115);
+    INVSEETABICON(0, 52, 63, 115),
+    LISTTABICON(64, 52, 127, 115),
+    MAPTABICON(128, 52, 191, 115);
 
     int x, y, cx, cy;
 
@@ -22,8 +22,9 @@ public enum CUTab {
         this.cx = cx;
         this.cy = cy;
     }
-    public void drawTab(AbstractGui gui, int i, int j, CUTab icon, float iconScale){
-        gui.blit(i,j,x,y,cx,cy);
-        gui.blit(i+5,j+6,gui.getBlitOffset(),(float)icon.x/iconScale,(float)icon.y/iconScale,17,17,(int) (256f/iconScale),(int)(256f/iconScale));
+
+    public void drawTab(AbstractGui gui, int i, int j, CUTab icon, float iconScale) {
+        gui.blit(i, j, x, y, cx, cy);
+        gui.blit(i + 5, j + 6, gui.getBlitOffset(), (float) icon.x / iconScale, (float) icon.y / iconScale, 17, 17, (int) (256f / iconScale), (int) (256f / iconScale));
     }
 }

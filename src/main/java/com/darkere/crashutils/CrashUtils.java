@@ -45,6 +45,7 @@ public class CrashUtils {
     Timer timer;
     public static boolean runHeapDump = false;
     public static boolean sparkLoaded = false;
+
     public CrashUtils() {
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::common);
@@ -57,7 +58,7 @@ public class CrashUtils {
     }
 
 
-    public void common(FMLCommonSetupEvent event){
+    public void common(FMLCommonSetupEvent event) {
         Network.register();
     }
 
@@ -98,8 +99,9 @@ public class CrashUtils {
         dispatcher.register(Commands.literal("cu").redirect(cmd));
 
     }
+
     @SubscribeEvent
-    public void ServerStopping(FMLServerStoppingEvent event){
+    public void ServerStopping(FMLServerStoppingEvent event) {
         timer.cancel();
     }
 
@@ -123,10 +125,10 @@ public class CrashUtils {
     public void onWorldTick(TickEvent.WorldTickEvent event) {
         if (event.world.isRemote) return;
         task.checkItemCounts((ServerWorld) event.world);
-        if(sparkLoaded && runHeapDump){
+        if (sparkLoaded && runHeapDump) {
             runHeapDump = false;
             event.world.getServer().sendMessage(new StringTextComponent("Running Heapdump. Massive Lagspike incoming!"));
-            event.world.getServer().getCommandManager().handleCommand(event.world.getServer().getCommandSource(),"/spark heapdump");
+            event.world.getServer().getCommandManager().handleCommand(event.world.getServer().getCommandSource(), "/spark heapdump");
         }
 
     }

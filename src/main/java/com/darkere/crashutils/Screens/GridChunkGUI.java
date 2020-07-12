@@ -71,8 +71,9 @@ public class GridChunkGUI extends CUContentPane {
         }
         FillMany.fillMany(TransformationMatrix.identity().getMatrix(), list);
     }
-    private void goTo(BlockPos pos){
-      ChunkPos chunkPos = new ChunkPos(pos);
+
+    private void goTo(BlockPos pos) {
+        ChunkPos chunkPos = new ChunkPos(pos);
         XOffset = -170 + chunkPos.x;
         YOffset = -90 + chunkPos.z;
     }
@@ -165,8 +166,8 @@ public class GridChunkGUI extends CUContentPane {
 
         } else {
             zoom /= 2;
-            XOffset -= distX ;
-            YOffset -= distY ;
+            XOffset -= distX;
+            YOffset -= distY;
 
         }
     }

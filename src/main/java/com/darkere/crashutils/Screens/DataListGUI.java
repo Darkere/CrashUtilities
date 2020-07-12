@@ -31,10 +31,22 @@ public class DataListGUI extends CUContentPane {
         LOCATIONS = new CUDropDown(DropDownType.LOCATIONS, screen, DataHolder.getLatestChunkData() == null ? new ArrayList<>() : new ArrayList<>(DataHolder.getLatestChunkData().getChunksByLocationType().keySet()), "all", -100, -105, 0);
         TICKETS = new CUDropDown(DropDownType.TICKETS, screen, DataHolder.getLatestChunkData() == null ? new ArrayList<>() : new ArrayList<>(DataHolder.getLatestChunkData().getChunksByTicketName().keySet()), "all", -100, -105, 0);
         SELECTOR = new CUDropDown(DropDownType.SELECTOR, screen, Arrays.asList("ENTITIES", "TILEENTITIES", "TICKETS", "STATES"), "ENTITIES", -192, -105, 75);
-        ENTITIES = new CUDropDown(DropDownType.ENTITIES, screen, DataHolder.getLatestEntityData() == null ? new ArrayList<>() : DataHolder.getLatestEntityData().getMap().entrySet().stream().filter(e -> e.getValue().size() > 0).sorted(Comparator.comparingInt(e -> e.getValue().size())).map(e -> "[" + e.getValue().size() + "] " + e.getKey().toString()).collect(Collectors.collectingAndThen(Collectors.toList(),l -> {Collections.reverse(l);return l; })), "", defaultRenderOffsetX, defaultRenderOffsetY, 0);
-        TILEENTITIES = new CUDropDown(DropDownType.TILEENTITIES, screen, DataHolder.getLatestTileEntityData() == null ? new ArrayList<>() : DataHolder.getLatestTileEntityData().getMap().entrySet().stream().filter(e -> e.getValue().size() > 0).sorted(Comparator.comparingInt(e -> e.getValue().size())).map(e -> "[" + e.getValue().size() + "] " + " " + e.getKey().toString()).collect(Collectors.collectingAndThen(Collectors.toList(),l -> {Collections.reverse(l);return l; })), "", defaultRenderOffsetX, defaultRenderOffsetY, 0);
-        ENTITYCHUNKLIST = new CUDropDown(DropDownType.ENTITYCHUNKLIST, screen, DataHolder.getLatestEntityData() == null ? new ArrayList<>() : DataHolder.getLatestEntityData().getChunkMap().entrySet().stream().filter(e -> e.getValue() > 0).sorted(Map.Entry.comparingByValue()).map(e -> "[" + e.getValue() + "] " + " " + e.getKey()).collect(Collectors.collectingAndThen(Collectors.toList(),l -> {Collections.reverse(l);return l; })), "", defaultRenderOffsetX, defaultRenderOffsetY, 0);
-        TILEENTITYCHUNKLIST = new CUDropDown(DropDownType.TILEENTITYCHUNKLIST, screen, DataHolder.getLatestTileEntityData() == null ? new ArrayList<>() : DataHolder.getLatestTileEntityData().getChunkMap().entrySet().stream().filter(e -> e.getValue() > 0).sorted(Map.Entry.comparingByValue()).map(e -> "[" + e.getValue() + "] " + e.getKey()).collect(Collectors.collectingAndThen(Collectors.toList(),l -> {Collections.reverse(l);return l; })), "", defaultRenderOffsetX, defaultRenderOffsetY, 0);
+        ENTITIES = new CUDropDown(DropDownType.ENTITIES, screen, DataHolder.getLatestEntityData() == null ? new ArrayList<>() : DataHolder.getLatestEntityData().getMap().entrySet().stream().filter(e -> e.getValue().size() > 0).sorted(Comparator.comparingInt(e -> e.getValue().size())).map(e -> "[" + e.getValue().size() + "] " + e.getKey().toString()).collect(Collectors.collectingAndThen(Collectors.toList(), l -> {
+            Collections.reverse(l);
+            return l;
+        })), "", defaultRenderOffsetX, defaultRenderOffsetY, 0);
+        TILEENTITIES = new CUDropDown(DropDownType.TILEENTITIES, screen, DataHolder.getLatestTileEntityData() == null ? new ArrayList<>() : DataHolder.getLatestTileEntityData().getMap().entrySet().stream().filter(e -> e.getValue().size() > 0).sorted(Comparator.comparingInt(e -> e.getValue().size())).map(e -> "[" + e.getValue().size() + "] " + " " + e.getKey().toString()).collect(Collectors.collectingAndThen(Collectors.toList(), l -> {
+            Collections.reverse(l);
+            return l;
+        })), "", defaultRenderOffsetX, defaultRenderOffsetY, 0);
+        ENTITYCHUNKLIST = new CUDropDown(DropDownType.ENTITYCHUNKLIST, screen, DataHolder.getLatestEntityData() == null ? new ArrayList<>() : DataHolder.getLatestEntityData().getChunkMap().entrySet().stream().filter(e -> e.getValue() > 0).sorted(Map.Entry.comparingByValue()).map(e -> "[" + e.getValue() + "] " + " " + e.getKey()).collect(Collectors.collectingAndThen(Collectors.toList(), l -> {
+            Collections.reverse(l);
+            return l;
+        })), "", defaultRenderOffsetX, defaultRenderOffsetY, 0);
+        TILEENTITYCHUNKLIST = new CUDropDown(DropDownType.TILEENTITYCHUNKLIST, screen, DataHolder.getLatestTileEntityData() == null ? new ArrayList<>() : DataHolder.getLatestTileEntityData().getChunkMap().entrySet().stream().filter(e -> e.getValue() > 0).sorted(Map.Entry.comparingByValue()).map(e -> "[" + e.getValue() + "] " + e.getKey()).collect(Collectors.collectingAndThen(Collectors.toList(), l -> {
+            Collections.reverse(l);
+            return l;
+        })), "", defaultRenderOffsetX, defaultRenderOffsetY, 0);
         TICKETCHUNKLIST = new CUDropDown(DropDownType.TICKETLIST, screen, DataHolder.getLatestChunkData() == null ? new ArrayList<>() : DataHolder.getLatestChunkData().getTicketsByChunk().entrySet().stream().map(e -> {
             StringBuilder s = new StringBuilder();
             s.append(e.getKey().toString()).append(" ");
@@ -43,8 +55,8 @@ public class DataListGUI extends CUContentPane {
             s.deleteCharAt(s.length() - 1);
             return s.toString();
         }).collect(Collectors.toList()), "", defaultRenderOffsetX, defaultRenderOffsetY, 0);
-        STATECOUNTLIST = new CUDropDown(DropDownType.STATECOUNTLIST,screen,DataHolder.getLatestChunkData() == null ? new ArrayList<>() : DataHolder.getLatestChunkData().getChunksByLocationType().entrySet().stream().map(e->"[" + e.getValue().size() + "] " + e.getKey()).collect(Collectors.toList()),"",defaultRenderOffsetX,defaultRenderOffsetY,0);
-        TICKETCOUNTLIST = new CUDropDown(DropDownType.TICKETCOUNTLIST,screen,DataHolder.getLatestChunkData() == null ? new ArrayList<>() : DataHolder.getLatestChunkData().getChunksByTicketName().entrySet().stream().map(e->"[" + e.getValue().size() + "] " + e.getKey()).collect(Collectors.toList()),"",defaultRenderOffsetX,defaultRenderOffsetY,0);
+        STATECOUNTLIST = new CUDropDown(DropDownType.STATECOUNTLIST, screen, DataHolder.getLatestChunkData() == null ? new ArrayList<>() : DataHolder.getLatestChunkData().getChunksByLocationType().entrySet().stream().map(e -> "[" + e.getValue().size() + "] " + e.getKey()).collect(Collectors.toList()), "", defaultRenderOffsetX, defaultRenderOffsetY, 0);
+        TICKETCOUNTLIST = new CUDropDown(DropDownType.TICKETCOUNTLIST, screen, DataHolder.getLatestChunkData() == null ? new ArrayList<>() : DataHolder.getLatestChunkData().getChunksByTicketName().entrySet().stream().map(e -> "[" + e.getValue().size() + "] " + e.getKey()).collect(Collectors.toList()), "", defaultRenderOffsetX, defaultRenderOffsetY, 0);
         STATECHUNKLIST = new CUDropDown(DropDownType.LOCATIONCHUNKLIST, screen, DataHolder.getLatestChunkData() == null ? new ArrayList<>() : DataHolder.getLatestChunkData().getLocationTypeByChunk().entrySet().stream().map(e -> e.getKey() + " " + e.getValue()).collect(Collectors.toList()), "", defaultRenderOffsetX, defaultRenderOffsetY, 0);
         ENTITIES.setAlwaysExpanded();
         ENTITIES.setFitOnScreen(16);
@@ -85,12 +97,24 @@ public class DataListGUI extends CUContentPane {
         SELECTOR.setEnabled(true);
         ENTITIES.setEnabled(true);
         DataHolder.registerListener(() -> {
-            ENTITIES.updateOptions(DataHolder.getLatestEntityData() == null ? new ArrayList<>() : DataHolder.getLatestEntityData().getMap().entrySet().stream().filter(e -> e.getValue().size() > 0).sorted(Comparator.comparingInt(e -> e.getValue().size())).map(e -> "[" + e.getValue().size() + "] " + e.getKey().toString()).collect(Collectors.collectingAndThen(Collectors.toList(),l -> {Collections.reverse(l);return l; })));
-            TILEENTITIES.updateOptions(DataHolder.getLatestTileEntityData() == null ? new ArrayList<>() : DataHolder.getLatestTileEntityData().getMap().entrySet().stream().filter(e -> e.getValue().size() > 0).sorted(Comparator.comparingInt(e -> e.getValue().size())).map(e -> "[" + e.getValue().size() + "] " + e.getKey().toString()).collect(Collectors.collectingAndThen(Collectors.toList(),l -> {Collections.reverse(l);return l; })));
+            ENTITIES.updateOptions(DataHolder.getLatestEntityData() == null ? new ArrayList<>() : DataHolder.getLatestEntityData().getMap().entrySet().stream().filter(e -> e.getValue().size() > 0).sorted(Comparator.comparingInt(e -> e.getValue().size())).map(e -> "[" + e.getValue().size() + "] " + e.getKey().toString()).collect(Collectors.collectingAndThen(Collectors.toList(), l -> {
+                Collections.reverse(l);
+                return l;
+            })));
+            TILEENTITIES.updateOptions(DataHolder.getLatestTileEntityData() == null ? new ArrayList<>() : DataHolder.getLatestTileEntityData().getMap().entrySet().stream().filter(e -> e.getValue().size() > 0).sorted(Comparator.comparingInt(e -> e.getValue().size())).map(e -> "[" + e.getValue().size() + "] " + e.getKey().toString()).collect(Collectors.collectingAndThen(Collectors.toList(), l -> {
+                Collections.reverse(l);
+                return l;
+            })));
             LOCATIONS.updateOptions(DataHolder.getLatestChunkData() == null ? new ArrayList<>() : new ArrayList<>(DataHolder.getLatestChunkData().getChunksByLocationType().keySet()));
             TICKETS.updateOptions(DataHolder.getLatestChunkData() == null ? new ArrayList<>() : new ArrayList<>(DataHolder.getLatestChunkData().getChunksByTicketName().keySet()));
-            ENTITYCHUNKLIST.updateOptions(DataHolder.getLatestEntityData() == null ? new ArrayList<>() : DataHolder.getLatestEntityData().getChunkMap().entrySet().stream().filter(e -> e.getValue() > 0).sorted(Map.Entry.comparingByValue()).map(e -> "[" + e.getValue() + "] " + " " + e.getKey()).collect(Collectors.collectingAndThen(Collectors.toList(),l -> {Collections.reverse(l);return l; })));
-            TILEENTITYCHUNKLIST.updateOptions(DataHolder.getLatestTileEntityData() == null ? new ArrayList<>() : DataHolder.getLatestTileEntityData().getChunkMap().entrySet().stream().filter(e -> e.getValue() > 0).sorted(Map.Entry.comparingByValue()).map(e -> "[" + e.getValue() + "] " + " " + e.getKey()).collect(Collectors.collectingAndThen(Collectors.toList(),l -> {Collections.reverse(l);return l; })));
+            ENTITYCHUNKLIST.updateOptions(DataHolder.getLatestEntityData() == null ? new ArrayList<>() : DataHolder.getLatestEntityData().getChunkMap().entrySet().stream().filter(e -> e.getValue() > 0).sorted(Map.Entry.comparingByValue()).map(e -> "[" + e.getValue() + "] " + " " + e.getKey()).collect(Collectors.collectingAndThen(Collectors.toList(), l -> {
+                Collections.reverse(l);
+                return l;
+            })));
+            TILEENTITYCHUNKLIST.updateOptions(DataHolder.getLatestTileEntityData() == null ? new ArrayList<>() : DataHolder.getLatestTileEntityData().getChunkMap().entrySet().stream().filter(e -> e.getValue() > 0).sorted(Map.Entry.comparingByValue()).map(e -> "[" + e.getValue() + "] " + " " + e.getKey()).collect(Collectors.collectingAndThen(Collectors.toList(), l -> {
+                Collections.reverse(l);
+                return l;
+            })));
             TICKETCHUNKLIST.updateOptions(DataHolder.getLatestChunkData() == null ? new ArrayList<>() : DataHolder.getLatestChunkData().getTicketsByChunk().entrySet().stream().map(e -> {
                 StringBuilder s = new StringBuilder();
                 s.append(e.getKey().toString()).append(" ");
@@ -99,8 +123,8 @@ public class DataListGUI extends CUContentPane {
                 s.deleteCharAt(s.length() - 1);
                 return s.toString();
             }).collect(Collectors.toList()));
-            TICKETCOUNTLIST.updateOptions(DataHolder.getLatestChunkData() == null ? new ArrayList<>() : DataHolder.getLatestChunkData().getChunksByTicketName().entrySet().stream().map(e->"[" + e.getValue().size() + "] " + e.getKey()).collect(Collectors.toList()));
-            STATECOUNTLIST.updateOptions(DataHolder.getLatestChunkData() == null ? new ArrayList<>() : DataHolder.getLatestChunkData().getChunksByLocationType().entrySet().stream().map(e->"[" + e.getValue().size() + "] " + e.getKey()).collect(Collectors.toList()));
+            TICKETCOUNTLIST.updateOptions(DataHolder.getLatestChunkData() == null ? new ArrayList<>() : DataHolder.getLatestChunkData().getChunksByTicketName().entrySet().stream().map(e -> "[" + e.getValue().size() + "] " + e.getKey()).collect(Collectors.toList()));
+            STATECOUNTLIST.updateOptions(DataHolder.getLatestChunkData() == null ? new ArrayList<>() : DataHolder.getLatestChunkData().getChunksByLocationType().entrySet().stream().map(e -> "[" + e.getValue().size() + "] " + e.getKey()).collect(Collectors.toList()));
             STATECHUNKLIST.updateOptions(DataHolder.getLatestChunkData() == null ? new ArrayList<>() : DataHolder.getLatestChunkData().getLocationTypeByChunk().entrySet().stream().map(e -> e.getKey() + " " + e.getValue()).collect(Collectors.toList()));
         });
     }
@@ -108,7 +132,7 @@ public class DataListGUI extends CUContentPane {
     @Override
     public void updateSelection(DropDownType ddtype, String s) {
 
-        if(s.equals("all")) s = "";
+        if (s.equals("all")) s = "";
         switch (ddtype) {
             case SELECTOR:
                 screen.dropDowns.forEach(x -> x.setEnabled(false));
@@ -194,12 +218,12 @@ public class DataListGUI extends CUContentPane {
         }
     }
 
-    private String getStringWithoutPrefixNumbers(String s){
+    private String getStringWithoutPrefixNumbers(String s) {
         return (s == null) ? null : s.substring(s.indexOf("]") + 2);
     }
 
     private ChunkPos getChunkfromString(String s) {
-        if(s == null)return null;
+        if (s == null) return null;
         s = s.trim();
         String x = s.substring(1, s.indexOf(","));
         String y = s.substring(s.indexOf(",") + 2, s.indexOf("]"));
@@ -218,15 +242,15 @@ public class DataListGUI extends CUContentPane {
     }
 
     public void addToToolTip(List<String> tooltips, int mx, int my) {
-        if(ENTITIES.isEnabled() && ENTITIES.isMouseOver(mx,my)){
+        if (ENTITIES.isEnabled() && ENTITIES.isMouseOver(mx, my)) {
             tooltips.add("Click to see Chunk Counts for this Entity");
-        } else if (TILEENTITIES.isEnabled()&& TILEENTITIES.isMouseOver(mx,my)){
+        } else if (TILEENTITIES.isEnabled() && TILEENTITIES.isMouseOver(mx, my)) {
             tooltips.add("Click to see Chunk Counts for this Tileentity");
-        } else if ( TICKETCHUNKLIST.isEnabled() && TICKETCHUNKLIST.isMouseOver(mx,my)|| STATECHUNKLIST.isEnabled()&& STATECHUNKLIST.isMouseOver(mx,my)){
+        } else if (TICKETCHUNKLIST.isEnabled() && TICKETCHUNKLIST.isMouseOver(mx, my) || STATECHUNKLIST.isEnabled() && STATECHUNKLIST.isMouseOver(mx, my)) {
             tooltips.add("Click to teleport to the specified Chunk");
-        } else if (ENTITYCHUNKLIST.isEnabled()&& ENTITYCHUNKLIST.isMouseOver(mx,my)){
+        } else if (ENTITYCHUNKLIST.isEnabled() && ENTITYCHUNKLIST.isMouseOver(mx, my)) {
             tooltips.add("Click to teleport to one of the Entities in the specified Chunk");
-        }else if (TILEENTITYCHUNKLIST.isEnabled()&& TILEENTITYCHUNKLIST.isMouseOver(mx,my)){
+        } else if (TILEENTITYCHUNKLIST.isEnabled() && TILEENTITYCHUNKLIST.isMouseOver(mx, my)) {
             tooltips.add("Click to teleport to one of the Tileentities in the specified Chunk");
         }
 

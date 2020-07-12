@@ -31,8 +31,8 @@ public class PlayerInvContainer extends Container {
     public Map<String, Integer> slotAmounts;
 
 
-    public PlayerInvContainer(PlayerEntity player, PlayerEntity otherPlayer, int id,String otherPlayerName,Map<String, Integer> slotAmounts, int curioSlotcount) {
-        super(null,id);
+    public PlayerInvContainer(PlayerEntity player, PlayerEntity otherPlayer, int id, String otherPlayerName, Map<String, Integer> slotAmounts, int curioSlotcount) {
+        super(null, id);
         this.otherPlayerName = otherPlayerName;
         this.world = player.getEntityWorld();
         this.player = player;
@@ -75,7 +75,7 @@ public class PlayerInvContainer extends Container {
                 CuriosAPI.getCuriosHandler(player).ifPresent(x -> x.getCurioMap().forEach((s, h) -> finalSlotAmounts.put(s, h.getSlots())));
             }
             layoutCurioSlots(otherPlayer, 204, -35, slotAmounts.values(), curiosInv);
-            layoutCurioSlots(player,204,85,slotAmounts.values(),null);
+            layoutCurioSlots(player, 204, 85, slotAmounts.values(), null);
         }
 
     }
@@ -103,7 +103,6 @@ public class PlayerInvContainer extends Container {
         }
         addSlot(new SlotItemHandler(playerInventory, 40, x, y + 18 * 5 + 4));
     }
-
 
 
     private void layoutCurioSlots(PlayerEntity player, int x, int y, Collection<Integer> curioSlots, IItemHandler curiosInv) {

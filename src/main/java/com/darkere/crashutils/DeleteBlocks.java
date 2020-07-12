@@ -12,19 +12,22 @@ import java.util.Set;
 
 public class DeleteBlocks {
     static Set<BlockPos> toDelete = new HashSet<>();
+
     @SubscribeEvent
-    public void loadChunkData(ChunkDataEvent.Load event){
+    public void loadChunkData(ChunkDataEvent.Load event) {
         toDelete.forEach(x -> {
-            if(isInChunk(x,event.getChunk())){
-                deleteBlock(x,event.getChunk());
+            if (isInChunk(x, event.getChunk())) {
+                deleteBlock(x, event.getChunk());
             }
         });
 
     }
-    public static void addBlockToRemove(BlockPos pos){
+
+    public static void addBlockToRemove(BlockPos pos) {
         toDelete.add(pos);
     }
-    private boolean isInChunk(BlockPos pos, IChunk chunk){
+
+    private boolean isInChunk(BlockPos pos, IChunk chunk) {
         return pos.getX() > chunk.getPos().getXStart() &&
             pos.getX() < chunk.getPos().getXEnd() &&
             pos.getZ() > chunk.getPos().getZStart() &&
@@ -32,12 +35,13 @@ public class DeleteBlocks {
 
 
     }
-    private void deleteBlock(BlockPos pos,IChunk chunk){
+
+    private void deleteBlock(BlockPos pos, IChunk chunk) {
         IWorld world = chunk.getWorldForge();
-        if(world != null){
-            world.setBlockState(pos, Blocks.AIR.getDefaultState(),01);
-          //  BlockState block = world.getBlockState(pos);
-        //    world.removeBlock(pos,false);
+        if (world != null) {
+            world.setBlockState(pos, Blocks.AIR.getDefaultState(), 01);
+            //  BlockState block = world.getBlockState(pos);
+            //    world.removeBlock(pos,false);
             chunk.removeTileEntity(pos);
             System.out.println("TE GONE ");
         }

@@ -19,7 +19,7 @@ public class AliasCommand {
     private static int newAlias(CommandContext<CommandSource> ctx, String alias, String cmd) {
         AliasRegistry.addAliases(alias, cmd);
         ctx.getSource().sendFeedback(new StringTextComponent("New command alias"), false);
-        ctx.getSource().sendFeedback(new StringTextComponent("\"/"+ alias + "\""+  " now runs " + "\"/"+ cmd +"\""), false);
+        ctx.getSource().sendFeedback(new StringTextComponent("\"/" + alias + "\"" + " now runs " + "\"/" + cmd + "\""), false);
         ctx.getSource().sendFeedback(new StringTextComponent("The server needs to be restarted to register the command"), false);
         return 1;
     }

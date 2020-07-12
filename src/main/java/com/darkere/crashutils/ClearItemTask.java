@@ -4,7 +4,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.server.management.PlayerList;
-import net.minecraft.util.text.*;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.server.ServerWorld;
 
 import java.util.Comparator;
@@ -62,7 +65,7 @@ public class ClearItemTask extends TimerTask {
                         }
 
                     }
-                }, integer*1000);
+                }, integer * 1000);
 
             }
             String intText = text.replaceFirst("%", integer.toString());
@@ -72,14 +75,14 @@ public class ClearItemTask extends TimerTask {
                 public void run() {
                     playerList.sendMessage(message);
                 }
-            }, (last - integer)*1000);
+            }, (last - integer) * 1000);
 
         }
 
 
         if (!CrashUtils.SERVER_CONFIG.getTitle()) return;
         try {
-            if(world.getServer().getPlayerList().getPlayers().size() == 0) return;
+            if (world.getServer().getPlayerList().getPlayers().size() == 0) return;
             world.getServer().getCommandManager().getDispatcher().execute("title @a title {\"text\":\"" + CrashUtils.SERVER_CONFIG.getTitleText() + "\",\"color\":\"dark_red\"}", world.getServer().getCommandSource());
         } catch (CommandSyntaxException e) {
             e.printStackTrace();

@@ -39,14 +39,14 @@ public class GetLogCommand {
     }
 
     private static void uploadString(CommandContext<CommandSource> context, Path logPath, String text) {
-        context.getSource().sendFeedback(new StringTextComponent("Uploading..."),false);
+        context.getSource().sendFeedback(new StringTextComponent("Uploading..."), false);
         String description = "Log Created " + LogHandler.getRelativePathDateInMin(logPath) + "min before upload";
         String url = LogHandler.uploadLog(description, logPath.getFileName().toString(), text);
         if (url.startsWith("https")) {
-            context.getSource().sendFeedback(CommandUtils.createURLComponent(url,url),true);
+            context.getSource().sendFeedback(CommandUtils.createURLComponent(url, url), true);
         } else {
-            context.getSource().sendFeedback(new StringTextComponent("Upload Failed: "+ url), true);
-            context.getSource().sendFeedback(new StringTextComponent("Try again or use Copy"),true);
+            context.getSource().sendFeedback(new StringTextComponent("Upload Failed: " + url), true);
+            context.getSource().sendFeedback(new StringTextComponent("Try again or use Copy"), true);
         }
     }
 

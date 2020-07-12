@@ -19,44 +19,44 @@ public class MemoryCommand {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("memoryCheck")
-            .executes(ctx -> run(ctx ,10))
-            .then(Commands.argument("count",IntegerArgumentType.integer())
-                .executes(ctx -> run(ctx ,IntegerArgumentType.getInteger(ctx,"count"))));
+            .executes(ctx -> run(ctx, 10))
+            .then(Commands.argument("count", IntegerArgumentType.integer())
+                .executes(ctx -> run(ctx, IntegerArgumentType.getInteger(ctx, "count"))));
     }
 
-    private static int run(CommandContext<CommandSource> context, int count){
-        if(!CrashUtils.SERVER_CONFIG.getMemoryChecker()){
-            context.getSource().sendFeedback(new StringTextComponent("Memory Checker not enabled in Config"),true);
+    private static int run(CommandContext<CommandSource> context, int count) {
+        if (!CrashUtils.SERVER_CONFIG.getMemoryChecker()) {
+            context.getSource().sendFeedback(new StringTextComponent("Memory Checker not enabled in Config"), true);
         }
         List<MemoryChecker.MemoryCount> full = CrashUtils.memoryChecker.counts;
-        if(full.size() < count){
+        if (full.size() < count) {
             count = full.size();
         }
-        for (int i = full.size() - count; i < full.size() ; i++) { //last count elements
-            context.getSource().sendFeedback(createVisualMemoryText(full.get(i)),true);
+        for (int i = full.size() - count; i < full.size(); i++) { //last count elements
+            context.getSource().sendFeedback(createVisualMemoryText(full.get(i)), true);
         }
         return Command.SINGLE_SUCCESS;
     }
 
-    private static ITextComponent createVisualMemoryText(MemoryChecker.MemoryCount count){
+    private static ITextComponent createVisualMemoryText(MemoryChecker.MemoryCount count) {
         ITextComponent text = new StringTextComponent("[");
-        double maximum =  (Math.ceil(MemoryChecker.inGigaBytes(count.getMaximum())));
-        double total =   MemoryChecker.inGigaBytes(count.getTotal());
-        double used = total -  MemoryChecker.inGigaBytes(count.getFree());
-        double percentTotal = total /maximum;
-        double percentUsed = used /maximum;
+        double maximum = (Math.ceil(MemoryChecker.inGigaBytes(count.getMaximum())));
+        double total = MemoryChecker.inGigaBytes(count.getTotal());
+        double used = total - MemoryChecker.inGigaBytes(count.getFree());
+        double percentTotal = total / maximum;
+        double percentUsed = used / maximum;
 
-        for (double i = 0.1D; i<=1; i +=0.1D){
-            if(i < percentUsed){
+        for (double i = 0.1D; i <= 1; i += 0.1D) {
+            if (i < percentUsed) {
                 text.appendSibling(CommandUtils.coloredComponent("I", TextFormatting.RED));
-            } else if (i < percentTotal){
-                text.appendSibling(CommandUtils.coloredComponent("I",TextFormatting.YELLOW));
+            } else if (i < percentTotal) {
+                text.appendSibling(CommandUtils.coloredComponent("I", TextFormatting.YELLOW));
             } else {
-                text.appendSibling(CommandUtils.coloredComponent("I",TextFormatting.GREEN));
+                text.appendSibling(CommandUtils.coloredComponent("I", TextFormatting.GREEN));
             }
         }
-        int usedpercent = (int)(percentUsed * 100);
-        int allocatedpercent = (int)(percentTotal* 100);
+        int usedpercent = (int) (percentUsed * 100);
+        int allocatedpercent = (int) (percentTotal * 100);
         text.appendSibling(CommandUtils.coloredComponent("] " + usedpercent + " % Used " + allocatedpercent + " % Allocated", TextFormatting.WHITE));
 
         return text;

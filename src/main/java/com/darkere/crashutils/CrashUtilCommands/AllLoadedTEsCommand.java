@@ -15,6 +15,7 @@ import java.util.List;
 
 public class AllLoadedTEsCommand implements Command<CommandSource> {
     private static final AllLoadedTEsCommand cmd = new AllLoadedTEsCommand();
+
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("allLoadedTileEntities")
             .then(Commands.argument("dim", DimensionArgument.getDimension()).executes(cmd))
@@ -27,7 +28,7 @@ public class AllLoadedTEsCommand implements Command<CommandSource> {
         TileEntityData list = new TileEntityData();
         List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
         list.createLists(worlds);
-        list.reply(null,context.getSource());
+        list.reply(null, context.getSource());
         return Command.SINGLE_SUCCESS;
     }
 }

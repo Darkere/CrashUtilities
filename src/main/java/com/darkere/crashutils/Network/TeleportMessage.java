@@ -24,8 +24,8 @@ public class TeleportMessage {
     public static void encode(TeleportMessage data, PacketBuffer buf) {
         ResourceLocation desti = data.dest.getRegistryName();
         ResourceLocation ori = data.origin.getRegistryName();
-        if(desti == null)desti = new ResourceLocation("minecraft:overworld");
-        if(ori == null)ori = new ResourceLocation("minecraft:overworld");
+        if (desti == null) desti = new ResourceLocation("minecraft:overworld");
+        if (ori == null) ori = new ResourceLocation("minecraft:overworld");
         buf.writeResourceLocation(ori);
         buf.writeResourceLocation(desti);
         buf.writeBlockPos(data.pos);
@@ -43,8 +43,8 @@ public class TeleportMessage {
     public static void handle(TeleportMessage data, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayerEntity player = ctx.get().getSender();
-            if(player == null)return;
-            WorldUtils.teleportPlayer(player,data.origin,data.dest,data.pos);
+            if (player == null) return;
+            WorldUtils.teleportPlayer(player, data.origin, data.dest, data.pos);
         });
         ctx.get().setPacketHandled(true);
     }

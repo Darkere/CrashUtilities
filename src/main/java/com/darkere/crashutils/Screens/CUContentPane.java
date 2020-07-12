@@ -36,6 +36,7 @@ public abstract class CUContentPane extends AbstractGui {
             DataHolder.cancelTimer();
         }
     }
+
     public void addOffset(double x, double y) {
 
     }
@@ -44,7 +45,7 @@ public abstract class CUContentPane extends AbstractGui {
     }
 
     public boolean isMouseOver(double mx, double my, int centerX, int centerY) {
-        return (mx >= XTopLeft  && mx <= XTopLeft + XAcross && my >= YTopLeft && my <= YTopLeft + YAcross);
+        return (mx >= XTopLeft && mx <= XTopLeft + XAcross && my >= YTopLeft && my <= YTopLeft + YAcross);
     }
 
     public void render(int centerX, int centerY) {

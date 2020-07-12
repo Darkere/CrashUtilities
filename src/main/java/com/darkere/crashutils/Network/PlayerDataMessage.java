@@ -11,9 +11,11 @@ import java.util.function.Supplier;
 
 public class PlayerDataMessage {
     private PlayerData data;
+
     public PlayerDataMessage(PlayerData playerData) {
         data = playerData;
     }
+
     public static void encode(PlayerDataMessage data, PacketBuffer buf) {
         List<String> names = data.data.getPlayerNames(null);
         buf.writeInt(names.size());
@@ -24,7 +26,7 @@ public class PlayerDataMessage {
     public static PlayerDataMessage decode(PacketBuffer buf) {
         List<String> names = new ArrayList<>();
         int size = buf.readInt();
-        for (int i = 0; i<size;i++){
+        for (int i = 0; i < size; i++) {
             names.add(buf.readString());
         }
         return new PlayerDataMessage(new PlayerData(names));

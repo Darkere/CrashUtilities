@@ -20,7 +20,8 @@ import java.util.List;
 
 public class FindLoadedTEsCommand implements Command<CommandSource> {
     private static final FindLoadedTEsCommand cmd = new FindLoadedTEsCommand();
-    private static final SuggestionProvider<CommandSource> sugg = (ctx,builder) -> ISuggestionProvider.func_212476_a(ForgeRegistries.TILE_ENTITIES.getKeys().stream(), builder);
+    private static final SuggestionProvider<CommandSource> sugg = (ctx, builder) -> ISuggestionProvider.func_212476_a(ForgeRegistries.TILE_ENTITIES.getKeys().stream(), builder);
+
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("findLoadedTileEntities")
             .then(Commands.argument("res", ResourceLocationArgument.resourceLocation())
@@ -38,8 +39,8 @@ public class FindLoadedTEsCommand implements Command<CommandSource> {
         TileEntityData list = new TileEntityData();
         List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
         list.createLists(worlds);
-        ResourceLocation res = ResourceLocationArgument.getResourceLocation(context,"res");
-        list.reply(res,context.getSource());
+        ResourceLocation res = ResourceLocationArgument.getResourceLocation(context, "res");
+        list.reply(res, context.getSource());
         return Command.SINGLE_SUCCESS;
     }
 }

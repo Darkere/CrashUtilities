@@ -45,7 +45,7 @@ public class CUScreen extends Screen {
     protected void init() {
         centerY = height / 2;
         centerX = width / 2;
-        contentGUI = new GridChunkGUI(this, dim,initial);
+        contentGUI = new GridChunkGUI(this, dim, initial);
         button = new ExtendedButton(centerX + 174, centerY - 103, 20, 10, String.valueOf(contentGUI.updateSpeed), (x) -> {
             contentGUI.shouldUpdate = !contentGUI.shouldUpdate;
             contentGUI.setUpdateSpeed();

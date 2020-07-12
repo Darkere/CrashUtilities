@@ -40,18 +40,18 @@ public class PlayerInventoryRequestMessage {
             ServerPlayerEntity player = ctx.get().getSender();
             MinecraftServer server = player.getServer();
             PlayerEntity otherPlayer = ctx.get().getSender().getServer().getPlayerList().getPlayerByUsername(data.playerName);
-            if(otherPlayer == null){
+            if (otherPlayer == null) {
                 GameProfile profile = server.getPlayerProfileCache().getGameProfileForUsername(data.playerName);
                 ServerWorld overworld = server.getWorld(DimensionType.OVERWORLD);
-                otherPlayer = FakePlayerFactory.get(overworld,profile);
+                otherPlayer = FakePlayerFactory.get(overworld, profile);
                 overworld.getSaveHandler().readPlayerData(otherPlayer);
             }
 
-            WorldUtils.addPlayerContainerRel(player,otherPlayer);
-            Map<String,Integer> curios = new LinkedHashMap<>();
-            if(CrashUtils.curiosLoaded){
-                CuriosAPI.getCuriosHandler(otherPlayer).orElse(null).getCurioMap().forEach((s,handler)->{
-                    curios.put(s,handler.getSlots());
+            WorldUtils.addPlayerContainerRel(player, otherPlayer);
+            Map<String, Integer> curios = new LinkedHashMap<>();
+            if (CrashUtils.curiosLoaded) {
+                CuriosAPI.getCuriosHandler(otherPlayer).orElse(null).getCurioMap().forEach((s, handler) -> {
+                    curios.put(s, handler.getSlots());
                 });
             }
 
@@ -59,8 +59,8 @@ public class PlayerInventoryRequestMessage {
             player.getNextWindowId();
             int id = player.currentWindowId;
 
-            Network.sendToPlayer(player,new OpenPlayerInvMessage(id,data.playerName,curios));
-            player.openContainer = new PlayerInvContainer(player,otherPlayer,id,null,null,0);
+            Network.sendToPlayer(player, new OpenPlayerInvMessage(id, data.playerName, curios));
+            player.openContainer = new PlayerInvContainer(player, otherPlayer, id, null, null, 0);
             player.openContainer.addListener(player);
 
 

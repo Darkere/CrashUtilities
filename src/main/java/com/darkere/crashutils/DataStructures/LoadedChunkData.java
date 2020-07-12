@@ -33,16 +33,16 @@ public class LoadedChunkData {
 
 
     public Map<ChunkPos, String> getLocationTypeByChunk() {
-        if(!filter.isEmpty()){
-            return  locationTypeByChunk.entrySet().stream().filter(e->e.getValue().equals(filter)).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        if (!filter.isEmpty()) {
+            return locationTypeByChunk.entrySet().stream().filter(e -> e.getValue().equals(filter)).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
 
         return locationTypeByChunk;
     }
 
     public Map<ChunkPos, Set<String>> getTicketsByChunk() {
-        if(!filter.isEmpty()){
-            return  ticketsByChunk.entrySet().stream().filter(e->e.getValue().contains(filter)).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        if (!filter.isEmpty()) {
+            return ticketsByChunk.entrySet().stream().filter(e -> e.getValue().contains(filter)).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
         return ticketsByChunk;
     }
@@ -134,30 +134,32 @@ public class LoadedChunkData {
         source.sendFeedback(new StringTextComponent("Chunks with " + word + " Ticket"), true);
         sendChunkPositions(source, chunks);
     }
-    public void createReverseMapping(){
-        chunksByTicketName.forEach((x,y)->{
-            y.forEach(t->{
-                ticketsByChunk.merge(t,new HashSet<>(Collections.singleton(x)),(old,n)->{
+
+    public void createReverseMapping() {
+        chunksByTicketName.forEach((x, y) -> {
+            y.forEach(t -> {
+                ticketsByChunk.merge(t, new HashSet<>(Collections.singleton(x)), (old, n) -> {
                     old.add(x);
                     return old;
                 });
             });
         });
-        chunksByLocationType.forEach((x,y)->{
-            y.forEach(t->{
-                locationTypeByChunk.put(t,x);
+        chunksByLocationType.forEach((x, y) -> {
+            y.forEach(t -> {
+                locationTypeByChunk.put(t, x);
             });
         });
     }
+
     public String getTickets(ChunkPos pos) {
         Set<String> strings = ticketsByChunk.get(pos);
-        if(strings == null || strings.isEmpty())return null;
-        if(strings.size()> 1) strings.remove("unknown");
+        if (strings == null || strings.isEmpty()) return null;
+        if (strings.size() > 1) strings.remove("unknown");
         StringBuilder toReturn = new StringBuilder();
         Iterator<String> it = strings.iterator();
-        while (it.hasNext()){
+        while (it.hasNext()) {
             toReturn.append(it.next());
-            if(it.hasNext()) toReturn.append(", ");
+            if (it.hasNext()) toReturn.append(", ");
         }
         return toReturn.toString();
     }

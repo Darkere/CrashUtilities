@@ -17,20 +17,21 @@ import net.minecraft.util.text.StringTextComponent;
 
 public class InventoryRemovalCommand {
     private static final SuggestionProvider<CommandSource> sugg = (ctx, builder) -> ISuggestionProvider.suggest(ctx.getSource().getServer().getPlayerProfileCache().gameProfiles.stream().map(GameProfile::getName), builder);
+
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("removeAllFromInventory")
             .then(Commands.argument("name", StringArgumentType.string())
                 .suggests(sugg)
                 .then(Commands.argument("item", ItemArgument.item())
-                .executes(ctx -> removeAll(ctx,StringArgumentType.getString(ctx,"name"),ItemArgument.getItem(ctx,"item")))));
+                    .executes(ctx -> removeAll(ctx, StringArgumentType.getString(ctx, "name"), ItemArgument.getItem(ctx, "item")))));
     }
 
-    public static int removeAll(CommandContext<CommandSource> context, String playerName, ItemInput itemInput ) throws CommandSyntaxException {
-        ItemStack stack = itemInput.createStack(1,false);
-        WorldUtils.applyToPlayer(playerName,context,(player)->{
-            player.inventory.clearMatchingItems((itemStack -> itemStack.getItem().equals(stack.getItem())),Integer.MAX_VALUE);
+    public static int removeAll(CommandContext<CommandSource> context, String playerName, ItemInput itemInput) throws CommandSyntaxException {
+        ItemStack stack = itemInput.createStack(1, false);
+        WorldUtils.applyToPlayer(playerName, context, (player) -> {
+            player.inventory.clearMatchingItems((itemStack -> itemStack.getItem().equals(stack.getItem())), Integer.MAX_VALUE);
         });
-        context.getSource().sendFeedback(stack.getTextComponent().appendSibling(new StringTextComponent(" has been removed from " + playerName+ "'s Inventory")),true);
+        context.getSource().sendFeedback(stack.getTextComponent().appendSibling(new StringTextComponent(" has been removed from " + playerName + "'s Inventory")), true);
         return 1;
     }
 }

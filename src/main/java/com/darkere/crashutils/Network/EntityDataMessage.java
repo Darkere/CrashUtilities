@@ -16,7 +16,7 @@ public class EntityDataMessage {
 
 
     public static void encode(EntityDataMessage data, PacketBuffer buf) {
-        NetworkTools.writeRLWPMap(data.list.getMap(),buf);
+        NetworkTools.writeRLWPMap(data.list.getMap(), buf);
     }
 
     public static EntityDataMessage decode(PacketBuffer buf) {

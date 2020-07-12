@@ -10,7 +10,6 @@ public class ServerConfig {
 
 
     private ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
-    //ForgeConfigSpec spec;
     private ForgeConfigSpec.BooleanValue enabled;
     private ForgeConfigSpec.IntValue timer;
     private ForgeConfigSpec.IntValue maximum;

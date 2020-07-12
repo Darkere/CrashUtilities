@@ -26,9 +26,9 @@ public class MemoryChecker extends TimerTask {
         MemoryCount count = new MemoryCount(r.maxMemory(), r.freeMemory(), r.totalMemory());
         if (shouldLog()) {
             counts.add(count);
-            if(counts.size() > 100){
-                for(int i = 0; i< 20;i++){
-                    counts.remove(counts.size()-1);
+            if (counts.size() > 100) {
+                for (int i = 0; i < 20; i++) {
+                    counts.remove(counts.size() - 1);
                 }
             }
         }
@@ -40,12 +40,12 @@ public class MemoryChecker extends TimerTask {
             CrashUtils.LOGGER.info("Memory Spike " + deltaString + " MB");
         }
         lastUsed = used;
-        double usedPerc = (float)count.getFree()/(float)count.getMaximum();
-        if(usedPerc > 0.95F){
-            if(!ranHeapDump && CrashUtils.sparkLoaded){
+        double usedPerc = (float) count.getFree() / (float) count.getMaximum();
+        if (usedPerc > 0.95F) {
+            if (!ranHeapDump && CrashUtils.sparkLoaded) {
                 CrashUtils.LOGGER.info("Running Spark Heapdump! LagSpike incoming!");
                 CrashUtils.SERVER_CONFIG.disableHeapDump();
-                CrashUtils.runHeapDump =true;
+                CrashUtils.runHeapDump = true;
             }
             CrashUtils.LOGGER.info("Memory full, using" + usedPerc + "% of memory");
         }

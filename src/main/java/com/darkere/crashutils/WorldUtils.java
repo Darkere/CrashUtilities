@@ -27,43 +27,45 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class WorldUtils{
+public class WorldUtils {
 
-    private static Map<PlayerEntity,PlayerEntity> playerToContainer = new HashMap<>();
+    private static Map<PlayerEntity, PlayerEntity> playerToContainer = new HashMap<>();
 
-    public static void addPlayerContainerRel(PlayerEntity player1, PlayerEntity containerPlayer){
-        playerToContainer.put(player1,containerPlayer);
+    public static void addPlayerContainerRel(PlayerEntity player1, PlayerEntity containerPlayer) {
+        playerToContainer.put(player1, containerPlayer);
     }
-    public static PlayerEntity getRelatedContainer(PlayerEntity player){
+
+    public static PlayerEntity getRelatedContainer(PlayerEntity player) {
         return playerToContainer.get(player);
     }
 
-    public static List<ServerWorld> getWorldsFromDimensionArgument(CommandContext<CommandSource> context){
+    public static List<ServerWorld> getWorldsFromDimensionArgument(CommandContext<CommandSource> context) {
         DimensionType type = null;
         try {
-            type = DimensionArgument.getDimensionArgument(context,"dim");
-        }catch (IllegalArgumentException e){
+            type = DimensionArgument.getDimensionArgument(context, "dim");
+        } catch (IllegalArgumentException e) {
             //NO OP
         }
         List<ServerWorld> worlds = new ArrayList<>();
-        if(type == null){
+        if (type == null) {
             context.getSource().getServer().getWorlds().forEach(worlds::add);
         } else {
             worlds.add(context.getSource().getServer().getWorld(type));
         }
         return worlds;
     }
-    public static void teleportPlayer(ServerPlayerEntity player, DimensionType startWorld, DimensionType destWorld, BlockPos newPos){
-        if(player.world.isRemote){
-            Network.sendToServer(new TeleportMessage(startWorld,destWorld,newPos));
+
+    public static void teleportPlayer(ServerPlayerEntity player, DimensionType startWorld, DimensionType destWorld, BlockPos newPos) {
+        if (player.world.isRemote) {
+            Network.sendToServer(new TeleportMessage(startWorld, destWorld, newPos));
         }
-        if(newPos.getY() == 0){
-            ServerWorld world = DimensionManager.getWorld(player.server,destWorld,false,true);
+        if (newPos.getY() == 0) {
+            ServerWorld world = DimensionManager.getWorld(player.server, destWorld, false, true);
             IChunk chunk = world.getChunkAt(newPos);
-            int y = chunk.getTopBlockY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,newPos.getX(),newPos.getZ());
-            newPos = new BlockPos(newPos.getX(),y,newPos.getZ());
+            int y = chunk.getTopBlockY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, newPos.getX(), newPos.getZ());
+            newPos = new BlockPos(newPos.getX(), y, newPos.getZ());
         }
-        if(startWorld != destWorld){
+        if (startWorld != destWorld) {
             BlockPos finalNewPos = newPos;
             player.changeDimension(destWorld, new ITeleporter() {
                 @Override
@@ -74,18 +76,18 @@ public class WorldUtils{
                 }
             });
         } else {
-            player.setPositionAndUpdate(newPos.getX(),newPos.getY() + 1,newPos.getZ());
+            player.setPositionAndUpdate(newPos.getX(), newPos.getY() + 1, newPos.getZ());
         }
     }
 
-    public static void applyToPlayer(String playerName, CommandContext<CommandSource> context, Consumer<ServerPlayerEntity> consumer){
+    public static void applyToPlayer(String playerName, CommandContext<CommandSource> context, Consumer<ServerPlayerEntity> consumer) {
         ServerPlayerEntity player = context.getSource().getServer().getPlayerList().getPlayerByUsername(playerName);
         CommandSource source = context.getSource();
-        if(player == null){
+        if (player == null) {
             GameProfile profile = source.getServer().getPlayerProfileCache().getGameProfileForUsername(playerName);
             ServerWorld overworld = source.getServer().getWorld(DimensionType.OVERWORLD);
-            if(profile == null) source.sendErrorMessage(new StringTextComponent("Player not found"));
-            FakePlayer fakePlayer = FakePlayerFactory.get(overworld,profile);
+            if (profile == null) source.sendErrorMessage(new StringTextComponent("Player not found"));
+            FakePlayer fakePlayer = FakePlayerFactory.get(overworld, profile);
             overworld.getSaveHandler().readPlayerData(fakePlayer);
             consumer.accept(fakePlayer);
             overworld.getSaveHandler().writePlayerData(fakePlayer);

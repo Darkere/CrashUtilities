@@ -13,8 +13,9 @@ import net.minecraft.world.server.ServerWorld;
 
 import java.util.List;
 
-public class AllEntitiesCommand implements Command<CommandSource>{
+public class AllEntitiesCommand implements Command<CommandSource> {
     private static final AllEntitiesCommand cmd = new AllEntitiesCommand();
+
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("allEntities")
             .then(Commands.argument("dim", DimensionArgument.getDimension()).executes(cmd))
@@ -27,7 +28,7 @@ public class AllEntitiesCommand implements Command<CommandSource>{
         EntityData list = new EntityData();
         List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
         list.createLists(worlds);
-        list.reply(null,context.getSource());
+        list.reply(null, context.getSource());
         return Command.SINGLE_SUCCESS;
     }
 }

@@ -27,7 +27,7 @@ public class UpdateDataRequestMessage {
 
     public static void encode(UpdateDataRequestMessage data, PacketBuffer buf) {
         buf.writeInt(data.type.ordinal());
-        NetworkTools.writeDimensionType(data.dim,buf);
+        NetworkTools.writeDimensionType(data.dim, buf);
     }
 
 
@@ -40,8 +40,8 @@ public class UpdateDataRequestMessage {
 
     public static void handle(UpdateDataRequestMessage data, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            if(ctx.get().getSender() == null)return;
-            if(!ctx.get().getSender().hasPermissionLevel(4)) return;
+            if (ctx.get().getSender() == null) return;
+            if (!ctx.get().getSender().hasPermissionLevel(4)) return;
             MinecraftServer server = ctx.get().getSender().getServer();
             if (server == null) return;
             ServerWorld world = DimensionManager.getWorld(server, data.dim, false, false);
@@ -55,19 +55,19 @@ public class UpdateDataRequestMessage {
                 case ENTITYDATA: {
                     EntityData entityData = new EntityData();
                     entityData.createLists(worlds);
-                    Network.sendToPlayer(ctx.get().getSender(),new EntityDataMessage(entityData));
+                    Network.sendToPlayer(ctx.get().getSender(), new EntityDataMessage(entityData));
                     break;
                 }
                 case TILEENTITYDATA: {
                     TileEntityData tileEntityData = new TileEntityData();
                     tileEntityData.createLists(worlds);
-                    Network.sendToPlayer(ctx.get().getSender(),new TileEntityDataMessage(tileEntityData));
+                    Network.sendToPlayer(ctx.get().getSender(), new TileEntityDataMessage(tileEntityData));
                     break;
                 }
-                case PLAYERDATA:{
+                case PLAYERDATA: {
                     PlayerData playerData = new PlayerData();
                     playerData.createLists(worlds);
-                    Network.sendToPlayer(ctx.get().getSender(),new PlayerDataMessage(playerData));
+                    Network.sendToPlayer(ctx.get().getSender(), new PlayerDataMessage(playerData));
                     break;
                 }
             }

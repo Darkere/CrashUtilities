@@ -13,12 +13,16 @@ public class PlayerData {
     public void createLists(List<ServerWorld> worlds) {
         playerNames = worlds.get(0).getServer().getPlayerProfileCache().gameProfiles.stream().map(GameProfile::getName).collect(Collectors.toList());
     }
-    public List<String> getPlayerNames(String requestingPlayer){
+
+    public List<String> getPlayerNames(String requestingPlayer) {
         playerNames.remove(requestingPlayer);
         return playerNames;
     }
-    public PlayerData(){}
-    public PlayerData(List<String> names){
+
+    public PlayerData() {
+    }
+
+    public PlayerData(List<String> names) {
         playerNames = names;
     }
 }

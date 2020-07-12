@@ -16,7 +16,7 @@ public class TileEntityDataMessage {
 
 
     public static void encode(TileEntityDataMessage data, PacketBuffer buf) {
-        NetworkTools.writeRLWPMap(data.list.getMap(),buf);
+        NetworkTools.writeRLWPMap(data.list.getMap(), buf);
     }
 
 
