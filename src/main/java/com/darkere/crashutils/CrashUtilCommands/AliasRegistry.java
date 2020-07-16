@@ -17,11 +17,12 @@ import java.util.List;
 import java.util.Map;
 
 public class AliasRegistry {
-    private static Map<String, String> aliases = new HashMap<>();
+    private static final Map<String, String> aliases = new HashMap<>();
     private static final File file = new File("config/crashutilities-aliases.txt");
 
     public static int runAlias(CommandContext<CommandSource> context) {
-        String command = context.getInput().substring(1);
+        String input = context.getInput();
+        String command = input.substring(input.indexOf(context.getNodes().get(0).getNode().getName()));
         String commandToRun = aliases.get(command);
         if (commandToRun == null) return 0;
         context.getSource().getServer().getCommandManager().handleCommand(context.getSource(), commandToRun);
@@ -43,7 +44,7 @@ public class AliasRegistry {
 
             LiteralArgumentBuilder<CommandSource> literal = null;
             if (literals.size() == 1) {
-                literal = literals.get(0);
+                literal = literals.get(0).executes(AliasRegistry::runAlias);
             } else {
                 for (int i = literals.size() - 1; i > 0; i--) {
                     if (i == literals.size() - 1) {
