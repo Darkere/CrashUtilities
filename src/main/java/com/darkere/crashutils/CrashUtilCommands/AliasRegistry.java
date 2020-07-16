@@ -11,10 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class AliasRegistry {
     private static final Map<String, String> aliases = new HashMap<>();
@@ -23,10 +20,28 @@ public class AliasRegistry {
     public static int runAlias(CommandContext<CommandSource> context) {
         String input = context.getInput();
         String command = input.substring(input.indexOf(context.getNodes().get(0).getNode().getName()));
-        String commandToRun = aliases.get(command);
-        if (commandToRun == null) return 0;
+        String commandToRun = getCommandWithArguments(command);
         context.getSource().getServer().getCommandManager().handleCommand(context.getSource(), commandToRun);
         return 1;
+    }
+
+    private static String getCommandWithArguments(String command) {
+        List<String> nodes = StringUtils.split(command, ' ');
+        String test = "";
+        for (Iterator<String> iterator = nodes.iterator(); iterator.hasNext(); ) {
+            test = test + iterator.next();
+            iterator.remove();
+            if (aliases.containsKey(test)) {
+                break;
+            }
+        }
+
+        String com = aliases.get(test);
+        StringBuilder args = new StringBuilder();
+        for (String node : nodes) {
+            args.append(" ").append(node);
+        }
+        return com + args;
     }
 
     public static void registerAliases(CommandDispatcher<CommandSource> dispatcher) {
