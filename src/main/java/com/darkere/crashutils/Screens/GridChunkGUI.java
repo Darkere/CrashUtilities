@@ -4,11 +4,12 @@ import com.darkere.crashutils.DataStructures.DataHolder;
 import com.darkere.crashutils.Network.DataRequestType;
 import com.darkere.crashutils.Screens.Types.DropDownType;
 import com.darkere.crashutils.Screens.Types.GridRenderType;
-import net.minecraft.client.renderer.TransformationMatrix;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.World;
 
 import java.awt.*;
 import java.util.List;
@@ -30,7 +31,7 @@ public class GridChunkGUI extends CUContentPane {
     int hoveringX, hoveringY = 0;
     long blinkTime = 0;
 
-    GridChunkGUI(CUScreen screen, DimensionType dim, BlockPos initial) {
+    GridChunkGUI(CUScreen screen, RegistryKey<World> dim, BlockPos initial) {
         super(dim, screen);
         goTo(initial);
         DataHolder.requestUpdates(DataRequestType.LOADEDCHUNKDATA, 0, dim, true);
@@ -59,8 +60,8 @@ public class GridChunkGUI extends CUContentPane {
         });
     }
 
-    public void render(int centerX, int centerY) {
-        super.render(centerX, centerY);
+    public void render(MatrixStack stack, int centerX, int centerY) {
+        super.render(stack, centerX, centerY);
         List<FillMany.ColoredRectangle> list = new ArrayList<>();
         for (int i = 0; i < XAcross; i++) {
             for (int j = 0; j < YAcross; j++) {
@@ -69,7 +70,7 @@ public class GridChunkGUI extends CUContentPane {
                 list.add(new FillMany.ColoredRectangle(i + XTopLeft, j + YTopLeft, i + 1 + XTopLeft, j + 1 + YTopLeft, x));
             }
         }
-        FillMany.fillMany(TransformationMatrix.identity().getMatrix(), list);
+        FillMany.fillMany(stack.getLast().getMatrix(), list);
     }
 
     private void goTo(BlockPos pos) {

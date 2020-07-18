@@ -6,8 +6,11 @@ import com.darkere.crashutils.Network.DataRequestType;
 import com.darkere.crashutils.Network.Network;
 import com.darkere.crashutils.Network.TeleportMessage;
 import com.darkere.crashutils.Screens.Types.DropDownType;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.World;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,7 +28,7 @@ public class DataListGUI extends CUContentPane {
     CUDropDown TICKETCOUNTLIST;
     CUDropDown STATECOUNTLIST;
 
-    DataListGUI(CUScreen screen, DimensionType dim) {
+    DataListGUI(CUScreen screen, RegistryKey<World> dim) {
         super(dim, screen);
         DataHolder.requestUpdates(DataRequestType.ENTITYDATA, 0, dim, true);
         LOCATIONS = new CUDropDown(DropDownType.LOCATIONS, screen, DataHolder.getLatestChunkData() == null ? new ArrayList<>() : new ArrayList<>(DataHolder.getLatestChunkData().getChunksByLocationType().keySet()), "all", -100, -105, 0);
@@ -241,17 +244,17 @@ public class DataListGUI extends CUContentPane {
 
     }
 
-    public void addToToolTip(List<String> tooltips, int mx, int my) {
+    public void addToToolTip(IFormattableTextComponent tooltips, int mx, int my) {
         if (ENTITIES.isEnabled() && ENTITIES.isMouseOver(mx, my)) {
-            tooltips.add("Click to see Chunk Counts for this Entity");
+            tooltips.func_230529_a_(new StringTextComponent("Click to see Chunk Counts for this Entity"));
         } else if (TILEENTITIES.isEnabled() && TILEENTITIES.isMouseOver(mx, my)) {
-            tooltips.add("Click to see Chunk Counts for this Tileentity");
+            tooltips.func_230529_a_(new StringTextComponent("Click to see Chunk Counts for this Tileentity"));
         } else if (TICKETCHUNKLIST.isEnabled() && TICKETCHUNKLIST.isMouseOver(mx, my) || STATECHUNKLIST.isEnabled() && STATECHUNKLIST.isMouseOver(mx, my)) {
-            tooltips.add("Click to teleport to the specified Chunk");
+            tooltips.func_230529_a_(new StringTextComponent("Click to teleport to the specified Chunk"));
         } else if (ENTITYCHUNKLIST.isEnabled() && ENTITYCHUNKLIST.isMouseOver(mx, my)) {
-            tooltips.add("Click to teleport to one of the Entities in the specified Chunk");
+            tooltips.func_230529_a_(new StringTextComponent("Click to teleport to one of the Entities in the specified Chunk"));
         } else if (TILEENTITYCHUNKLIST.isEnabled() && TILEENTITYCHUNKLIST.isMouseOver(mx, my)) {
-            tooltips.add("Click to teleport to one of the Tileentities in the specified Chunk");
+            tooltips.func_230529_a_(new StringTextComponent("Click to teleport to one of the Tileentities in the specified Chunk"));
         }
 
     }

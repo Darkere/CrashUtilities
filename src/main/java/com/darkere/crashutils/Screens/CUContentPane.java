@@ -3,8 +3,10 @@ package com.darkere.crashutils.Screens;
 import com.darkere.crashutils.DataStructures.DataHolder;
 import com.darkere.crashutils.Network.DataRequestType;
 import com.darkere.crashutils.Screens.Types.DropDownType;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.world.World;
 
 public abstract class CUContentPane extends AbstractGui {
     int defaultRenderOffsetX = -191;
@@ -17,14 +19,14 @@ public abstract class CUContentPane extends AbstractGui {
     boolean firstChunks = false;
     int updateSpeed = 60;
     boolean shouldUpdate = false;
-    DimensionType dim;
+    RegistryKey<World> dim;
     CUScreen screen;
     int XTopLeft;
     int YTopLeft;
     int XAcross = 383;
     int YAcross = 190;
 
-    public CUContentPane(DimensionType dim, CUScreen screen) {
+    public CUContentPane(RegistryKey<World> dim, CUScreen screen) {
         this.dim = dim;
         this.screen = screen;
     }
@@ -48,12 +50,12 @@ public abstract class CUContentPane extends AbstractGui {
         return (mx >= XTopLeft && mx <= XTopLeft + XAcross && my >= YTopLeft && my <= YTopLeft + YAcross);
     }
 
-    public void render(int centerX, int centerY) {
+    public void render(MatrixStack stack, int centerX, int centerY) {
         this.centerX = centerX;
         this.centerY = centerY;
         XTopLeft = centerX + defaultRenderOffsetX;
         YTopLeft = centerY + defaultRenderOffsetY;
-        fill(XTopLeft, YTopLeft, XAcross + XTopLeft, YAcross + YTopLeft, 0xFF000000);
+        fill(stack, XTopLeft, YTopLeft, XAcross + XTopLeft, YAcross + YTopLeft, 0xFF000000);
     }
 
     public abstract void updateSelection(DropDownType ddtype, String s);

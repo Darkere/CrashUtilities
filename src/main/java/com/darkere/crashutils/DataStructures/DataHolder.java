@@ -3,8 +3,9 @@ package com.darkere.crashutils.DataStructures;
 import com.darkere.crashutils.Network.DataRequestType;
 import com.darkere.crashutils.Network.Network;
 import com.darkere.crashutils.Network.UpdateDataRequestMessage;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.World;
 
 import java.util.LinkedList;
 import java.util.Timer;
@@ -87,7 +88,7 @@ public class DataHolder {
         return null;
     }
 
-    public static void requestUpdates(DataRequestType type, int updateFrequency, DimensionType dim, boolean now) {
+    public static void requestUpdates(DataRequestType type, int updateFrequency, RegistryKey<World> dim, boolean now) {
         timer.cancel();
         if (now) Network.INSTANCE.sendToServer(new UpdateDataRequestMessage(type, dim));
         if (updateFrequency == 0) return;

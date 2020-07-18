@@ -4,20 +4,21 @@ import com.darkere.crashutils.Network.Network;
 import com.darkere.crashutils.Network.TeleportMessage;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.arguments.DimensionArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunk;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.common.util.ITeleporter;
 
 import java.util.ArrayList;
@@ -40,28 +41,27 @@ public class WorldUtils {
     }
 
     public static List<ServerWorld> getWorldsFromDimensionArgument(CommandContext<CommandSource> context) {
-        DimensionType type = null;
+        ServerWorld world = null;
         try {
-            type = DimensionArgument.getDimensionArgument(context, "dim");
-        } catch (IllegalArgumentException e) {
+            world = DimensionArgument.getDimensionArgument(context, "dim");
+        } catch (IllegalArgumentException | CommandSyntaxException e) {
             //NO OP
         }
         List<ServerWorld> worlds = new ArrayList<>();
-        if (type == null) {
+        if (world == null) {
             context.getSource().getServer().getWorlds().forEach(worlds::add);
         } else {
-            worlds.add(context.getSource().getServer().getWorld(type));
+            worlds.add(world);
         }
         return worlds;
     }
 
-    public static void teleportPlayer(ServerPlayerEntity player, DimensionType startWorld, DimensionType destWorld, BlockPos newPos) {
+    public static void teleportPlayer(ServerPlayerEntity player, ServerWorld startWorld, ServerWorld destWorld, BlockPos newPos) {
         if (player.world.isRemote) {
-            Network.sendToServer(new TeleportMessage(startWorld, destWorld, newPos));
+            Network.sendToServer(new TeleportMessage(startWorld.func_234923_W_(), destWorld.func_234923_W_(), newPos));
         }
         if (newPos.getY() == 0) {
-            ServerWorld world = DimensionManager.getWorld(player.server, destWorld, false, true);
-            IChunk chunk = world.getChunkAt(newPos);
+            IChunk chunk = destWorld.getChunkAt(newPos);
             int y = chunk.getTopBlockY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, newPos.getX(), newPos.getZ());
             newPos = new BlockPos(newPos.getX(), y, newPos.getZ());
         }
@@ -84,13 +84,20 @@ public class WorldUtils {
         ServerPlayerEntity player = context.getSource().getServer().getPlayerList().getPlayerByUsername(playerName);
         CommandSource source = context.getSource();
         if (player == null) {
-            GameProfile profile = source.getServer().getPlayerProfileCache().getGameProfileForUsername(playerName);
-            ServerWorld overworld = source.getServer().getWorld(DimensionType.OVERWORLD);
-            if (profile == null) source.sendErrorMessage(new StringTextComponent("Player not found"));
-            FakePlayer fakePlayer = FakePlayerFactory.get(overworld, profile);
-            overworld.getSaveHandler().readPlayerData(fakePlayer);
+            MinecraftServer server = source.getServer();
+            GameProfile profile = server.getPlayerProfileCache().getGameProfileForUsername(playerName);
+            if (profile == null){
+                source.sendErrorMessage(new StringTextComponent("Player not found"));
+                return;
+            }
+            FakePlayer fakePlayer = new FakePlayer(server.getWorld(World.field_234918_g_),profile);
+            CompoundNBT nbt = server.field_240766_e_.func_237336_b_(fakePlayer);
+            if(nbt == null) return;
+            fakePlayer.read(nbt);
             consumer.accept(fakePlayer);
-            overworld.getSaveHandler().writePlayerData(fakePlayer);
+            server.field_240766_e_.func_237335_a_(fakePlayer);
+
+
         } else {
             consumer.accept(player);
         }

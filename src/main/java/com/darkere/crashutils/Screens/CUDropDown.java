@@ -1,10 +1,12 @@
 package com.darkere.crashutils.Screens;
 
 import com.darkere.crashutils.Screens.Types.DropDownType;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.renderer.TransformationMatrix;
+import net.minecraft.util.math.vector.TransformationMatrix;
+import net.minecraft.util.text.StringTextComponent;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -56,7 +58,7 @@ public class CUDropDown extends AbstractGui {
         } else {
             this.width = width;
         }
-        widget = new TextFieldWidget(Minecraft.getInstance().fontRenderer, this.posX, this.posY, this.width, height, selected);
+        widget = new TextFieldWidget(Minecraft.getInstance().fontRenderer, this.posX, this.posY, this.width, height, new StringTextComponent(selected));
         widget.setText(selected);
         widget.setCursorPositionZero();
         maxOffset = options.size() - fitOnScreen;
@@ -68,13 +70,13 @@ public class CUDropDown extends AbstractGui {
         this.fitOnScreen = fitOnScreen;
     }
 
-    public void render(int centerX, int centerY) {
+    public void render(MatrixStack stack, int centerX, int centerY) {
         posX = centerX + defaultXRenderOffset + 1;
         posY = centerY + defaultYRenderOffset + 1;
         if (!isEnabled) return;
         List<FillMany.ColoredRectangle> list = new ArrayList<>();
         strings = new ArrayList<>();
-        widget.render(posX, posY, 0);
+        widget.render(stack, posX, posY, 0);
 
         if (expanded) {
             boolean colored = false;
@@ -93,7 +95,7 @@ public class CUDropDown extends AbstractGui {
             }
         }
         FillMany.fillMany(TransformationMatrix.identity().getMatrix(), list);
-        FillMany.drawStrings(Minecraft.getInstance().fontRenderer, strings);
+        FillMany.drawStrings(stack, Minecraft.getInstance().fontRenderer, strings);
 
     }
 

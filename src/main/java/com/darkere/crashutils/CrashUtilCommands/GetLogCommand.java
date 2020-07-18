@@ -6,7 +6,7 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 
@@ -68,22 +68,22 @@ public class GetLogCommand {
 
 
     private static int getLogOverview(CommandContext<CommandSource> ctx) {
-        ITextComponent latestlogText = new StringTextComponent("Log from current Game").applyTextStyle(TextFormatting.YELLOW);
-        latestlogText.appendSibling(CommandUtils.getCommandTextComponent(" [Upload]", "/cu getLog uploadLatestLog"));
-        latestlogText.appendSibling(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getFileAsStringFromPath(LogHandler.latestlog)));
+        IFormattableTextComponent latestlogText = new StringTextComponent("Log from current Game").func_240701_a_(TextFormatting.YELLOW);
+        latestlogText.func_230529_a_(CommandUtils.getCommandTextComponent(" [Upload]", "/cu getLog uploadLatestLog"));
+        latestlogText.func_230529_a_(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getFileAsStringFromPath(LogHandler.latestlog)));
         ctx.getSource().sendFeedback(latestlogText, true);
         Path crashreport = LogHandler.getLatestCrashReportPath();
         if (crashreport != null) {
-            ITextComponent crashreporttext = new StringTextComponent("Latest Crash Report ").applyTextStyle(TextFormatting.RED).appendSibling(new StringTextComponent(LogHandler.getRelativePathDateInMin(crashreport) + " Minutes old").applyTextStyle(TextFormatting.AQUA));
-            crashreporttext.appendSibling(CommandUtils.getCommandTextComponent(" [Upload]", "/cu getLog uploadCrashReport"));
-            crashreporttext.appendSibling(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getFileAsStringFromPath(crashreport)));
+            IFormattableTextComponent crashreporttext = new StringTextComponent("Latest Crash Report ").func_240701_a_(TextFormatting.RED).func_230529_a_(new StringTextComponent(LogHandler.getRelativePathDateInMin(crashreport) + " Minutes old").func_240701_a_(TextFormatting.AQUA));
+            crashreporttext.func_230529_a_(CommandUtils.getCommandTextComponent(" [Upload]", "/cu getLog uploadCrashReport"));
+            crashreporttext.func_230529_a_(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getFileAsStringFromPath(crashreport)));
             ctx.getSource().sendFeedback(crashreporttext, true);
         }
         Path archivedLog = LogHandler.getLatestArchivedLogPath();
         if (archivedLog != null) {
-            ITextComponent archivedText = new StringTextComponent("Archived Latest.log ").applyTextStyle(TextFormatting.GREEN).appendSibling(new StringTextComponent(LogHandler.getRelativePathDateInMin(archivedLog) + " Minutes old").applyTextStyle(TextFormatting.AQUA));
-            archivedText.appendSibling(CommandUtils.getCommandTextComponent(" [Upload]", "/cu getLog uploadArchivedLog"));
-            archivedText.appendSibling(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getStringFromArchive(archivedLog)));
+            IFormattableTextComponent archivedText = new StringTextComponent("Archived Latest.log ").func_240701_a_(TextFormatting.GREEN).func_230529_a_(new StringTextComponent(LogHandler.getRelativePathDateInMin(archivedLog) + " Minutes old").func_240701_a_(TextFormatting.AQUA));
+            archivedText.func_230529_a_(CommandUtils.getCommandTextComponent(" [Upload]", "/cu getLog uploadArchivedLog"));
+            archivedText.func_230529_a_(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getStringFromArchive(archivedLog)));
             ctx.getSource().sendFeedback(archivedText, true);
         }
         return 1;

@@ -6,9 +6,9 @@ import com.darkere.crashutils.DataStructures.PlayerData;
 import com.darkere.crashutils.DataStructures.TileEntityData;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.Collections;
@@ -17,24 +17,24 @@ import java.util.function.Supplier;
 
 public class UpdateDataRequestMessage {
     private DataRequestType type;
-    private DimensionType dim;
+    private RegistryKey<World> worldKey;
 
-    public UpdateDataRequestMessage(DataRequestType type, DimensionType dim) {
+    public UpdateDataRequestMessage(DataRequestType type, RegistryKey<World> worldKey) {
         this.type = type;
-        this.dim = dim;
+        this.worldKey = worldKey;
     }
 
 
     public static void encode(UpdateDataRequestMessage data, PacketBuffer buf) {
         buf.writeInt(data.type.ordinal());
-        NetworkTools.writeDimensionType(data.dim, buf);
+        NetworkTools.writeWorldKey(data.worldKey, buf);
     }
 
 
     public static UpdateDataRequestMessage decode(PacketBuffer buf) {
         return new UpdateDataRequestMessage(
             DataRequestType.values()[buf.readInt()],
-            NetworkTools.readDimensionType(buf)
+            NetworkTools.readWorldKey(buf)
         );
     }
 
@@ -44,7 +44,7 @@ public class UpdateDataRequestMessage {
             if (!ctx.get().getSender().hasPermissionLevel(4)) return;
             MinecraftServer server = ctx.get().getSender().getServer();
             if (server == null) return;
-            ServerWorld world = DimensionManager.getWorld(server, data.dim, false, false);
+            ServerWorld world = server.getWorld(data.worldKey);
             List<ServerWorld> worlds = Collections.singletonList(world);
             switch (data.type) {
                 case LOADEDCHUNKDATA: {

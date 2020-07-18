@@ -6,13 +6,13 @@ import com.darkere.crashutils.WorldUtils;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraft.world.World;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.network.NetworkEvent;
-import top.theillusivec4.curios.api.CuriosAPI;
+import top.theillusivec4.curios.api.CuriosApi;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -42,15 +42,18 @@ public class PlayerInventoryRequestMessage {
             PlayerEntity otherPlayer = ctx.get().getSender().getServer().getPlayerList().getPlayerByUsername(data.playerName);
             if (otherPlayer == null) {
                 GameProfile profile = server.getPlayerProfileCache().getGameProfileForUsername(data.playerName);
-                ServerWorld overworld = server.getWorld(DimensionType.OVERWORLD);
-                otherPlayer = FakePlayerFactory.get(overworld, profile);
-                overworld.getSaveHandler().readPlayerData(otherPlayer);
+                if(profile == null)return;
+                otherPlayer = new FakePlayer(server.getWorld(World.field_234918_g_),profile);
+                CompoundNBT nbt = server.field_240766_e_.func_237336_b_(otherPlayer);
+                if(nbt == null) return;
+                otherPlayer.read(nbt);
+
             }
 
             WorldUtils.addPlayerContainerRel(player, otherPlayer);
             Map<String, Integer> curios = new LinkedHashMap<>();
             if (CrashUtils.curiosLoaded) {
-                CuriosAPI.getCuriosHandler(otherPlayer).orElse(null).getCurioMap().forEach((s, handler) -> {
+                CuriosApi.getCuriosHelper().getCuriosHandler(otherPlayer).orElse(null).getCurios().forEach((s, handler) -> {
                     curios.put(s, handler.getSlots());
                 });
             }

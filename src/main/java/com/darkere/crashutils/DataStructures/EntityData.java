@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.text.Color;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -51,7 +52,7 @@ public class EntityData {
             map.entrySet().stream().filter(x -> x.getValue().size() != 0).sorted(Comparator.comparingInt(e -> e.getValue().size())).forEach((e) -> {
                 CommandUtils.sendFindEMessage(source, e.getKey(), e.getValue().size());
             });
-            CommandUtils.sendNormalMessage(source, total + " Entities", TextFormatting.DARK_AQUA);
+            CommandUtils.sendNormalMessage(source, total + " Entities", Color.func_240744_a_(TextFormatting.DARK_AQUA));
 
         } else {
             createEntityChunkMap(source, res);
@@ -64,7 +65,7 @@ public class EntityData {
 
     private void createEntityChunkMap(CommandSource source, ResourceLocation res) {
         fillChunkMap(res);
-        CommandUtils.sendNormalMessage(source, res.toString(), TextFormatting.DARK_BLUE);
+        CommandUtils.sendNormalMessage(source, res.toString(), Color.func_240744_a_(TextFormatting.DARK_BLUE));
         chunkMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Integer::compareTo)).forEach((k) -> CommandUtils.sendChunkEntityMessage(source, k.getValue(), tpPos.get(k.getKey()).pos, tpPos.get(k.getKey()).type, true));
 
 

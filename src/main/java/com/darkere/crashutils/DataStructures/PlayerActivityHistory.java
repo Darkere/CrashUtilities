@@ -24,7 +24,10 @@ public class PlayerActivityHistory {
     public PlayerActivityHistory(ServerWorld world) {
         long current = Instant.now().getEpochSecond();
         try {
-            Files.list(world.getSaveHandler().getPlayerFolder().toPath()).forEach(x -> {
+            Files.list(world.getServer().field_240766_e_.getPlayerDataFolder().toPath()).forEach(x -> {
+                if(x.getFileName().toString().endsWith("old")){
+                    return;
+                }
                 long fileTime = 0;
                 try {
                     fileTime = Files.getLastModifiedTime(x, LinkOption.NOFOLLOW_LINKS).toInstant().getEpochSecond();

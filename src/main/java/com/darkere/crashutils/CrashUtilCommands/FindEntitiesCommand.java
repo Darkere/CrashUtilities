@@ -28,8 +28,7 @@ public class FindEntitiesCommand implements Command<CommandSource> {
             .then(Commands.argument("res", ResourceLocationArgument.resourceLocation())
                 .suggests(sugg)
                 .executes(cmd)
-            )
-            .then(Commands.argument("dim", DimensionArgument.getDimension())
+                .then(Commands.argument("dim", DimensionArgument.getDimension()))
                 .executes(cmd));
 
 

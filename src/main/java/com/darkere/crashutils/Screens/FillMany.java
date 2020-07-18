@@ -1,12 +1,13 @@
 package com.darkere.crashutils.Screens;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.math.vector.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
@@ -42,9 +43,9 @@ public class FillMany {
         }
     }
 
-    public static void drawStrings(FontRenderer renderer, List<Text> texts) {
+    public static void drawStrings(MatrixStack stack, FontRenderer renderer, List<Text> texts) {
         for (Text text : texts) {
-            renderer.drawString(text.text, text.x, text.y, text.color);
+            renderer.drawString(stack,text.text, text.x, text.y, text.color);
         }
     }
 

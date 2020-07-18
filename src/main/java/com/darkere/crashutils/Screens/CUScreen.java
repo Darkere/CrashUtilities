@@ -5,24 +5,28 @@ import com.darkere.crashutils.DataStructures.DataHolder;
 import com.darkere.crashutils.Network.Network;
 import com.darkere.crashutils.Network.TeleportMessage;
 import com.darkere.crashutils.Screens.Types.DropDownType;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.client.gui.widget.ExtendedButton;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class CUScreen extends Screen {
     CUContentPane contentGUI;
     long doubleClickTimer;
     double oldClickX;
     double OldClickY;
-    DimensionType dim;
+    RegistryKey<World> dim;
     int centerX;
     int centerY;
     int activeTab = 0;
@@ -35,9 +39,9 @@ public class CUScreen extends Screen {
     boolean dragging;
     BlockPos initial = null;
 
-    public CUScreen(DimensionType dimension, BlockPos position) {
+    public CUScreen(RegistryKey<World> worldKey, BlockPos position) {
         super(new StringTextComponent("CUScreen"));
-        dim = dimension;
+        dim = worldKey;
         initial = position;
     }
 
@@ -46,7 +50,7 @@ public class CUScreen extends Screen {
         centerY = height / 2;
         centerX = width / 2;
         contentGUI = new GridChunkGUI(this, dim, initial);
-        button = new ExtendedButton(centerX + 174, centerY - 103, 20, 10, String.valueOf(contentGUI.updateSpeed), (x) -> {
+        button = new ExtendedButton(centerX + 174, centerY - 103, 20, 10, new StringTextComponent(String.valueOf(contentGUI.updateSpeed)), (x) -> {
             contentGUI.shouldUpdate = !contentGUI.shouldUpdate;
             contentGUI.setUpdateSpeed();
         });
@@ -54,42 +58,42 @@ public class CUScreen extends Screen {
     }
 
     @Override
-    public void renderBackground() {
+    public void renderBackground(MatrixStack stack) {
         assert this.minecraft != null;
         this.minecraft.getTextureManager().bindTexture(WINDOW);
         int i = centerX - (400 / 2);
         int j = centerY - (216 / 2);
-        blit(i, j, 0, 0, 400, 216, 512, 512);
-        renderTabs();
+        blit(stack,i, j, 0, 0, 400, 216, 512, 512);
+        renderTabs(stack);
 
     }
 
     @Override
-    public void render(int mx, int my, float p_render_3_) {
-        contentGUI.render(centerX, centerY);
-        dropDowns.forEach(x -> x.render(centerX, centerY));
-        renderBackground();
+    public void render(MatrixStack stack, int mx, int my, float p_render_3_) {
+        contentGUI.render(stack, centerX, centerY);
+        dropDowns.forEach(x -> x.render(stack, centerX, centerY));
+        renderBackground(stack);
         centerX = width / 2;
         centerY = height / 2;
-        fill(centerX + 173, centerY - 105, centerX + 195, centerY - 93, contentGUI.shouldUpdate ? 0xff51f542 : 0xfff54242);
+        fill(stack, centerX + 173, centerY - 105, centerX + 195, centerY - 93, contentGUI.shouldUpdate ? 0xff51f542 : 0xfff54242);
         button.x = centerX + 174;
         button.y = centerY - 104;
-        button.renderButton(mx, my, p_render_3_);
-        topDropDowns.forEach(x -> x.render(centerX, centerY));
-        renderToolTips(mx, my);
-        super.render(mx, my, p_render_3_);
+        button.renderButton(stack, mx, my, p_render_3_);
+        topDropDowns.forEach(x -> x.render(stack, centerX, centerY));
+        renderToolTips(stack, mx, my);
+        super.render(stack, mx, my, p_render_3_);
     }
 
-    private void renderToolTips(int mx, int my) {
-        List<String> tooltips = new ArrayList<>();
+    private void renderToolTips(MatrixStack stack, int mx, int my) {
+        IFormattableTextComponent tooltips = new StringTextComponent("");
         //tooltips.add(mx+ " " + my);
         if (contentGUI.isMouseOver(mx, my, centerX, centerY)) {
             if (contentGUI instanceof GridChunkGUI) {
                 GridChunkGUI gui = (GridChunkGUI) contentGUI;
                 ChunkPos chunkPos = gui.getChunkFor(mx, my);
-                tooltips.add("Chunk: X: " + chunkPos.x + " Z: " + chunkPos.z);
+                tooltips.func_230529_a_(new StringTextComponent("Chunk: X: " + chunkPos.x + " Z: " + chunkPos.z));
                 String loc = gui.getLocFor(mx, my);
-                tooltips.add("State: " + gui.getNameForLocationType(loc));
+                tooltips.func_230529_a_(new StringTextComponent("State: " + gui.getNameForLocationType(loc)));
                 StringBuilder builder = new StringBuilder();
                 switch (gui.type) {
                     case TICKET:
@@ -110,23 +114,23 @@ public class CUScreen extends Screen {
                         break;
                 }
 
-                tooltips.add(builder.toString());
-                tooltips.add("(Double click to teleport)");
+                tooltips.func_230529_a_(new StringTextComponent(builder.toString()));
+                tooltips.func_230529_a_(new StringTextComponent("(Double click to teleport)"));
             } else if (contentGUI instanceof DataListGUI) {
                 DataListGUI gui = (DataListGUI) contentGUI;
                 gui.addToToolTip(tooltips, mx, my);
             }
         }
         if (button.isMouseOver(mx, my)) {
-            tooltips.add("Requesting data every " + contentGUI.updateSpeed + " seconds");
-            tooltips.add("Currently " + (contentGUI.shouldUpdate ? "enabled" : "disabled"));
-            tooltips.add("Scroll to change update Speed");
-            tooltips.add("(It may be possible to lag a server using this)");
+            tooltips.func_230529_a_(new StringTextComponent("Requesting data every " + contentGUI.updateSpeed + " seconds"));
+            tooltips.func_230529_a_(new StringTextComponent("Currently " + (contentGUI.shouldUpdate ? "enabled" : "disabled")));
+            tooltips.func_230529_a_(new StringTextComponent("Scroll to change update Speed"));
+            tooltips.func_230529_a_(new StringTextComponent("(It may be possible to lag a server using this)"));
         }
-        renderTooltip(tooltips, mx, my);
+        renderTooltip(stack, tooltips, mx, my);
     }
 
-    private void renderTabs() {
+    private void renderTabs(MatrixStack stack) {
         int x = centerX - (400 / 2);
         int y = centerY - (216 / 2) - 22;
         assert this.minecraft != null;
@@ -139,15 +143,15 @@ public class CUScreen extends Screen {
         for (int i = 0; i < tabs; i++) {
             if (i == 0) {
                 if (i == activeTab) {
-                    CUTab.ATL.drawTab(this, x + (i * 27), y, tabIcons.get(i), iconScale);
+                    CUTab.ATL.drawTab(stack,this, x + (i * 27), y, tabIcons.get(i), iconScale);
                 } else {
-                    CUTab.ITL.drawTab(this, x + (i * 27), y, tabIcons.get(i), iconScale);
+                    CUTab.ITL.drawTab(stack,this, x + (i * 27), y, tabIcons.get(i), iconScale);
                 }
             } else {
                 if (i == activeTab) {
-                    CUTab.ATC.drawTab(this, x + (i * 27), y, tabIcons.get(i), iconScale);
+                    CUTab.ATC.drawTab(stack,this, x + (i * 27), y, tabIcons.get(i), iconScale);
                 } else {
-                    CUTab.ITC.drawTab(this, x + (i * 27), y, tabIcons.get(i), iconScale);
+                    CUTab.ITC.drawTab(stack,this, x + (i * 27), y, tabIcons.get(i), iconScale);
                 }
             }
         }
@@ -263,7 +267,7 @@ public class CUScreen extends Screen {
             } else if (delta < 0 && contentGUI.updateSpeed <= 5 && contentGUI.updateSpeed > 1) {
                 contentGUI.updateSpeed -= 1;
             }
-            button.setMessage(String.valueOf(contentGUI.updateSpeed));
+            button.setMessage(new StringTextComponent(String.valueOf(contentGUI.updateSpeed)));
             contentGUI.setUpdateSpeed();
             return true;
         }

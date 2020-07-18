@@ -6,8 +6,12 @@ import com.darkere.crashutils.Screens.PlayerInvScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -23,7 +27,7 @@ public class ClientEvents {
         if (event.getGui() instanceof ContainerScreen) {
             ContainerScreen screen = (ContainerScreen) event.getGui();
             if (screen.getSlotUnderMouse() == null) return;
-            screen.renderTooltip("Index: " + screen.getSlotUnderMouse().getSlotIndex(), event.getMouseX(), event.getMouseY());
+            screen.renderTooltip(event.getMatrixStack(), ITextProperties.func_240652_a_("Index: " + screen.getSlotUnderMouse().getSlotIndex()), event.getMouseX(), event.getMouseY());
         }
 
     }
@@ -48,18 +52,14 @@ public class ClientEvents {
         if (Minecraft.getInstance().player == null || Minecraft.getInstance().world == null) return;
         if (event.getAction() != GLFW.GLFW_PRESS) return;
         if (event.getKey() == GLFW.GLFW_KEY_U && event.getModifiers() == GLFW.GLFW_MOD_CONTROL) {
-            DimensionType dim = Minecraft.getInstance().player.dimension;
-            if (dim == null) {
-                CrashUtils.LOGGER.warn("Player has no dimension :/");
-                return;
-            }
+            RegistryKey<World> worldKey = Minecraft.getInstance().player.getEntityWorld().func_234923_W_();
             if (Minecraft.getInstance().player.hasPermissionLevel(4)) {
-                Minecraft.getInstance().displayGuiScreen(new CUScreen(dim, Minecraft.getInstance().player.getPosition()));
+                Minecraft.getInstance().displayGuiScreen(new CUScreen(worldKey, new BlockPos(Minecraft.getInstance().player.getPositionVec())));
             } else {
                 if (!Minecraft.getInstance().isSingleplayer()) {
-                    Minecraft.getInstance().ingameGUI.setOverlayMessage("You need to be OP to use the Crash Utils GUI", false);
+                    Minecraft.getInstance().ingameGUI.setOverlayMessage(ITextComponent.func_241827_a_("You need to be OP to use the Crash Utils GUI"), false);
                 } else {
-                    Minecraft.getInstance().ingameGUI.setOverlayMessage("Cheats need to be enabled to use the Crash Utils GUI", false);
+                    Minecraft.getInstance().ingameGUI.setOverlayMessage(ITextComponent.func_241827_a_("Cheats need to be enabled to use the Crash Utils GUI"), false);
                 }
 
             }

@@ -8,12 +8,11 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 import net.minecraftforge.items.wrapper.InvWrapper;
-import top.theillusivec4.curios.api.CuriosAPI;
-import top.theillusivec4.curios.api.inventory.CurioStackHandler;
+import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -72,7 +71,7 @@ public class PlayerInvContainer extends Container {
             } else {
                 slotAmounts = new LinkedHashMap<>();
                 Map<String, Integer> finalSlotAmounts = slotAmounts;
-                CuriosAPI.getCuriosHandler(player).ifPresent(x -> x.getCurioMap().forEach((s, h) -> finalSlotAmounts.put(s, h.getSlots())));
+                CuriosApi.getCuriosHelper().getCuriosHandler(player).ifPresent(x -> x.getCurios().forEach((s, h) -> finalSlotAmounts.put(s, h.getSlots())));
             }
             layoutCurioSlots(otherPlayer, 204, -35, slotAmounts.values(), curiosInv);
             layoutCurioSlots(player, 204, 85, slotAmounts.values(), null);
@@ -107,11 +106,11 @@ public class PlayerInvContainer extends Container {
 
     private void layoutCurioSlots(PlayerEntity player, int x, int y, Collection<Integer> curioSlots, IItemHandler curiosInv) {
         if (player != null) {
-            Map<String, CurioStackHandler> curios = CuriosAPI.getCuriosHandler(player).orElse(null).getCurioMap();
+            Map<String, ICurioStacksHandler> curios = CuriosApi.getCuriosHelper().getCuriosHandler(player).orElse(null).getCurios();
             if (curios == null) return;
             int temp = x;
             int g = 0;
-            for (Map.Entry<String, CurioStackHandler> entry : curios.entrySet()) {
+            for (Map.Entry<String, ICurioStacksHandler> entry : curios.entrySet()) {
                 if (g == 4) {
                     y -= 120;
                 }
@@ -120,7 +119,7 @@ public class PlayerInvContainer extends Container {
                 } else {
                     x = -26 - 18 * entry.getValue().getSlots();
                 }
-                addSlotRange(entry.getValue(), 0, x, y, entry.getValue().getSlots(), 18);
+                addSlotRange(entry.getValue().getStacks(), 0, x, y, entry.getValue().getSlots(), 18);
                 y += 30;
                 g++;
             }
@@ -180,8 +179,9 @@ public class PlayerInvContainer extends Container {
     @Override
     public void onContainerClosed(PlayerEntity playerIn) {
         super.onContainerClosed(playerIn);
-        if (!world.isRemote() && otherPlayer instanceof FakePlayer) {
-            ((ServerWorld) world).getSaveHandler().writePlayerData(otherPlayer);
+
+        if (!world.isRemote() && !playerIn.getServer().getPlayerList().getPlayers().contains(otherPlayer)) {
+            ((ServerWorld) world).getServer().field_240766_e_.func_237335_a_(otherPlayer);
         }
     }
 

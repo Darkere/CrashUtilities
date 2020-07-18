@@ -1,6 +1,7 @@
 package com.darkere.crashutils.Screens;
 
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.gui.AbstractGui;
 
 public enum CUTab {
@@ -23,8 +24,8 @@ public enum CUTab {
         this.cy = cy;
     }
 
-    public void drawTab(AbstractGui gui, int i, int j, CUTab icon, float iconScale) {
-        gui.blit(i, j, x, y, cx, cy);
-        gui.blit(i + 5, j + 6, gui.getBlitOffset(), (float) icon.x / iconScale, (float) icon.y / iconScale, 17, 17, (int) (256f / iconScale), (int) (256f / iconScale));
+    public void drawTab(MatrixStack stack, AbstractGui gui, int i, int j, CUTab icon, float iconScale) {
+        gui.blit(stack,i, j, x, y, cx, cy);
+        gui.blit(stack,i + 5, j + 6, gui.getBlitOffset(), (float) icon.x / iconScale, (float) icon.y / iconScale, 17, 17, (int) (256f / iconScale), (int) (256f / iconScale));
     }
 }

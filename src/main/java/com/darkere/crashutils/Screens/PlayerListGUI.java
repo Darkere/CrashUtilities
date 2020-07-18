@@ -6,14 +6,15 @@ import com.darkere.crashutils.Network.Network;
 import com.darkere.crashutils.Network.PlayerInventoryRequestMessage;
 import com.darkere.crashutils.Screens.Types.DropDownType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.world.World;
 
 import java.util.ArrayList;
 
 public class PlayerListGUI extends CUContentPane {
     CUDropDown PLAYERLIST;
 
-    public PlayerListGUI(CUScreen screen, DimensionType dim) {
+    public PlayerListGUI(CUScreen screen, RegistryKey<World> dim) {
         super(dim, screen);
         String playerName = Minecraft.getInstance().player.getName().getString();
         DataHolder.requestUpdates(DataRequestType.PLAYERDATA, 0, dim, true);

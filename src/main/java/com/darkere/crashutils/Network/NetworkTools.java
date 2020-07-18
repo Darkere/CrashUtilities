@@ -2,9 +2,11 @@ package com.darkere.crashutils.Network;
 
 import com.darkere.crashutils.DataStructures.WorldPos;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.World;
 
 import java.util.*;
 
@@ -35,23 +37,22 @@ public class NetworkTools {
         return map;
     }
 
-    public static void writeDimensionType(DimensionType type, PacketBuffer buf) {
-        ResourceLocation loc = type.getRegistryName();
-        if (loc == null) loc = new ResourceLocation("minecraft:overworld");
+    public static void writeWorldKey(RegistryKey<World> worldKey, PacketBuffer buf) {
+        ResourceLocation loc = worldKey.func_240901_a_();
         buf.writeResourceLocation(loc);
     }
 
-    public static DimensionType readDimensionType(PacketBuffer buf) {
-        return DimensionType.byName(buf.readResourceLocation());
+    public static RegistryKey<World> readWorldKey(PacketBuffer buf) {
+        return RegistryKey.func_240903_a_(Registry.WORLD_KEY,buf.readResourceLocation());
     }
 
     public static void writeWorldPos(WorldPos pos, PacketBuffer buf) {
         buf.writeBlockPos(pos.pos);
-        writeDimensionType(pos.type, buf);
+        writeWorldKey(pos.type, buf);
     }
 
     public static WorldPos readWorldPos(PacketBuffer buf) {
-        return new WorldPos(buf.readBlockPos(), readDimensionType(buf));
+        return new WorldPos(buf.readBlockPos(), readWorldKey(buf));
     }
 
     public static void writeRLWPMap(Map<ResourceLocation, List<WorldPos>> map, PacketBuffer buf) {
@@ -60,8 +61,7 @@ public class NetworkTools {
             buf.writeResourceLocation(x);
             buf.writeInt(y.size());
             y.forEach(e -> {
-                buf.writeBlockPos(e.pos);
-                NetworkTools.writeDimensionType(e.type, buf);
+                writeWorldPos(e,buf);
             });
         });
     }

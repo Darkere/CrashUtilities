@@ -4,10 +4,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.server.management.PlayerList;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.Util;
+import net.minecraft.util.text.*;
 import net.minecraft.world.server.ServerWorld;
 
 import java.util.Comparator;
@@ -59,9 +57,9 @@ public class ClearItemTask extends TimerTask {
                         int size = list.size();
                         if (size > maxItems) {
                             list.forEach(Entity::remove);
-                            world.getServer().getPlayerList().sendMessage(new StringTextComponent(size + " Items cleared"));
+                            world.getServer().sendMessage(new StringTextComponent(size + " Items cleared"), Util.DUMMY_UUID);
                         } else {
-                            world.getServer().getPlayerList().sendMessage(new StringTextComponent("Item Clear prevented. Only " + size + " items on the ground"));
+                            world.getServer().sendMessage(new StringTextComponent("Item Clear prevented. Only " + size + " items on the ground"),Util.DUMMY_UUID);
                         }
 
                     }
@@ -69,11 +67,11 @@ public class ClearItemTask extends TimerTask {
 
             }
             String intText = text.replaceFirst("%", integer.toString());
-            ITextComponent message = new StringTextComponent("[=== ").appendSibling(new StringTextComponent(intText).setStyle(new Style().setColor(TextFormatting.RED))).appendSibling(new StringTextComponent(" ===]"));
+            ITextComponent message = new StringTextComponent("[=== ").func_230529_a_(new StringTextComponent(intText).func_240703_c_(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.RED)))).func_230529_a_(new StringTextComponent(" ===]"));
             new java.util.Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    playerList.sendMessage(message);
+                    world.getServer().sendMessage(message,Util.DUMMY_UUID);
                 }
             }, (last - integer) * 1000);
 

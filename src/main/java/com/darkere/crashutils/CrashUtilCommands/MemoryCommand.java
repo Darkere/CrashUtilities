@@ -9,9 +9,7 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.*;
 
 import java.util.List;
 
@@ -27,6 +25,7 @@ public class MemoryCommand {
     private static int run(CommandContext<CommandSource> context, int count) {
         if (!CrashUtils.SERVER_CONFIG.getMemoryChecker()) {
             context.getSource().sendFeedback(new StringTextComponent("Memory Checker not enabled in Config"), true);
+            return 0;
         }
         List<MemoryChecker.MemoryCount> full = CrashUtils.memoryChecker.counts;
         if (full.size() < count) {
@@ -39,7 +38,7 @@ public class MemoryCommand {
     }
 
     private static ITextComponent createVisualMemoryText(MemoryChecker.MemoryCount count) {
-        ITextComponent text = new StringTextComponent("[");
+        IFormattableTextComponent text = new StringTextComponent("[");
         double maximum = (Math.ceil(MemoryChecker.inGigaBytes(count.getMaximum())));
         double total = MemoryChecker.inGigaBytes(count.getTotal());
         double used = total - MemoryChecker.inGigaBytes(count.getFree());
@@ -48,16 +47,16 @@ public class MemoryCommand {
 
         for (double i = 0.1D; i <= 1; i += 0.1D) {
             if (i < percentUsed) {
-                text.appendSibling(CommandUtils.coloredComponent("I", TextFormatting.RED));
+                text.func_230529_a_(CommandUtils.coloredComponent("I", Color.func_240744_a_(TextFormatting.RED)));
             } else if (i < percentTotal) {
-                text.appendSibling(CommandUtils.coloredComponent("I", TextFormatting.YELLOW));
+                text.func_230529_a_(CommandUtils.coloredComponent("I", Color.func_240744_a_(TextFormatting.YELLOW)));
             } else {
-                text.appendSibling(CommandUtils.coloredComponent("I", TextFormatting.GREEN));
+                text.func_230529_a_(CommandUtils.coloredComponent("I", Color.func_240744_a_(TextFormatting.GREEN)));
             }
         }
         int usedpercent = (int) (percentUsed * 100);
         int allocatedpercent = (int) (percentTotal * 100);
-        text.appendSibling(CommandUtils.coloredComponent("] " + usedpercent + " % Used " + allocatedpercent + " % Allocated", TextFormatting.WHITE));
+        text.func_230529_a_(CommandUtils.coloredComponent("] " + usedpercent + " % Used " + allocatedpercent + " % Allocated", Color.func_240744_a_(TextFormatting.WHITE)));
 
         return text;
     }

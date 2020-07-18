@@ -1,11 +1,13 @@
 package com.darkere.crashutils.Screens;
 
 import com.darkere.crashutils.CrashUtils;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 
 import java.awt.*;
 import java.util.Map;
@@ -38,12 +40,16 @@ public class PlayerInvScreen extends ContainerScreen<PlayerInvContainer> {
         curioLeft = 110;
 
     }
-
     @Override
-    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-        renderTooltip(mouseX + " " + mouseY, mouseX, mouseY);
+    protected void func_230451_b_(MatrixStack p_230451_1_, int p_230451_2_, int p_230451_3_) {
+
+    }
+
+    @Override //drawGuiContainerBackgroundLayer
+    protected void func_230450_a_(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
+        renderTooltip(stack ,new StringTextComponent( mouseX + " " + mouseY), mouseX, mouseY);
         Minecraft.getInstance().textureManager.bindTexture(texture);
-        blit(centerX - doubleinv.width / 2, centerY - doubleinv.height / 2, doubleinv.x, doubleinv.y, doubleinv.width, doubleinv.height);
+        blit(stack, centerX - doubleinv.width / 2, centerY - doubleinv.height / 2, doubleinv.x, doubleinv.y, doubleinv.width, doubleinv.height);
         if (CrashUtils.curiosLoaded) {
             int y = 45;
             for (int g = 0; g < 2; g++) {
@@ -53,9 +59,9 @@ public class PlayerInvScreen extends ContainerScreen<PlayerInvContainer> {
                         y = g == 1 ? 165 : 45;
                     }
                     if (i < 4) {
-                        drawSlotRangeRight(entry.getValue(), centerX + curioRight, y);
+                        drawSlotRangeRight(stack, entry.getValue(), centerX + curioRight, y);
                     } else {
-                        drawSlotRangeLeft(entry.getValue(), centerX - curioLeft, y);
+                        drawSlotRangeLeft(stack, entry.getValue(), centerX - curioLeft, y);
                     }
 
 
@@ -68,26 +74,26 @@ public class PlayerInvScreen extends ContainerScreen<PlayerInvContainer> {
         }
     }
 
-    private void drawSlotRangeRight(int numberOfSlots, int x, int y) {
+    private void drawSlotRangeRight(MatrixStack stack, int numberOfSlots, int x, int y) {
         if (numberOfSlots == 1) {
-            blit(x, y, singleSlot.x, singleSlot.y, singleSlot.width, singleSlot.height);
+            blit(stack, x, y, singleSlot.x, singleSlot.y, singleSlot.width, singleSlot.height);
         } else {
             int dist = leftSlot.width + ((numberOfSlots - 2) * (middleSlot.width));
-            blit(x, y, leftSlot.x, leftSlot.y, leftSlot.width, leftSlot.height);
-            blit(x + dist, y, rightSlot.x, rightSlot.y, rightSlot.width, rightSlot.height);
+            blit(stack, x, y, leftSlot.x, leftSlot.y, leftSlot.width, leftSlot.height);
+            blit(stack,x + dist, y, rightSlot.x, rightSlot.y, rightSlot.width, rightSlot.height);
             for (int i = 0; i < numberOfSlots - 2; i++) {
                 int dist2 = leftSlot.width + i * (middleSlot.width);
-                blit(x + dist2, y, middleSlot.x, middleSlot.y, middleSlot.width, middleSlot.height);
+                blit(stack, x + dist2, y, middleSlot.x, middleSlot.y, middleSlot.width, middleSlot.height);
             }
         }
     }
 
-    private void drawSlotRangeLeft(int numberOfSlots, int x, int y) {
+    private void drawSlotRangeLeft(MatrixStack stack, int numberOfSlots, int x, int y) {
         if (numberOfSlots == 1) {
             x -= singleSlot.width;
         } else {
             x = x - rightSlot.width - leftSlot.width - (numberOfSlots - 2) * middleSlot.width;
         }
-        drawSlotRangeRight(numberOfSlots, x, y);
+        drawSlotRangeRight(stack, numberOfSlots, x, y);
     }
 }

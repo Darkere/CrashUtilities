@@ -11,6 +11,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -21,7 +22,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.network.FMLNetworkConstants;
@@ -29,6 +29,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -45,6 +47,7 @@ public class CrashUtils {
     Timer timer;
     public static boolean runHeapDump = false;
     public static boolean sparkLoaded = false;
+    public static List<Runnable> runnables = new ArrayList<>();
 
     public CrashUtils() {
 
@@ -70,10 +73,10 @@ public class CrashUtils {
 
 
     @SubscribeEvent
-    public void serverStarting(FMLServerStartingEvent event) {
+    public void onRegisterCommands(RegisterCommandsEvent event) {
         curiosLoaded = ModList.get().isLoaded("curios");
         sparkLoaded = ModList.get().isLoaded("spark");
-        CommandDispatcher<CommandSource> dispatcher = event.getCommandDispatcher();
+        CommandDispatcher<CommandSource> dispatcher = event.getDispatcher();
         LiteralCommandNode<CommandSource> cmd = dispatcher.register(LiteralArgumentBuilder.<CommandSource>literal(MODID)
             .requires(x -> x.hasPermissionLevel(4))
             .then(AllLoadedTEsCommand.register())
@@ -84,7 +87,6 @@ public class CrashUtils {
             .then(UnstuckCommand.register())
             .then(MemoryCommand.register())
             .then(ItemClearCommand.register())
-            .then(InventoryRemovalCommand.register())
             .then(InventoryLookCommand.register())
             .then(RemoveFromInventorySlotCommand.register())
             .then(GetLogCommand.register())
@@ -92,10 +94,8 @@ public class CrashUtils {
             .then(LoadedChunksCommand.register())
             .then(RemoveEntitiesCommand.register())
             .then(ActivityCommand.register())
-            .then(AliasCommand.register())
 
         );
-        AliasRegistry.registerAliases(dispatcher);
         dispatcher.register(Commands.literal("cu").redirect(cmd));
 
     }
@@ -112,6 +112,7 @@ public class CrashUtils {
         task.setup();
         int time = SERVER_CONFIG.getTimer() * 60 * 1000;
         timer.scheduleAtFixedRate(task, time, time);
+
         if (SERVER_CONFIG.getMemoryChecker()) {
             memoryChecker = new MemoryChecker();
             memoryChecker.setup();
@@ -121,14 +122,24 @@ public class CrashUtils {
 
     }
 
+    public static void runNextTick(Runnable run){
+        runnables.add(run);
+    }
+
     @SubscribeEvent
     public void onWorldTick(TickEvent.WorldTickEvent event) {
-        if (event.world.isRemote) return;
+        if (event.world.isRemote && event.phase != TickEvent.Phase.END) return;
         task.checkItemCounts((ServerWorld) event.world);
+
         if (sparkLoaded && runHeapDump) {
             runHeapDump = false;
-            event.world.getServer().sendMessage(new StringTextComponent("Running Heapdump. Massive Lagspike incoming!"));
+            event.world.getServer().sendMessage(new StringTextComponent("Running Heapdump. Massive Lagspike incoming!"),null);
             event.world.getServer().getCommandManager().handleCommand(event.world.getServer().getCommandSource(), "/spark heapdump");
+        }
+
+        if(!runnables.isEmpty()){
+            runnables.forEach(Runnable::run);
+            runnables.clear();
         }
 
     }

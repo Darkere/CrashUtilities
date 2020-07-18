@@ -14,7 +14,7 @@ import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
 public class UnstuckCommand implements Command<CommandSource> {
@@ -35,14 +35,14 @@ public class UnstuckCommand implements Command<CommandSource> {
         ServerPlayerEntity player = context.getSource().getServer().getPlayerList().getPlayerByUsername(name);
         if (player == null) {
             WorldUtils.applyToPlayer(name, context, (fakePlayer) -> {
-                ServerWorld overworld = context.getSource().getServer().getWorld(DimensionType.OVERWORLD);
-                BlockPos spawn = overworld.getSpawnPoint();
-                fakePlayer.setPosition(spawn.getX(), spawn.getY(), spawn.getZ());
-                fakePlayer.dimension = DimensionType.OVERWORLD;
+                ServerWorld overworld = context.getSource().getServer().getWorld(World.field_234918_g_);
+                BlockPos spawn = overworld.func_241135_u_();
+                fakePlayer.setWorld(overworld);
+                fakePlayer.setPosition(spawn.getX(),spawn.getY(),spawn.getZ());
             });
         } else {
-            BlockPos p = context.getSource().getServer().getWorld(DimensionType.OVERWORLD).getSpawnPoint();
-            context.getSource().getServer().getCommandManager().handleCommand(context.getSource(), "cu tp " + name + " " + p.getX() + " " + p.getY() + " " + p.getZ() + " minecraft:overworld");
+            BlockPos p = context.getSource().getServer().getWorld(World.field_234918_g_).func_241135_u_();
+            WorldUtils.teleportPlayer(player,player.getServerWorld(),player.getServer().getWorld(World.field_234918_g_),p);
         }
         context.getSource().sendFeedback(new StringTextComponent("Sent Player " + name + " to Spawn"), true);
         return 0;

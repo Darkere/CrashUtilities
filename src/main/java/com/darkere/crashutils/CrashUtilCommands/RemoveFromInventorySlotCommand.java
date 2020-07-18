@@ -13,10 +13,10 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import top.theillusivec4.curios.api.CuriosAPI;
-import top.theillusivec4.curios.api.capability.ICurioItemHandler;
+import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,8 +29,9 @@ public class RemoveFromInventorySlotCommand {
     private static SuggestionProvider<CommandSource> invtype;
 
     public static ArgumentBuilder<CommandSource, ?> register() {
-        if (CrashUtils.curiosLoaded) {
-            invTypes.addAll(CuriosAPI.getTypeIdentifiers());
+        if (CrashUtils.curiosLoaded && CuriosApi.getSlotHelper() != null) {
+            invTypes.addAll(CuriosApi.getSlotHelper().getSlotTypeIds());
+
 
         }
         invtype = (ctx, builder) -> ISuggestionProvider.suggest(invTypes.stream(), builder);
@@ -44,34 +45,34 @@ public class RemoveFromInventorySlotCommand {
     }
 
     private static int removeFromSlot(CommandContext<CommandSource> context, String name, String inventoryType, int slot) throws CommandSyntaxException {
-        AtomicReference<ITextComponent> text = new AtomicReference<ITextComponent>(new StringTextComponent(""));
+        AtomicReference<IFormattableTextComponent> text = new AtomicReference(new StringTextComponent(""));
         WorldUtils.applyToPlayer(name, context, (player) -> {
             switch (inventoryType) {
                 case "inventory": {
-                    text.set(player.inventory.mainInventory.get(slot).getTextComponent());
+                    text.set(player.inventory.mainInventory.get(slot).getTextComponent().deepCopy());
                     player.inventory.mainInventory.set(slot, ItemStack.EMPTY);
                     break;
                 }
                 case "armor": {
-                    text.set(player.inventory.armorInventory.get(slot).getTextComponent());
+                    text.set(player.inventory.armorInventory.get(slot).getTextComponent().deepCopy());
                     player.inventory.armorInventory.set(slot, ItemStack.EMPTY);
                     break;
                 }
                 case "offHand": {
-                    text.set(player.inventory.offHandInventory.get(slot).getTextComponent());
+                    text.set(player.inventory.offHandInventory.get(slot).getTextComponent().deepCopy());
                     player.inventory.offHandInventory.set(slot, ItemStack.EMPTY);
                     break;
                 }
                 default: {
-                    if (CrashUtils.curiosLoaded && CuriosAPI.getTypeIdentifiers().contains(inventoryType)) {
-                        ICurioItemHandler handler = CuriosAPI.getCuriosHandler(player).orElse(null);
-                        text.set(handler.getStackInSlot(inventoryType, slot).getTextComponent());
-                        handler.setStackInSlot(inventoryType, slot, ItemStack.EMPTY);
+                    if (CrashUtils.curiosLoaded && CuriosApi.getSlotHelper().getSlotTypeIds().contains(inventoryType)) {
+                        ICuriosItemHandler handler = CuriosApi.getCuriosHelper().getCuriosHandler(player).orElse(null);
+                        text.set(handler.getStacksHandler(inventoryType).get().getStacks().getStackInSlot(slot).getTextComponent().deepCopy());
+                        handler.getStacksHandler(inventoryType).get().getStacks().setStackInSlot(slot, ItemStack.EMPTY);
                     }
                 }
             }
         });
-        context.getSource().sendFeedback(text.get().appendSibling(new StringTextComponent(" has been deleted from " + name + "'s InventorySlot")), true);
+        context.getSource().sendFeedback(text.get().func_230529_a_(new StringTextComponent(" has been deleted from " + name + "'s InventorySlot")), true);
 
         return 1;
     }
