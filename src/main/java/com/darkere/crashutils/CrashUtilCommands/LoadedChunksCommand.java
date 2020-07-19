@@ -1,5 +1,6 @@
 package com.darkere.crashutils.CrashUtilCommands;
 
+import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.DataStructures.LoadedChunkData;
 import com.darkere.crashutils.WorldUtils;
 import com.mojang.brigadier.Command;
@@ -10,6 +11,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.DimensionArgument;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.server.ServerWorld;
 
 import java.util.List;
@@ -33,21 +35,29 @@ public class LoadedChunksCommand {
     public static int run(CommandContext<CommandSource> context, int type, String word) throws CommandSyntaxException {
         List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
         LoadedChunkData loadedChunkData = new LoadedChunkData(worlds);
-        switch (type) {
-            case 0: {
-                loadedChunkData.reply(context.getSource());
-                break;
+        CrashUtils.runNextTick(() -> reply(type, loadedChunkData, context, word));
+        return Command.SINGLE_SUCCESS;
+    }
+
+    public static void reply(int type, LoadedChunkData loadedChunkData, CommandContext<CommandSource> context, String word) {
+        try {
+            switch (type) {
+                case 0: {
+                    loadedChunkData.reply(context.getSource());
+                    break;
+                }
+                case 1: {
+                    loadedChunkData.replyWithLocation(context.getSource(), word);
+                    break;
+                }
+                case 2: {
+                    loadedChunkData.replyWithTicket(context.getSource(), word);
+                    break;
+                }
             }
-            case 1: {
-                loadedChunkData.replyWithLocation(context.getSource(), word);
-                break;
-            }
-            case 2: {
-                loadedChunkData.replyWithTicket(context.getSource(), word);
-                break;
-            }
+        }catch (CommandSyntaxException e){
+            context.getSource().sendFeedback(new StringTextComponent("Exception getting player"),true);
         }
 
-        return Command.SINGLE_SUCCESS;
     }
 }

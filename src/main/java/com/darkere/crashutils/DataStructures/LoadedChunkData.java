@@ -2,6 +2,7 @@ package com.darkere.crashutils.DataStructures;
 
 
 import com.darkere.crashutils.CommandUtils;
+import com.darkere.crashutils.CrashUtils;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
@@ -57,6 +58,11 @@ public class LoadedChunkData {
     }
 
     public LoadedChunkData(List<ServerWorld> worlds) {
+        CrashUtils.runNextTick(()->init(worlds));
+
+    }
+
+    public void init(List<ServerWorld> worlds){
         for (World world : worlds) {
             ChunkManager chunkManager = ((ServerChunkProvider) world.getChunkProvider()).chunkManager;
             TicketManager ticketManager = chunkManager.getTicketManager();

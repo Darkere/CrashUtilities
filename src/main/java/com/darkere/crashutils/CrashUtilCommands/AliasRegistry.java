@@ -2,6 +2,7 @@ package com.darkere.crashutils.CrashUtilCommands;
 
 import com.electronwill.nightconfig.core.utils.StringUtils;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.CommandSource;
@@ -59,11 +60,11 @@ public class AliasRegistry {
 
             LiteralArgumentBuilder<CommandSource> literal = null;
             if (literals.size() == 1) {
-                literal = literals.get(0).executes(AliasRegistry::runAlias);
+                literal = literals.get(0).then(Commands.argument("args", StringArgumentType.greedyString()).executes(AliasRegistry::runAlias));
             } else {
                 for (int i = literals.size() - 1; i > 0; i--) {
                     if (i == literals.size() - 1) {
-                        literals.get(i).executes(AliasRegistry::runAlias);
+                        literals.get(i).then(Commands.argument("args", StringArgumentType.greedyString()).executes(AliasRegistry::runAlias));
                     }
                     literal = literals.get(i - 1).then(literals.get(i));
                 }

@@ -29,6 +29,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -45,6 +47,7 @@ public class CrashUtils {
     Timer timer;
     public static boolean runHeapDump = false;
     public static boolean sparkLoaded = false;
+    public static List<Runnable> runnables = new ArrayList<>();
 
     public CrashUtils() {
 
@@ -55,6 +58,10 @@ public class CrashUtils {
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SERVER_CONFIG.getSpec());
 
+    }
+
+    public static void runNextTick(Runnable runnable) {
+        runnables.add(runnable);
     }
 
 
@@ -123,12 +130,18 @@ public class CrashUtils {
 
     @SubscribeEvent
     public void onWorldTick(TickEvent.WorldTickEvent event) {
-        if (event.world.isRemote) return;
+        if (event.world.isRemote && event.phase != TickEvent.Phase.END) return;
         task.checkItemCounts((ServerWorld) event.world);
+
         if (sparkLoaded && runHeapDump) {
             runHeapDump = false;
             event.world.getServer().sendMessage(new StringTextComponent("Running Heapdump. Massive Lagspike incoming!"));
             event.world.getServer().getCommandManager().handleCommand(event.world.getServer().getCommandSource(), "/spark heapdump");
+        }
+
+        if(!runnables.isEmpty()){
+            runnables.forEach(Runnable::run);
+            runnables.clear();
         }
 
     }
