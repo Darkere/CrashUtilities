@@ -1,5 +1,6 @@
 package com.darkere.crashutils.Network;
 
+import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.DataStructures.EntityData;
 import com.darkere.crashutils.DataStructures.LoadedChunkData;
 import com.darkere.crashutils.DataStructures.PlayerData;
@@ -49,7 +50,7 @@ public class UpdateDataRequestMessage {
             switch (data.type) {
                 case LOADEDCHUNKDATA: {
                     LoadedChunkData loadedChunkData = new LoadedChunkData(worlds);
-                    Network.sendToPlayer(ctx.get().getSender(), new LoadedChunkDataMessage(loadedChunkData));
+                    CrashUtils.runNextTick(()->Network.sendToPlayer(ctx.get().getSender(), new LoadedChunkDataMessage(loadedChunkData)));
                     break;
                 }
                 case ENTITYDATA: {
