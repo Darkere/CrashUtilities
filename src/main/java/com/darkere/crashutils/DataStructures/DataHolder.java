@@ -4,12 +4,10 @@ import com.darkere.crashutils.Network.DataRequestType;
 import com.darkere.crashutils.Network.Network;
 import com.darkere.crashutils.Network.UpdateDataRequestMessage;
 import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
-import java.util.LinkedList;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class DataHolder {
     private static final LinkedList<LoadedChunkData> LOADED_CHUNK_DATA_HOLDER = new LinkedList<>();
@@ -17,10 +15,11 @@ public class DataHolder {
     private static final LinkedList<TileEntityData> TILE_ENTITY_DATA_HOLDER = new LinkedList<>();
     private static final LinkedList<PlayerData> PLAYER_DATA_HOLDER = new LinkedList<>();
     private static Timer timer = new Timer();
-    private static ResourceLocation entityFilter = null;
-    private static ResourceLocation tileEntityFilter = null;
     private static Runnable listener = null;
-    private static String ChunkDataFilter = "";
+    private static Map<String, Set<ChunkPos>> stateData;
+    private static Map<String, Set<ChunkPos>> ticketData;
+    private static DataRequestType currentDataType;
+
 
     public static void addPlayerData(PlayerData data) {
         if (PLAYER_DATA_HOLDER.size() > 3) {
@@ -35,13 +34,31 @@ public class DataHolder {
     }
 
     //----------------------------------------------------------------------------------------------------------------
+    public static void addStateData(Map<String, Set<ChunkPos>> data){
+        if(ticketData == null){
+            stateData = data;
+        } else {
+            addLoadedChunkData(new LoadedChunkData(ticketData,data));
+            ticketData = null;
+            stateData = null;
+        }
+    }
+
+    public static void addTicketData(Map<String, Set<ChunkPos>> data){
+        if(stateData == null){
+            ticketData = data;
+        } else {
+            addLoadedChunkData(new LoadedChunkData(data,stateData));
+            ticketData = null;
+            stateData = null;
+        }
+    }
     public static void addLoadedChunkData(LoadedChunkData data) {
         if (LOADED_CHUNK_DATA_HOLDER.size() > 3) {
             LOADED_CHUNK_DATA_HOLDER.removeLast();
         }
         LOADED_CHUNK_DATA_HOLDER.addFirst(data);
         data.createReverseMapping();
-        data.applyFilter(ChunkDataFilter);
         notifyListener();
     }
 
@@ -56,7 +73,6 @@ public class DataHolder {
             ENTITY_DATA_HOLDER.removeLast();
         }
         ENTITY_DATA_HOLDER.addFirst(data);
-        data.fillChunkMap(entityFilter);
         notifyListener();
     }
 
@@ -71,7 +87,6 @@ public class DataHolder {
             TILE_ENTITY_DATA_HOLDER.removeLast();
         }
         TILE_ENTITY_DATA_HOLDER.addFirst(data);
-        data.fillChunkMap(tileEntityFilter);
         notifyListener();
     }
 
@@ -81,22 +96,26 @@ public class DataHolder {
 
 //---------------------------------------------------------------------------------
 
-    private static Object getLatestData(LinkedList list) {
+    private static Object getLatestData(LinkedList<?> list) {
         if (list.size() > 0) {
             return list.peek();
         }
         return null;
     }
 
-    public static void requestUpdates(DataRequestType type, int updateFrequency, RegistryKey<World> dim, boolean now) {
+    public static void requestImmediateUpdate(RegistryKey<World> dim){
+        Network.INSTANCE.sendToServer(new UpdateDataRequestMessage(currentDataType, dim));
+    }
+
+    public static void requestUpdates(int updateFrequency, RegistryKey<World> dim, boolean now) {
         timer.cancel();
-        if (now) Network.INSTANCE.sendToServer(new UpdateDataRequestMessage(type, dim));
+        if (now) requestImmediateUpdate(dim);
         if (updateFrequency == 0) return;
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                Network.INSTANCE.sendToServer(new UpdateDataRequestMessage(type, dim));
+                Network.INSTANCE.sendToServer(new UpdateDataRequestMessage(currentDataType, dim));
             }
         }, updateFrequency, updateFrequency);
     }
@@ -106,33 +125,22 @@ public class DataHolder {
     }
 
     //--------------------------------------------------------------------------------
-    public static void setChunkDataFilter(String s) {
-        if (getLatestChunkData() == null) return;
-        ChunkDataFilter = s;
-        getLatestChunkData().applyFilter(ChunkDataFilter);
-    }
 
-    public static void setEntityFilter(String s) {
-        if (getLatestEntityData() == null) return;
-        entityFilter = s == null ? null : new ResourceLocation(s);
-        getLatestEntityData().fillChunkMap(entityFilter);
-    }
-
-    public static void setTileEntityFilter(String s) {
-        if (getLatestTileEntityData() == null) return;
-        tileEntityFilter = s == null ? null : new ResourceLocation(s);
-        getLatestTileEntityData().fillChunkMap(tileEntityFilter);
-    }
-
-    public static void registerListener(Runnable run) {
+    public static void setListener(Runnable run) {
         listener = run;
     }
 
     public static void notifyListener() {
-        listener.run();
+        if(listener != null){
+            listener.run();
+        }
     }
 
     public static void stopListening() {
         listener = null;
+    }
+
+    public static void setRequestType(DataRequestType type) {
+        currentDataType = type;
     }
 }

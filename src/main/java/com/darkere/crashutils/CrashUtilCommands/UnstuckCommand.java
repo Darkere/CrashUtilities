@@ -34,7 +34,7 @@ public class UnstuckCommand implements Command<CommandSource> {
         String name = StringArgumentType.getString(context, "name");
         ServerPlayerEntity player = context.getSource().getServer().getPlayerList().getPlayerByUsername(name);
         if (player == null) {
-            WorldUtils.applyToPlayer(name, context, (fakePlayer) -> {
+            WorldUtils.applyToPlayer(name, context.getSource().getServer(), (fakePlayer) -> {
                 ServerWorld overworld = context.getSource().getServer().getWorld(World.field_234918_g_);
                 BlockPos spawn = overworld.func_241135_u_();
                 fakePlayer.setWorld(overworld);

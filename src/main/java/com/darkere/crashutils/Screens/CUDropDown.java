@@ -130,6 +130,8 @@ public class CUDropDown extends AbstractGui {
 
     public void setAlwaysExpanded() {
         this.alwaysExpanded = true;
+        this.setFitOnScreen(16);
+        this.setSortByName(false);
         setExpanded(true);
     }
 

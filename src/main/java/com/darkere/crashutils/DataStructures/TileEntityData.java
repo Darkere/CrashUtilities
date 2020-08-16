@@ -5,7 +5,6 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.text.Color;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.server.ServerWorld;
@@ -13,12 +12,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 
-public class TileEntityData {
-    Map<ResourceLocation, List<WorldPos>> map = new HashMap<>();
+public class TileEntityData extends LocationData{
     Map<ResourceLocation, Boolean> tickmap = new HashMap<>();
-    Map<ChunkPos, Integer> chunkMap = new HashMap<>();
-    Map<ChunkPos, WorldPos> tpPos = new HashMap<>();
-    int total = 0;
+    public static Map<UUID,WorldPos> TEID = new HashMap<>();
     int totalticking = 0;
 
     public TileEntityData() {
@@ -37,7 +33,11 @@ public class TileEntityData {
         worlds.forEach(x -> tileEntities.addAll(x.loadedTileEntityList));
         worlds.forEach(x -> ticking.addAll(x.tickableTileEntities));
         for (TileEntity tileEntity : tileEntities) {
-            map.get(tileEntity.getType().getRegistryName()).add(WorldPos.getPosFromTileEntity(tileEntity));
+            WorldPos pos = WorldPos.getPosFromTileEntity(tileEntity);
+            if(pos != null){
+                TEID.put(pos.getID(),pos);
+                map.get(tileEntity.getType().getRegistryName()).add(pos);
+            }
         }
         total = tileEntities.size();
         for (TileEntity tileEntity : ticking) {
@@ -58,49 +58,5 @@ public class TileEntityData {
         }
     }
 
-    public Map<ResourceLocation, List<WorldPos>> getMap() {
-        return map;
-    }
 
-    public void fillChunkMap(ResourceLocation rl) {
-        fillChunkMaps(rl, map, chunkMap, tpPos);
-    }
-
-    static void fillChunkMaps(ResourceLocation rl, Map<ResourceLocation, List<WorldPos>> map, Map<ChunkPos, Integer> chunkMap, Map<ChunkPos, WorldPos> tpPos) {
-        List<WorldPos> entities = new ArrayList<>();
-        if (rl == null) {
-            for (ResourceLocation resourceLocation : map.keySet()) {
-                entities.addAll(map.get(resourceLocation));
-            }
-        } else {
-            entities = map.get(rl);
-        }
-        chunkMap.clear();
-        tpPos.clear();
-        for (WorldPos entity : entities) {
-            ChunkPos pos = new ChunkPos(entity.pos);
-            if (chunkMap.containsKey(pos)) {
-                int x = chunkMap.get(pos);
-                x++;
-                chunkMap.put(pos, x);
-            } else {
-                chunkMap.put(pos, 1);
-                tpPos.put(pos, entity);
-            }
-        }
-    }
-
-    public int getTileEntityCountForChunk(ChunkPos chunkPos) {
-        if (chunkMap == null) return 0;
-        Integer i = chunkMap.get(chunkPos);
-        return i == null ? 0 : i;
-    }
-
-    public Map<ChunkPos, Integer> getChunkMap() {
-        return chunkMap;
-    }
-
-    public WorldPos getTpforChunk(ChunkPos pos) {
-        return tpPos.get(pos);
-    }
 }

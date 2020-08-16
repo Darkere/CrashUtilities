@@ -45,8 +45,8 @@ public class RemoveFromInventorySlotCommand {
     }
 
     private static int removeFromSlot(CommandContext<CommandSource> context, String name, String inventoryType, int slot) throws CommandSyntaxException {
-        AtomicReference<IFormattableTextComponent> text = new AtomicReference(new StringTextComponent(""));
-        WorldUtils.applyToPlayer(name, context, (player) -> {
+        AtomicReference<IFormattableTextComponent> text = new AtomicReference<>(new StringTextComponent(""));
+        WorldUtils.applyToPlayer(name, context.getSource().getServer(), (player) -> {
             switch (inventoryType) {
                 case "inventory": {
                     text.set(player.inventory.mainInventory.get(slot).getTextComponent().deepCopy());
@@ -72,7 +72,7 @@ public class RemoveFromInventorySlotCommand {
                 }
             }
         });
-        context.getSource().sendFeedback(text.get().func_230529_a_(new StringTextComponent(" has been deleted from " + name + "'s InventorySlot")), true);
+        context.getSource().sendFeedback(text.get().append(new StringTextComponent(" has been deleted from " + name + "'s InventorySlot")), true);
 
         return 1;
     }

@@ -28,7 +28,7 @@ public class InventoryLookCommand {
     }
 
     public static int printInventory(CommandContext<CommandSource> context, String name) {
-        WorldUtils.applyToPlayer(name, context, (playerEntity) -> {
+        WorldUtils.applyToPlayer(name, context.getSource().getServer(), (playerEntity) -> {
             context.getSource().sendFeedback(CommandUtils.coloredComponent("Offhand", Color.func_240744_a_(TextFormatting.DARK_AQUA)), true);
             for (int i = 0; i < playerEntity.inventory.offHandInventory.size(); i++) {
                 if (!playerEntity.inventory.offHandInventory.get(i).isEmpty()) {

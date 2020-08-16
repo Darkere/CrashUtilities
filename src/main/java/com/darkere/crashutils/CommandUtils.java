@@ -22,7 +22,7 @@ public class CommandUtils {
         IFormattableTextComponent text = new StringTextComponent(msg);
         Style style = Style.EMPTY;
         style.setColor(color);
-        text = text.func_240703_c_(style);
+        text = text.setStyle(style);
         source.sendFeedback(text, true);
     }
 
@@ -35,7 +35,7 @@ public class CommandUtils {
 
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Click to execute \u00A76" + command + "\u00A7r"));
         style = style.mergeStyle(style.setHoverEvent(hoverEvent));
-        IFormattableTextComponent tex = text.func_240703_c_(style);
+        IFormattableTextComponent tex = text.setStyle(style);
         source.sendFeedback(tex, false);
         LOGGER.info(text.getString() + " " + command);
     }
@@ -43,7 +43,7 @@ public class CommandUtils {
     public static void sendTEMessage(CommandSource source, WorldPos worldPos, boolean runDirectly) {
         BlockPos pos = worldPos.pos;
         String position = " - " + "[" + pos.getX() + "," + pos.getY() + "," + pos.getZ() + "]";
-        IFormattableTextComponent text = new StringTextComponent(position).func_240703_c_(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.GREEN)));
+        IFormattableTextComponent text = new StringTextComponent(position).setStyle(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.GREEN)));
         ServerPlayerEntity player = null;
         try {
             player = source.asPlayer();
@@ -54,19 +54,19 @@ public class CommandUtils {
     }
 
     public static void sendFindTEMessage(CommandSource source, ResourceLocation res, int count, boolean ticking) {
-        IFormattableTextComponent text = new StringTextComponent(res.toString()).func_240703_c_(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.AQUA)));
-        text.func_230529_a_(new StringTextComponent(" Count ").func_240703_c_(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.DARK_RED))));
-        text.func_230529_a_(new StringTextComponent(Integer.toString(count)).func_240703_c_(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.GREEN))));
+        IFormattableTextComponent text = new StringTextComponent(res.toString()).setStyle(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.AQUA)));
+        text.append(new StringTextComponent(" Count ").setStyle(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.DARK_RED))));
+        text.append(new StringTextComponent(Integer.toString(count)).setStyle(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.GREEN))));
         if (ticking)
-            text.func_230529_a_(new StringTextComponent(" ticking").func_240703_c_(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.RED))));
+            text.append(new StringTextComponent(" ticking").setStyle(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.RED))));
         sendCommandMessage(source, text, "/cu findLoadedTileEntities " + res.toString(), true);
 
     }
 
     public static void sendChunkEntityMessage(CommandSource source, int count, BlockPos pos, RegistryKey<World> type, boolean runDirectly) {
-        IFormattableTextComponent text = new StringTextComponent("- " + pos.toString()).func_240703_c_(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.GREEN)));
-        text.func_230529_a_(coloredComponent(" Count ", Color.func_240744_a_(TextFormatting.RED)));
-        text.func_230529_a_(coloredComponent(Integer.toString(count), Color.func_240744_a_(TextFormatting.GREEN)));
+        IFormattableTextComponent text = new StringTextComponent("- " + pos.toString()).setStyle(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.GREEN)));
+        text.append(coloredComponent(" Count ", Color.func_240744_a_(TextFormatting.RED)));
+        text.append(coloredComponent(Integer.toString(count), Color.func_240744_a_(TextFormatting.GREEN)));
         ServerPlayerEntity player = null;
         try {
             player = source.asPlayer();
@@ -77,20 +77,20 @@ public class CommandUtils {
     }
 
     public static void sendFindEMessage(CommandSource source, ResourceLocation res, int count) {
-        IFormattableTextComponent text = new StringTextComponent(res.toString()).func_240703_c_(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.AQUA)));
-        text.func_230529_a_(new StringTextComponent(" Count: ").func_240703_c_(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.DARK_RED))));
-        text.func_230529_a_(new StringTextComponent(count + " ").func_240703_c_(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.GREEN))));
+        IFormattableTextComponent text = new StringTextComponent(String.valueOf(count)).mergeStyle(TextFormatting.BLUE);
+        text.append(new StringTextComponent("x ").mergeStyle(TextFormatting.YELLOW));
+        text.append(new StringTextComponent(res.toString()).mergeStyle(TextFormatting.AQUA));
         sendCommandMessage(source, text, "/cu findEntities " + res.toString(), true);
 
     }
 
     public static IFormattableTextComponent coloredComponent(String text, Color color) {
-        return new StringTextComponent(text).func_240703_c_(Style.EMPTY.setColor(color));
+        return new StringTextComponent(text).setStyle(Style.EMPTY.setColor(color));
     }
 
     public static void sendItemInventoryRemovalMessage(CommandSource source, String name, ItemStack itemStack, String inventoryType, int i) {
-        IFormattableTextComponent text = new StringTextComponent("[" + i + "] ").func_240703_c_(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.DARK_BLUE)));
-        text.func_230529_a_(itemStack.getTextComponent());
+        IFormattableTextComponent text = new StringTextComponent("[" + i + "] ").setStyle(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.DARK_BLUE)));
+        text.append(itemStack.getTextComponent());
         String Command = "/cu removeItemFromInventorySlot " + name + " " + inventoryType + " " + i;
         sendCommandMessage(source, text, Command, false);
     }
@@ -102,7 +102,7 @@ public class CommandUtils {
         Style style = Style.EMPTY;
         style = style.mergeStyle(style.setClickEvent(clickEvent));
         style = style.mergeStyle(style.setHoverEvent(hoverEvent));
-        text.func_240703_c_(style);
+        text.setStyle(style);
         return text;
     }
 
@@ -114,7 +114,7 @@ public class CommandUtils {
         style.setClickEvent(clickEvent);
         style.setHoverEvent(hoverEvent);
         style.setColor(Color.func_240744_a_(TextFormatting.GREEN));
-        text.func_240703_c_(style);
+        text.setStyle(style);
         return text;
     }
 
@@ -126,7 +126,7 @@ public class CommandUtils {
         style = style.mergeStyle(style.setClickEvent(clickEvent));
         style = style.mergeStyle(style.setHoverEvent(hoverEvent));
         style = style.mergeStyle(style.setColor(Color.func_240744_a_(TextFormatting.GOLD)));
-        text.func_240703_c_(style);
+        text.setStyle(style);
         return text;
     }
 }

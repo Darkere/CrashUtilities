@@ -20,6 +20,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
@@ -48,16 +49,23 @@ public class CrashUtils {
     public static boolean runHeapDump = false;
     public static boolean sparkLoaded = false;
     public static List<Runnable> runnables = new ArrayList<>();
+    public static boolean intwoTicks = false;
 
     public CrashUtils() {
 
+
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::common);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::client);
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> MinecraftForge.EVENT_BUS.register(new ClientEvents()));
         MinecraftForge.EVENT_BUS.register(new DeleteBlocks());
         MinecraftForge.EVENT_BUS.register(this);
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SERVER_CONFIG.getSpec());
 
+    }
+
+    public void client(FMLClientSetupEvent event){
+        ClientEvents.registerKeybindings();
     }
 
 
@@ -126,6 +134,11 @@ public class CrashUtils {
         runnables.add(run);
     }
 
+    public static void runInTwoTicks(Runnable run) {
+        runnables.add(run);
+        intwoTicks = true;
+    }
+
     @SubscribeEvent
     public void onWorldTick(TickEvent.WorldTickEvent event) {
         if (event.world.isRemote && event.phase != TickEvent.Phase.END) return;
@@ -136,7 +149,10 @@ public class CrashUtils {
             event.world.getServer().sendMessage(new StringTextComponent("Running Heapdump. Massive Lagspike incoming!"),null);
             event.world.getServer().getCommandManager().handleCommand(event.world.getServer().getCommandSource(), "/spark heapdump");
         }
-
+        if(intwoTicks){
+            intwoTicks = false;
+            return;
+        }
         if(!runnables.isEmpty()){
             runnables.forEach(Runnable::run);
             runnables.clear();

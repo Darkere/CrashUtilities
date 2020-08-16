@@ -1,6 +1,9 @@
 package com.darkere.crashutils.DataStructures;
 
+import com.darkere.crashutils.Screens.CUOption;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.server.ServerWorld;
 
 import java.util.ArrayList;
@@ -24,5 +27,13 @@ public class PlayerData {
 
     public PlayerData(List<String> names) {
         playerNames = names;
+    }
+
+    public List<CUOption> getCUPlayers(String requestingPlayer) {
+        playerNames.remove(requestingPlayer);
+        List<CUOption> list = new ArrayList<>();
+        playerNames.forEach(name -> list.add(new CUOption(name, !Minecraft.getInstance().isSingleplayer() &&
+            Minecraft.getInstance().getCurrentServerData().playerList.stream().map(ITextComponent::getString).anyMatch(name::equals) ? "(online)" : null)));
+        return list;
     }
 }

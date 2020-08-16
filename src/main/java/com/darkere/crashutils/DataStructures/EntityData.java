@@ -5,20 +5,18 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.text.Color;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-public class EntityData {
-    Map<ResourceLocation, List<WorldPos>> map = new HashMap<>();
-    Map<ChunkPos, Integer> chunkMap = new HashMap<>();
-    Map<ChunkPos, WorldPos> tpPos = new HashMap<>();
-    int total = 0;
+public class EntityData extends LocationData {
 
     public EntityData() {
         for (Map.Entry<ResourceLocation, EntityType<?>> entry : ForgeRegistries.ENTITIES.getEntries()) {
@@ -28,14 +26,6 @@ public class EntityData {
 
     public EntityData(Map<ResourceLocation, List<WorldPos>> map) {
         this.map = map;
-    }
-
-    public Map<ResourceLocation, List<WorldPos>> getMap() {
-        return map;
-    }
-
-    public Map<ChunkPos, Integer> getChunkMap() {
-        return chunkMap;
     }
 
     public void createLists(List<ServerWorld> worlds) {
@@ -55,29 +45,14 @@ public class EntityData {
             CommandUtils.sendNormalMessage(source, total + " Entities", Color.func_240744_a_(TextFormatting.DARK_AQUA));
 
         } else {
-            createEntityChunkMap(source, res);
+            sendEntityChunkMapCommand(source, res);
         }
     }
 
-    public void fillChunkMap(ResourceLocation rl) {
-        TileEntityData.fillChunkMaps(rl, map, chunkMap, tpPos);
-    }
 
-    private void createEntityChunkMap(CommandSource source, ResourceLocation res) {
-        fillChunkMap(res);
+    private void sendEntityChunkMapCommand(CommandSource source, ResourceLocation res) {
+        fillChunkMaps(res.toString());
         CommandUtils.sendNormalMessage(source, res.toString(), Color.func_240744_a_(TextFormatting.DARK_BLUE));
-        chunkMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Integer::compareTo)).forEach((k) -> CommandUtils.sendChunkEntityMessage(source, k.getValue(), tpPos.get(k.getKey()).pos, tpPos.get(k.getKey()).type, true));
-
-
-    }
-
-    public int getEntityCountForChunk(ChunkPos chunkPos) {
-        if (chunkMap == null) return 0;
-        Integer i = chunkMap.get(chunkPos);
-        return i == null ? 0 : i;
-    }
-
-    public WorldPos getTpforChunk(ChunkPos chunkfromString) {
-        return tpPos.get(chunkfromString);
+        chunkMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.comparingInt(List::size))).forEach((k) -> CommandUtils.sendChunkEntityMessage(source, k.getValue().size(), tpPos.get(k.getKey()).pos, tpPos.get(k.getKey()).type, true));
     }
 }

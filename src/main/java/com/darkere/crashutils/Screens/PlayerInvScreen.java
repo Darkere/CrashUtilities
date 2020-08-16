@@ -41,12 +41,12 @@ public class PlayerInvScreen extends ContainerScreen<PlayerInvContainer> {
 
     }
     @Override
-    protected void func_230451_b_(MatrixStack p_230451_1_, int p_230451_2_, int p_230451_3_) {
+    protected void drawGuiContainerForegroundLayer(MatrixStack p_230451_1_, int p_230451_2_, int p_230451_3_) {
 
     }
 
     @Override //drawGuiContainerBackgroundLayer
-    protected void func_230450_a_(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
+    protected void drawGuiContainerBackgroundLayer(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
         renderTooltip(stack ,new StringTextComponent( mouseX + " " + mouseY), mouseX, mouseY);
         Minecraft.getInstance().textureManager.bindTexture(texture);
         blit(stack, centerX - doubleinv.width / 2, centerY - doubleinv.height / 2, doubleinv.x, doubleinv.y, doubleinv.width, doubleinv.height);

@@ -30,11 +30,13 @@ public class GridChunkGUI extends CUContentPane {
     CUDropDown TILEENTITIES;
     int hoveringX, hoveringY = 0;
     long blinkTime = 0;
+    private String entityFilter;
 
     GridChunkGUI(CUScreen screen, RegistryKey<World> dim, BlockPos initial) {
         super(dim, screen);
         goTo(initial);
-        DataHolder.requestUpdates(DataRequestType.LOADEDCHUNKDATA, 0, dim, true);
+        DataHolder.setRequestType(DataRequestType.LOADEDCHUNKDATA);
+        DataHolder.requestUpdates(0, dim, true);
         colormap.put(null, 0x686868 + 0xFF000000); // GRAY
         colormap.put("PARTIALLYGENERATED", 0x66ff99 + 0xff000000); //GREEN
         colormap.put("BORDER", 0xffff99 + 0xff000000); //YELLOW
@@ -53,15 +55,15 @@ public class GridChunkGUI extends CUContentPane {
         screen.topDropDowns.add(ENTITIES);
         screen.topDropDowns.add(TILEENTITIES);
         RENDERTYPES.setEnabled(true);
-        DataHolder.registerListener(() -> {
+        DataHolder.setListener(() -> {
             TICKETS.updateOptions(DataHolder.getLatestChunkData() == null ? new ArrayList<>() : new ArrayList<>(DataHolder.getLatestChunkData().getChunksByTicketName().keySet()));
             ENTITIES.updateOptions(DataHolder.getLatestEntityData() == null ? new ArrayList<>() : DataHolder.getLatestEntityData().getMap().keySet().stream().map(ResourceLocation::toString).collect(Collectors.toList()));
             TILEENTITIES.updateOptions(DataHolder.getLatestTileEntityData() == null ? new ArrayList<>() : DataHolder.getLatestTileEntityData().getMap().keySet().stream().map(ResourceLocation::toString).collect(Collectors.toList()));
         });
     }
 
-    public void render(MatrixStack stack, int centerX, int centerY) {
-        super.render(stack, centerX, centerY);
+    public void render(MatrixStack stack, int centerX, int centerY,int mx, int my, float partialTicks) {
+        super.render(stack, centerX, centerY,mx,my,partialTicks);
         List<FillMany.ColoredRectangle> list = new ArrayList<>();
         for (int i = 0; i < XAcross; i++) {
             for (int j = 0; j < YAcross; j++) {
@@ -111,16 +113,16 @@ public class GridChunkGUI extends CUContentPane {
                 break;
             case ENTITIES:
                 if (DataHolder.getLatestEntityData() == null) return -1;
-                counts = DataHolder.getLatestEntityData().getEntityCountForChunk(new ChunkPos(posX, posY));
+                counts = DataHolder.getLatestEntityData().getCountForChunk(new ChunkPos(posX, posY),entityFilter);
                 break;
             case TILEENTITIES:
                 if (DataHolder.getLatestTileEntityData() == null) return -1;
-                counts = DataHolder.getLatestTileEntityData().getTileEntityCountForChunk(new ChunkPos(posX, posY));
+                counts = DataHolder.getLatestTileEntityData().getCountForChunk(new ChunkPos(posX, posY),entityFilter);
                 break;
 
         }
         if (counts != 0) {
-            float hue = 0;
+            float hue;
             if (counts > 100) {
                 hue = 0.4f;
             } else {
@@ -154,7 +156,7 @@ public class GridChunkGUI extends CUContentPane {
     }
 
     @Override
-    public void zoom(double x, double y, double delta, int centerX, int centerY) {
+    public void scroll(double x, double y, double delta, int centerX, int centerY) {
         double distX = x - (centerX + defaultRenderOffsetX);
         double distY = y - (centerY + defaultRenderOffsetY);
         distX /= zoom;
@@ -188,13 +190,13 @@ public class GridChunkGUI extends CUContentPane {
     public String getEntityCountFor(int x, int y) {
         ChunkPos pos = getChunkFor(x, y);
         if (DataHolder.getLatestEntityData() == null) return null;
-        return String.valueOf(DataHolder.getLatestEntityData().getEntityCountForChunk(pos));
+        return String.valueOf(DataHolder.getLatestEntityData().getCountForChunk(pos,entityFilter));
     }
 
     public String getTileEntityCountFor(int x, int y) {
         ChunkPos pos = getChunkFor(x, y);
         if (DataHolder.getLatestTileEntityData() == null) return null;
-        return String.valueOf(DataHolder.getLatestTileEntityData().getTileEntityCountForChunk(pos));
+        return String.valueOf(DataHolder.getLatestTileEntityData().getCountForChunk(pos,entityFilter));
     }
 
     public ChunkPos getChunkFor(int x, int y) {
@@ -211,15 +213,17 @@ public class GridChunkGUI extends CUContentPane {
         if (s == null) return "Nothing yet";
         switch (s) {
             case "ENTITY_TICKING":
-                return "Fully loaded and ticking";
+                return "Fully loaded and ticking (ENTITY_TICKING)";
             case "TICKING":
-                return "Loaded but not ticking entities";
+                return "Loaded but not ticking entities (TICKING)";
             case "BORDER":
+                return "Loaded but not ticking (BORDER)";
             case "INACCESSIBLE":
+                return "Loaded but not ticking (INACCESSIBLE)";
             case "FULL":
-                return "Loaded but not ticking";
+                return "Loaded but not ticking (FULL)";
             case "PRIMED":
-                return "Prepared for loading";
+                return "Prepared for loading (Chunk Primer)";
             case "PARTIALLYGENERATED":
                 return "Partially generated";
         }
@@ -235,27 +239,36 @@ public class GridChunkGUI extends CUContentPane {
                 if (type == null) return;
                 setRenderType(type);
                 setRenderFilter(null);
+                entityFilter = "";
                 screen.topDropDowns.forEach(x -> x.setEnabled(false));
                 RENDERTYPES.setEnabled(true);
                 switch (type) {
                     case LOCATIONTYPE:
+                        DataHolder.setRequestType(DataRequestType.LOADEDCHUNKDATA);
+                        DataHolder.requestUpdates(0, screen.dim, !firstEntity);
                         currentType = DataRequestType.LOADEDCHUNKDATA;
                         break;
                     case TICKET:
+                        DataHolder.setRequestType(DataRequestType.LOADEDCHUNKDATA);
+                        DataHolder.requestUpdates(0, screen.dim, !firstEntity);
                         TICKETS.setEnabled(true);
                         currentType = DataRequestType.LOADEDCHUNKDATA;
                         break;
                     case ENTITIES:
-                        DataHolder.requestUpdates(DataRequestType.ENTITYDATA, 0, screen.dim, !firstEntity);
+                        DataHolder.setRequestType(DataRequestType.ENTITYDATA);
+                        DataHolder.requestUpdates(0, screen.dim, !firstEntity);
                         currentType = DataRequestType.ENTITYDATA;
                         firstEntity = true;
                         ENTITIES.setEnabled(true);
+                        entityFilter = "";
                         break;
                     case TILEENTITIES:
-                        DataHolder.requestUpdates(DataRequestType.TILEENTITYDATA, 0, screen.dim, !firstTileEntity);
+                        DataHolder.setRequestType(DataRequestType.TILEENTITYDATA);
+                        DataHolder.requestUpdates(0, screen.dim, !firstTileEntity);
                         currentType = DataRequestType.TILEENTITYDATA;
                         firstTileEntity = true;
                         TILEENTITIES.setEnabled(true);
+                        entityFilter = "";
                         break;
                 }
                 break;
@@ -263,12 +276,30 @@ public class GridChunkGUI extends CUContentPane {
                 setRenderFilter(s);
                 break;
             case ENTITIES:
-                DataHolder.setEntityFilter(s);
-                break;
             case TILEENTITIES:
-                DataHolder.setTileEntityFilter(s);
+                entityFilter = s;
                 break;
         }
+    }
+
+    @Override
+    public boolean mouseClicked(double mx, double my, int mouseButton) {
+        return false;
+    }
+
+    @Override
+    public boolean mouseClickedOutside(double mx, double my, int centerX, int centerY) {
+        return false;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        return false;
+    }
+
+    @Override
+    public boolean charTyped(char p_charTyped_1_, int p_charTyped_2_) {
+        return false;
     }
 
 }

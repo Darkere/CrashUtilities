@@ -17,6 +17,7 @@ public abstract class CUContentPane extends AbstractGui {
     boolean firstEntity = false;
     boolean firstTileEntity = false;
     boolean firstChunks = false;
+    boolean firstPlayer = false;
     int updateSpeed = 60;
     boolean shouldUpdate = false;
     RegistryKey<World> dim;
@@ -33,7 +34,7 @@ public abstract class CUContentPane extends AbstractGui {
 
     public void setUpdateSpeed() {
         if (shouldUpdate) {
-            DataHolder.requestUpdates(currentType, updateSpeed * 1000, dim, false);
+            DataHolder.requestUpdates(updateSpeed * 1000, dim, false);
         } else {
             DataHolder.cancelTimer();
         }
@@ -43,20 +44,33 @@ public abstract class CUContentPane extends AbstractGui {
 
     }
 
-    public void zoom(double x, double y, double delta, int centerX, int centerY) {
+    public void scroll(double x, double y, double delta, int centerX, int centerY) {
     }
 
     public boolean isMouseOver(double mx, double my, int centerX, int centerY) {
         return (mx >= XTopLeft && mx <= XTopLeft + XAcross && my >= YTopLeft && my <= YTopLeft + YAcross);
     }
 
-    public void render(MatrixStack stack, int centerX, int centerY) {
-        this.centerX = centerX;
-        this.centerY = centerY;
-        XTopLeft = centerX + defaultRenderOffsetX;
-        YTopLeft = centerY + defaultRenderOffsetY;
+    public void render(MatrixStack stack, int centerX, int centerY,int mx, int my, float partialTicks) {
+        updateRenderValues(centerX, centerY);
         fill(stack, XTopLeft, YTopLeft, XAcross + XTopLeft, YAcross + YTopLeft, 0xFF000000);
     }
 
     public abstract void updateSelection(DropDownType ddtype, String s);
+
+    public abstract boolean mouseClicked(double mx, double my, int mouseButton);
+
+    public void updateRenderValues(int centerX, int centerY) {
+        this.centerX = centerX;
+        this.centerY = centerY;
+        XTopLeft = centerX + defaultRenderOffsetX;
+        YTopLeft = centerY + defaultRenderOffsetY;
+    }
+
+    public abstract boolean mouseClickedOutside(double mx, double my, int centerX, int centerY);
+
+    public abstract boolean keyPressed(int keyCode, int scanCode, int modifiers);
+
+    public abstract boolean charTyped(char p_charTyped_1_, int p_charTyped_2_);
+
 }

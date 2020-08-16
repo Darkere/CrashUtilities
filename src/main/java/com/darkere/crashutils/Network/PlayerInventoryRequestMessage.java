@@ -2,13 +2,13 @@ package com.darkere.crashutils.Network;
 
 import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.Screens.PlayerInvContainer;
-import com.darkere.crashutils.WorldUtils;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -16,6 +16,7 @@ import top.theillusivec4.curios.api.CuriosApi;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 public class PlayerInventoryRequestMessage {
@@ -42,15 +43,19 @@ public class PlayerInventoryRequestMessage {
             PlayerEntity otherPlayer = ctx.get().getSender().getServer().getPlayerList().getPlayerByUsername(data.playerName);
             if (otherPlayer == null) {
                 GameProfile profile = server.getPlayerProfileCache().getGameProfileForUsername(data.playerName);
-                if(profile == null)return;
+                if(profile == null){
+                    player.sendMessage(new StringTextComponent("Cannot find Player"),new UUID(0,0));
+                    return;
+                }
                 otherPlayer = new FakePlayer(server.getWorld(World.field_234918_g_),profile);
-                CompoundNBT nbt = server.field_240766_e_.func_237336_b_(otherPlayer);
-                if(nbt == null) return;
+                CompoundNBT nbt = server.playerDataManager.func_237336_b_(otherPlayer);
+                if(nbt == null){
+                    player.sendMessage(new StringTextComponent("Cannot load playerData"),new UUID(0,0));
+                    return;
+                }
                 otherPlayer.read(nbt);
-
             }
 
-            WorldUtils.addPlayerContainerRel(player, otherPlayer);
             Map<String, Integer> curios = new LinkedHashMap<>();
             if (CrashUtils.curiosLoaded) {
                 CuriosApi.getCuriosHelper().getCuriosHandler(otherPlayer).orElse(null).getCurios().forEach((s, handler) -> {

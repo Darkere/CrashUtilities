@@ -3,6 +3,7 @@ package com.darkere.crashutils.DataStructures;
 
 import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.CrashUtils;
+import com.darkere.crashutils.Screens.CUOption;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
@@ -17,35 +18,17 @@ import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.server.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class LoadedChunkData {
     Map<String, Set<ChunkPos>> chunksByTicketName = new HashMap<>();
     Map<String, Set<ChunkPos>> chunksByLocationType = new HashMap<>();
     Map<ChunkPos, Set<String>> ticketsByChunk = new HashMap<>();
     Map<ChunkPos, String> locationTypeByChunk = new HashMap<>();
-    String filter = "";
 
     int total = 0;
 
     public Map<String, Set<ChunkPos>> getChunksByTicketName() {
         return chunksByTicketName;
-    }
-
-
-    public Map<ChunkPos, String> getLocationTypeByChunk() {
-        if (!filter.isEmpty()) {
-            return locationTypeByChunk.entrySet().stream().filter(e -> e.getValue().equals(filter)).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        }
-
-        return locationTypeByChunk;
-    }
-
-    public Map<ChunkPos, Set<String>> getTicketsByChunk() {
-        if (!filter.isEmpty()) {
-            return ticketsByChunk.entrySet().stream().filter(e -> e.getValue().contains(filter)).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        }
-        return ticketsByChunk;
     }
 
     public Map<String, Set<ChunkPos>> getChunksByLocationType() {
@@ -174,7 +157,21 @@ public class LoadedChunkData {
     }
 
 
-    public void applyFilter(String chunkDataFilter) {
-        filter = chunkDataFilter;
+    public List<CUOption> getTicketsAsDropdownOptions(String filter){
+        return getCuDropDownOptions(filter, chunksByTicketName);
+    }
+
+    public List<CUOption> getStatesAsDropdownOptions(String filter){
+        return getCuDropDownOptions(filter, chunksByLocationType);
+    }
+
+    private List<CUOption> getCuDropDownOptions(String filter, Map<String, Set<ChunkPos>> chunkMap) {
+        List<CUOption> list = new ArrayList<>();
+        if(filter.isEmpty()){
+            chunkMap.forEach((string, set)-> list.add(new CUOption(string,set.size())));
+        } else {
+            chunkMap.get(filter).forEach(chunkPos-> list.add(new CUOption(chunkPos)));
+        }
+        return list;
     }
 }

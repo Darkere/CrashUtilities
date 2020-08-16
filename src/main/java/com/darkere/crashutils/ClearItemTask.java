@@ -67,7 +67,7 @@ public class ClearItemTask extends TimerTask {
 
             }
             String intText = text.replaceFirst("%", integer.toString());
-            ITextComponent message = new StringTextComponent("[=== ").func_230529_a_(new StringTextComponent(intText).func_240703_c_(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.RED)))).func_230529_a_(new StringTextComponent(" ===]"));
+            ITextComponent message = new StringTextComponent("[=== ").append(new StringTextComponent(intText).setStyle(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.RED)))).append(new StringTextComponent(" ===]"));
             new java.util.Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {

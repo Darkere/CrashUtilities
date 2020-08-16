@@ -181,7 +181,7 @@ public class PlayerInvContainer extends Container {
         super.onContainerClosed(playerIn);
 
         if (!world.isRemote() && !playerIn.getServer().getPlayerList().getPlayers().contains(otherPlayer)) {
-            ((ServerWorld) world).getServer().field_240766_e_.func_237335_a_(otherPlayer);
+            ((ServerWorld) world).getServer().playerDataManager.func_237335_a_(otherPlayer);
         }
     }
 

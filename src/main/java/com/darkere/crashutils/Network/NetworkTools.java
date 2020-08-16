@@ -17,7 +17,7 @@ public class NetworkTools {
             buf.writeString(key);
             buf.writeInt(value.size());
             value.forEach(x -> {
-                buf.writeBlockPos(x.asBlockPos());
+                buf.writeLong(x.asLong());
             });
         });
     }
@@ -30,7 +30,7 @@ public class NetworkTools {
             int listsize = buf.readInt();
             Set<ChunkPos> list = new HashSet<>();
             for (int j = 0; j < listsize; j++) {
-                list.add(new ChunkPos(buf.readBlockPos()));
+                list.add(new ChunkPos(buf.readLong()));
             }
             map.put(key, list);
         }
@@ -49,10 +49,11 @@ public class NetworkTools {
     public static void writeWorldPos(WorldPos pos, PacketBuffer buf) {
         buf.writeBlockPos(pos.pos);
         writeWorldKey(pos.type, buf);
+        buf.writeUniqueId(pos.id);
     }
 
     public static WorldPos readWorldPos(PacketBuffer buf) {
-        return new WorldPos(buf.readBlockPos(), readWorldKey(buf));
+        return new WorldPos(buf.readBlockPos(), readWorldKey(buf),buf.readUniqueId());
     }
 
     public static void writeRLWPMap(Map<ResourceLocation, List<WorldPos>> map, PacketBuffer buf) {
@@ -79,6 +80,10 @@ public class NetworkTools {
             map.put(loc, list);
         }
         return map;
+    }
+
+    public static boolean returnOnNull(Object... objects){
+        return Arrays.stream(objects).anyMatch(Objects::isNull);
     }
 }
 

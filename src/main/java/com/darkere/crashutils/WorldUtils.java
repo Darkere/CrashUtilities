@@ -1,7 +1,7 @@
 package com.darkere.crashutils;
 
-import com.darkere.crashutils.Network.Network;
-import com.darkere.crashutils.Network.TeleportMessage;
+import com.darkere.crashutils.DataStructures.TileEntityData;
+import com.darkere.crashutils.Network.*;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -12,8 +12,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
@@ -22,23 +25,13 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.ITeleporter;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class WorldUtils {
-
-    private static Map<PlayerEntity, PlayerEntity> playerToContainer = new HashMap<>();
-
-    public static void addPlayerContainerRel(PlayerEntity player1, PlayerEntity containerPlayer) {
-        playerToContainer.put(player1, containerPlayer);
-    }
-
-    public static PlayerEntity getRelatedContainer(PlayerEntity player) {
-        return playerToContainer.get(player);
-    }
 
     public static List<ServerWorld> getWorldsFromDimensionArgument(CommandContext<CommandSource> context) {
         ServerWorld world = null;
@@ -56,7 +49,7 @@ public class WorldUtils {
         return worlds;
     }
 
-    public static void teleportPlayer(ServerPlayerEntity player, ServerWorld startWorld, ServerWorld destWorld, BlockPos newPos) {
+    public static void teleportPlayer(PlayerEntity player, World startWorld, World destWorld, BlockPos newPos) {
         if (player.world.isRemote) {
             Network.sendToServer(new TeleportMessage(startWorld.func_234923_W_(), destWorld.func_234923_W_(), newPos));
         }
@@ -67,7 +60,7 @@ public class WorldUtils {
         }
         if (startWorld != destWorld) {
             BlockPos finalNewPos = newPos;
-            player.changeDimension(destWorld, new ITeleporter() {
+            player.changeDimension((ServerWorld) destWorld, new ITeleporter() {
                 @Override
                 public Entity placeEntity(Entity entity, ServerWorld currentWorld, ServerWorld destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
                     Entity entity1 = repositionEntity.apply(false);
@@ -80,28 +73,126 @@ public class WorldUtils {
         }
     }
 
-    public static void applyToPlayer(String playerName, CommandContext<CommandSource> context, Consumer<ServerPlayerEntity> consumer) {
-        ServerPlayerEntity player = context.getSource().getServer().getPlayerList().getPlayerByUsername(playerName);
-        CommandSource source = context.getSource();
+    public static void applyToPlayer(String playerName, MinecraftServer server, Consumer<ServerPlayerEntity> consumer) {
+        ServerPlayerEntity player = server.getPlayerList().getPlayerByUsername(playerName);
         if (player == null) {
-            MinecraftServer server = source.getServer();
             GameProfile profile = server.getPlayerProfileCache().getGameProfileForUsername(playerName);
-            if (profile == null){
-                source.sendErrorMessage(new StringTextComponent("Player not found"));
+            if (profile == null) {
                 return;
             }
-            FakePlayer fakePlayer = new FakePlayer(server.getWorld(World.field_234918_g_),profile);
-            CompoundNBT nbt = server.field_240766_e_.func_237336_b_(fakePlayer);
-            if(nbt == null) return;
+            FakePlayer fakePlayer = new FakePlayer(server.getWorld(World.field_234918_g_), profile);
+            CompoundNBT nbt = server.playerDataManager.func_237336_b_(fakePlayer);
+            if (nbt == null) return;
             fakePlayer.read(nbt);
             consumer.accept(fakePlayer);
-            server.field_240766_e_.func_237335_a_(fakePlayer);
+            server.playerDataManager.func_237335_a_(fakePlayer);
 
 
         } else {
             consumer.accept(player);
         }
-
-
     }
+
+    public static BlockPos getChunkCenter(ChunkPos pos) {
+        int x = pos.getXStart() + 8;
+        int z = pos.getZStart() + 8;
+        return new BlockPos(x, 0, z);
+    }
+
+    public static void removeEntity(World world, UUID id, boolean force) {
+        if(NetworkTools.returnOnNull(world,id))return;
+        if (world.isRemote) {
+            Network.sendToServer(new RemoveEntityMessage(world.func_234923_W_(), id, false, force));
+            return;
+        }
+        Entity e = ((ServerWorld) world).getEntityByUuid(id);
+        if (e == null) return;
+        if (force) {
+            ((ServerWorld) world).removeEntityComplete(e, false);
+        } else {
+            e.remove();
+        }
+    }
+
+    public static void removeEntityType(World world, ResourceLocation rl, boolean force) {
+        if(NetworkTools.returnOnNull(world,rl))return;
+        if (world.isRemote) {
+            Network.sendToServer(new RemoveEntitiesMessage(world.func_234923_W_(), rl, null, false, force));
+            return;
+        }
+        ((ServerWorld) world).getEntities().filter(entity -> Objects.equals(entity.getType().getRegistryName(), rl)).forEach(e -> {
+            if (force) {
+                ((ServerWorld) world).removeEntityComplete(e, false);
+            } else {
+                e.remove();
+            }
+        });
+    }
+
+    public static void removeEntitiesInChunk(World world, ChunkPos pos, ResourceLocation rl, boolean force) {
+        if(NetworkTools.returnOnNull(world,pos,rl))return;
+        if (world.isRemote) {
+            Network.sendToServer(new RemoveEntitiesMessage(world.func_234923_W_(), rl, pos, false, force));
+            return;
+        }
+        Vector3d start = new Vector3d(pos.getXStart(), 0, pos.getZStart());
+        Vector3d end = new Vector3d(pos.getXEnd(), 255, pos.getZEnd());
+        world.getEntitiesInAABBexcluding(null, new AxisAlignedBB(start, end), entity -> Objects.equals(entity.getType().getRegistryName(), rl)).forEach(e -> {
+            if (force) {
+                ((ServerWorld) world).removeEntityComplete(e, false);
+            } else {
+                e.remove();
+            }
+        });
+    }
+
+    public static void removeTileEntity(World world, UUID id, boolean force) {
+        if(NetworkTools.returnOnNull(world,id))return;
+        if (world.isRemote) {
+            Network.sendToServer(new RemoveEntityMessage(world.func_234923_W_(), id, true, force));
+            return;
+        }
+        if(force){
+            world.removeTileEntity(TileEntityData.TEID.get(id).pos);
+            world.removeBlock(TileEntityData.TEID.get(id).pos,false);
+        } else {
+            world.removeTileEntity(TileEntityData.TEID.get(id).pos);
+        }
+    }
+
+    public static void removeTileEntityType(World world, ResourceLocation rl, boolean force) {
+        if(NetworkTools.returnOnNull(world,rl))return;
+        if (world.isRemote) {
+            Network.sendToServer(new RemoveEntitiesMessage(world.func_234923_W_(), rl, null, true,force));
+            return;
+        }
+        world.loadedTileEntityList.stream().filter(te-> Objects.equals(te.getType().getRegistryName(), rl)).forEach(te->{
+            if(force){
+                world.removeTileEntity(te.getPos());
+                world.removeBlock(te.getPos(),false);
+            } else {
+                world.removeTileEntity(te.getPos());
+            }
+        });
+    }
+
+    public static void removeTileEntitiesInChunk(World world, ChunkPos pos, ResourceLocation rl, boolean force) {
+        if(NetworkTools.returnOnNull(world,pos,rl))return;
+        if (world.isRemote) {
+            Network.sendToServer(new RemoveEntitiesMessage(world.func_234923_W_(), rl, pos, true,force));
+            return;
+        }
+        Vector3d start = new Vector3d(pos.getXStart(), 0, pos.getZStart());
+        Vector3d end = new Vector3d(pos.getXEnd(), 255, pos.getZEnd());
+
+        world.loadedTileEntityList.stream().filter(te -> Objects.equals(te.getType().getRegistryName(), rl) && new AxisAlignedBB(start,end).contains(Vector3d.copyCentered(te.getPos()))).forEach(te->{
+            if(force){
+                world.removeTileEntity(te.getPos());
+                world.removeBlock(te.getPos(),false);
+            } else {
+                world.removeTileEntity(te.getPos());
+            }
+        });
+    }
+
 }

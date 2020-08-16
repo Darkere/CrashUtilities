@@ -68,22 +68,22 @@ public class GetLogCommand {
 
 
     private static int getLogOverview(CommandContext<CommandSource> ctx) {
-        IFormattableTextComponent latestlogText = new StringTextComponent("Log from current Game").func_240701_a_(TextFormatting.YELLOW);
-        latestlogText.func_230529_a_(CommandUtils.getCommandTextComponent(" [Upload]", "/cu getLog uploadLatestLog"));
-        latestlogText.func_230529_a_(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getFileAsStringFromPath(LogHandler.latestlog)));
+        IFormattableTextComponent latestlogText = new StringTextComponent("Log from current Game").mergeStyle(TextFormatting.YELLOW);
+        latestlogText.append(CommandUtils.getCommandTextComponent(" [Upload]", "/cu getLog uploadLatestLog"));
+        latestlogText.append(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getFileAsStringFromPath(LogHandler.latestlog)));
         ctx.getSource().sendFeedback(latestlogText, true);
         Path crashreport = LogHandler.getLatestCrashReportPath();
         if (crashreport != null) {
-            IFormattableTextComponent crashreporttext = new StringTextComponent("Latest Crash Report ").func_240701_a_(TextFormatting.RED).func_230529_a_(new StringTextComponent(LogHandler.getRelativePathDateInMin(crashreport) + " Minutes old").func_240701_a_(TextFormatting.AQUA));
-            crashreporttext.func_230529_a_(CommandUtils.getCommandTextComponent(" [Upload]", "/cu getLog uploadCrashReport"));
-            crashreporttext.func_230529_a_(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getFileAsStringFromPath(crashreport)));
+            IFormattableTextComponent crashreporttext = new StringTextComponent("Latest Crash Report ").mergeStyle(TextFormatting.RED).append(new StringTextComponent(LogHandler.getRelativePathDateInMin(crashreport) + " Minutes old").mergeStyle(TextFormatting.AQUA));
+            crashreporttext.append(CommandUtils.getCommandTextComponent(" [Upload]", "/cu getLog uploadCrashReport"));
+            crashreporttext.append(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getFileAsStringFromPath(crashreport)));
             ctx.getSource().sendFeedback(crashreporttext, true);
         }
         Path archivedLog = LogHandler.getLatestArchivedLogPath();
         if (archivedLog != null) {
-            IFormattableTextComponent archivedText = new StringTextComponent("Archived Latest.log ").func_240701_a_(TextFormatting.GREEN).func_230529_a_(new StringTextComponent(LogHandler.getRelativePathDateInMin(archivedLog) + " Minutes old").func_240701_a_(TextFormatting.AQUA));
-            archivedText.func_230529_a_(CommandUtils.getCommandTextComponent(" [Upload]", "/cu getLog uploadArchivedLog"));
-            archivedText.func_230529_a_(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getStringFromArchive(archivedLog)));
+            IFormattableTextComponent archivedText = new StringTextComponent("Archived Latest.log ").mergeStyle(TextFormatting.GREEN).append(new StringTextComponent(LogHandler.getRelativePathDateInMin(archivedLog) + " Minutes old").mergeStyle(TextFormatting.AQUA));
+            archivedText.append(CommandUtils.getCommandTextComponent(" [Upload]", "/cu getLog uploadArchivedLog"));
+            archivedText.append(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getStringFromArchive(archivedLog)));
             ctx.getSource().sendFeedback(archivedText, true);
         }
         return 1;

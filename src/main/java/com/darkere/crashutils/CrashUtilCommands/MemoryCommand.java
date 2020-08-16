@@ -47,16 +47,16 @@ public class MemoryCommand {
 
         for (double i = 0.1D; i <= 1; i += 0.1D) {
             if (i < percentUsed) {
-                text.func_230529_a_(CommandUtils.coloredComponent("I", Color.func_240744_a_(TextFormatting.RED)));
+                text.append(CommandUtils.coloredComponent("I", Color.func_240744_a_(TextFormatting.RED)));
             } else if (i < percentTotal) {
-                text.func_230529_a_(CommandUtils.coloredComponent("I", Color.func_240744_a_(TextFormatting.YELLOW)));
+                text.append(CommandUtils.coloredComponent("I", Color.func_240744_a_(TextFormatting.YELLOW)));
             } else {
-                text.func_230529_a_(CommandUtils.coloredComponent("I", Color.func_240744_a_(TextFormatting.GREEN)));
+                text.append(CommandUtils.coloredComponent("I", Color.func_240744_a_(TextFormatting.GREEN)));
             }
         }
         int usedpercent = (int) (percentUsed * 100);
         int allocatedpercent = (int) (percentTotal * 100);
-        text.func_230529_a_(CommandUtils.coloredComponent("] " + usedpercent + " % Used " + allocatedpercent + " % Allocated", Color.func_240744_a_(TextFormatting.WHITE)));
+        text.append(CommandUtils.coloredComponent("] " + usedpercent + " % Used " + allocatedpercent + " % Allocated", Color.func_240744_a_(TextFormatting.WHITE)));
 
         return text;
     }

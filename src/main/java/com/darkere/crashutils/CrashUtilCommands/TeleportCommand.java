@@ -72,7 +72,7 @@ public class TeleportCommand implements Command<CommandSource> {
               pos = new BlockPos(otherPlayer.getPositionVec());
             } else {
                 AtomicReference<BlockPos> offlinePlayerPos = new AtomicReference<>();
-                WorldUtils.applyToPlayer(otherPlayer.getName().getString(),context,fakePlayer->{
+                WorldUtils.applyToPlayer(otherPlayer.getName().getString(),context.getSource().getServer(),fakePlayer->{
                     offlinePlayerPos.set(new BlockPos(fakePlayer.getPositionVec()));
                 });
                 pos = offlinePlayerPos.get();
@@ -83,7 +83,7 @@ public class TeleportCommand implements Command<CommandSource> {
         } else {
             ServerWorld finalDestWorld = destWorld;
             BlockPos finalPos = pos;
-            WorldUtils.applyToPlayer(player.getName().getString(), context, fakePlayer -> {
+            WorldUtils.applyToPlayer(player.getName().getString(), context.getSource().getServer(), fakePlayer -> {
                 fakePlayer.setPosition(finalPos.getX(), finalPos.getY(), finalPos.getZ());
                 fakePlayer.setWorld(finalDestWorld);
             });

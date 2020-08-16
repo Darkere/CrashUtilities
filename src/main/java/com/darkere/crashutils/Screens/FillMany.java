@@ -45,7 +45,7 @@ public class FillMany {
 
     public static void drawStrings(MatrixStack stack, FontRenderer renderer, List<Text> texts) {
         for (Text text : texts) {
-            renderer.drawString(stack,text.text, text.x, text.y, text.color);
+            renderer.drawString(stack, text.text, text.x, text.y, text.color);
         }
     }
 

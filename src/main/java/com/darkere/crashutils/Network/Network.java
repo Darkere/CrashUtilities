@@ -17,13 +17,17 @@ public class Network {
         INSTANCE = NetworkRegistry.newSimpleChannel(CHANNELID, () -> "1", s -> true, s -> true);
 
         INSTANCE.registerMessage(ID++, UpdateDataRequestMessage.class, UpdateDataRequestMessage::encode, UpdateDataRequestMessage::decode, UpdateDataRequestMessage::handle);
-        INSTANCE.registerMessage(ID++, LoadedChunkDataMessage.class, LoadedChunkDataMessage::encode, LoadedChunkDataMessage::decode, LoadedChunkDataMessage::handle);
+        INSTANCE.registerMessage(ID++, LoadedChunkDataStateMessage.class, LoadedChunkDataStateMessage::encode, LoadedChunkDataStateMessage::decode, LoadedChunkDataStateMessage::handle);
         INSTANCE.registerMessage(ID++, TeleportMessage.class, TeleportMessage::encode, TeleportMessage::decode, TeleportMessage::handle);
         INSTANCE.registerMessage(ID++, EntityDataMessage.class, EntityDataMessage::encode, EntityDataMessage::decode, EntityDataMessage::handle);
         INSTANCE.registerMessage(ID++, TileEntityDataMessage.class, TileEntityDataMessage::encode, TileEntityDataMessage::decode, TileEntityDataMessage::handle);
         INSTANCE.registerMessage(ID++, PlayerInventoryRequestMessage.class, PlayerInventoryRequestMessage::encode, PlayerInventoryRequestMessage::decode, PlayerInventoryRequestMessage::handle);
         INSTANCE.registerMessage(ID++, PlayerDataMessage.class, PlayerDataMessage::encode, PlayerDataMessage::decode, PlayerDataMessage::handle);
         INSTANCE.registerMessage(ID++, OpenPlayerInvMessage.class, OpenPlayerInvMessage::encode, OpenPlayerInvMessage::decode, OpenPlayerInvMessage::handle);
+        INSTANCE.registerMessage(ID++, TeleportToPlayerMessage.class, TeleportToPlayerMessage::encode, TeleportToPlayerMessage::decode, TeleportToPlayerMessage::handle);
+        INSTANCE.registerMessage(ID++, LoadedChunkDataTicketsMessage.class, LoadedChunkDataTicketsMessage::encode, LoadedChunkDataTicketsMessage::decode, LoadedChunkDataTicketsMessage::handle);
+        INSTANCE.registerMessage(ID++, RemoveEntitiesMessage.class, RemoveEntitiesMessage::encode, RemoveEntitiesMessage::decode, RemoveEntitiesMessage::handle);
+        INSTANCE.registerMessage(ID++, RemoveEntityMessage.class, RemoveEntityMessage::encode, RemoveEntityMessage::decode, RemoveEntityMessage::handle);
 
     }
 
