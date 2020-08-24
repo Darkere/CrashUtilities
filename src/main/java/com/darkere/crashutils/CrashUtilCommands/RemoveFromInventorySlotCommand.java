@@ -1,8 +1,8 @@
 package com.darkere.crashutils.CrashUtilCommands;
 
+import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.WorldUtils;
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class RemoveFromInventorySlotCommand {
     private static final List<String> invTypes = new ArrayList<>(Arrays.asList("inventory", "armor", "offhand"));
-    private static final SuggestionProvider<CommandSource> sugg = (ctx, builder) -> ISuggestionProvider.suggest(ctx.getSource().getServer().getPlayerProfileCache().gameProfiles.stream().map(GameProfile::getName), builder);
     private static SuggestionProvider<CommandSource> invtype;
 
     public static ArgumentBuilder<CommandSource, ?> register() {
@@ -37,7 +36,7 @@ public class RemoveFromInventorySlotCommand {
         invtype = (ctx, builder) -> ISuggestionProvider.suggest(invTypes.stream(), builder);
         return Commands.literal("removeItemFromInventorySlot")
             .then(Commands.argument("name", StringArgumentType.string())
-                .suggests(sugg)
+                .suggests(CommandUtils.PROFILEPROVIDER)
                 .then(Commands.argument("slotType", StringArgumentType.string())
                     .suggests(invtype)
                     .then(Commands.argument("slot", IntegerArgumentType.integer())

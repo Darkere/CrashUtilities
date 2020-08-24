@@ -3,14 +3,11 @@ package com.darkere.crashutils.CrashUtilCommands;
 import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.WorldUtils;
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.util.text.Color;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.util.LazyOptional;
@@ -18,12 +15,11 @@ import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 
 public class InventoryLookCommand {
-    private static final SuggestionProvider<CommandSource> sugg = (ctx, builder) -> ISuggestionProvider.suggest(ctx.getSource().getServer().getPlayerProfileCache().gameProfiles.stream().map(GameProfile::getName), builder);
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("readInventory")
             .then(Commands.argument("name", StringArgumentType.string())
-                .suggests(sugg)
+                .suggests(CommandUtils.PROFILEPROVIDER)
                 .executes(ctx -> printInventory(ctx, StringArgumentType.getString(ctx, "name"))));
     }
 

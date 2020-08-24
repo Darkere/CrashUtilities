@@ -1,7 +1,6 @@
 package com.darkere.crashutils.DataStructures;
 
 import com.darkere.crashutils.Screens.CUOption;
-import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.server.ServerWorld;
@@ -14,7 +13,7 @@ public class PlayerData {
     List<String> playerNames = new ArrayList<>();
 
     public void createLists(List<ServerWorld> worlds) {
-        playerNames = worlds.get(0).getServer().getPlayerProfileCache().gameProfiles.stream().map(GameProfile::getName).collect(Collectors.toList());
+        playerNames = worlds.get(0).getServer().getPlayerProfileCache().func_242117_a(1000).map(e->e.getGameProfile().getName()).collect(Collectors.toList());
     }
 
     public List<String> getPlayerNames(String requestingPlayer) {

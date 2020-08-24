@@ -10,8 +10,6 @@ import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.GuiScreenEvent;
@@ -49,7 +47,7 @@ public class ClientEvents {
         if (event.getGui() instanceof ContainerScreen) {
             ContainerScreen<?> screen = (ContainerScreen<?>) event.getGui();
             if (screen.getSlotUnderMouse() == null) return;
-            screen.renderTooltip(event.getMatrixStack(), ITextProperties.func_240652_a_("Index: " + screen.getSlotUnderMouse().getSlotIndex()), event.getMouseX(), event.getMouseY());
+            screen.renderTooltip(event.getMatrixStack(), new StringTextComponent("Index: " + screen.getSlotUnderMouse().getSlotIndex()), event.getMouseX(), event.getMouseY());
         }
 
     }
@@ -57,14 +55,13 @@ public class ClientEvents {
     @SubscribeEvent
     public void GUIKeyEvent(GuiScreenEvent.KeyboardKeyPressedEvent.Post event) {
         if (Minecraft.getInstance().player == null || !(event.getGui() instanceof ContainerScreen)) return;
-        //if(event.getPhase() != EventPriority.LOW) return;
-        if (COPYCLASS.matchesKey(event.getKeyCode(),event.getScanCode())) {
+        if (COPYCLASS.isPressed()) {
             if (Minecraft.getInstance().player.openContainer != null) {
                 String toCopy = Minecraft.getInstance().player.openContainer.getClass().getName();
                 Minecraft.getInstance().keyboardListener.setClipboardString(toCopy);
             }
         }
-        if (TOGGLEINDEXES.matchesKey(event.getKeyCode(),event.getScanCode())) {
+        if (TOGGLEINDEXES.isPressed()) {
             CrashUtils.renderslotnumbers = !CrashUtils.renderslotnumbers;
         }
     }
@@ -73,15 +70,15 @@ public class ClientEvents {
     public void keyEvent(InputEvent.KeyInputEvent event) {
         if (Minecraft.getInstance().player == null || Minecraft.getInstance().world == null) return;
         if (event.getAction() != GLFW.GLFW_PRESS) return;
-        if (OPENSCREEN.matchesKey(event.getKey(),event.getScanCode())) {
+        if (OPENSCREEN.isPressed()) {
             RegistryKey<World> worldKey = Minecraft.getInstance().player.getEntityWorld().func_234923_W_();
             if (Minecraft.getInstance().player.hasPermissionLevel(4)) {
                 Minecraft.getInstance().displayGuiScreen(CUScreen.openCUScreen(worldKey, new BlockPos(Minecraft.getInstance().player.getPositionVec())));
             } else {
                 if (!Minecraft.getInstance().isSingleplayer()) {
-                    Minecraft.getInstance().ingameGUI.setOverlayMessage(ITextComponent.func_241827_a_("You need to be OP to use the Crash Utils GUI"), false);
+                    Minecraft.getInstance().ingameGUI.setOverlayMessage(new StringTextComponent("You need to be OP to use the Crash Utils GUI"), false);
                 } else {
-                    Minecraft.getInstance().ingameGUI.setOverlayMessage(ITextComponent.func_241827_a_("Cheats need to be enabled to use the Crash Utils GUI"), false);
+                    Minecraft.getInstance().ingameGUI.setOverlayMessage(new StringTextComponent("Cheats need to be enabled to use the Crash Utils GUI"), false);
                 }
 
             }

@@ -2,7 +2,9 @@ package com.darkere.crashutils;
 
 import com.darkere.crashutils.DataStructures.WorldPos;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.command.CommandSource;
+import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.RegistryKey;
@@ -17,6 +19,8 @@ import org.apache.logging.log4j.Logger;
 
 public class CommandUtils {
     private static final Logger LOGGER = LogManager.getLogger();
+    public static final SuggestionProvider<CommandSource> PROFILEPROVIDER = (ctx, builder) ->
+        ISuggestionProvider.suggest(ctx.getSource().getServer().getPlayerProfileCache().func_242117_a(1000).map(e->e.getGameProfile().getName()), builder);
 
     public static void sendNormalMessage(CommandSource source, String msg, Color color) {
         IFormattableTextComponent text = new StringTextComponent(msg);

@@ -1,16 +1,14 @@
 package com.darkere.crashutils.CrashUtilCommands;
 
+import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.WorldUtils;
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.BlockPosArgument;
 import net.minecraft.command.arguments.DimensionArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -21,7 +19,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class TeleportCommand implements Command<CommandSource> {
     private static final TeleportCommand cmd = new TeleportCommand();
-    private static final SuggestionProvider<CommandSource> sugg = (ctx, builder) -> ISuggestionProvider.suggest(ctx.getSource().getServer().getPlayerProfileCache().gameProfiles.stream().map(GameProfile::getName), builder);
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("tp")
             .then(Commands.argument("player", StringArgumentType.string())
@@ -30,7 +27,7 @@ public class TeleportCommand implements Command<CommandSource> {
                     .then(Commands.argument("dim", DimensionArgument.getDimension())
                         .executes(cmd)))
                 .then(Commands.argument("name", StringArgumentType.string())
-                    .suggests(sugg)
+                    .suggests(CommandUtils.PROFILEPROVIDER)
                         .executes(cmd)));
 
 
