@@ -43,14 +43,14 @@ public class PlayerInventoryRequestMessage {
             PlayerEntity otherPlayer = ctx.get().getSender().getServer().getPlayerList().getPlayerByUsername(data.playerName);
             if (otherPlayer == null) {
                 GameProfile profile = server.getPlayerProfileCache().getGameProfileForUsername(data.playerName);
-                if(profile == null){
-                    player.sendMessage(new StringTextComponent("Cannot find Player"),new UUID(0,0));
+                if (profile == null) {
+                    player.sendMessage(new StringTextComponent("Cannot find Player"), new UUID(0, 0));
                     return;
                 }
-                otherPlayer = new FakePlayer(server.getWorld(World.OVERWORLD),profile);
+                otherPlayer = new FakePlayer(server.getWorld(World.OVERWORLD), profile);
                 CompoundNBT nbt = server.playerDataManager.loadPlayerData(otherPlayer);
-                if(nbt == null){
-                    player.sendMessage(new StringTextComponent("Cannot load playerData"),new UUID(0,0));
+                if (nbt == null) {
+                    player.sendMessage(new StringTextComponent("Cannot load playerData"), new UUID(0, 0));
                     return;
                 }
                 otherPlayer.read(nbt);

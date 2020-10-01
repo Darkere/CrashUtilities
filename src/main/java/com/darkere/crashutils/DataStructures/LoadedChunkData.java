@@ -41,11 +41,11 @@ public class LoadedChunkData {
     }
 
     public LoadedChunkData(List<ServerWorld> worlds) {
-        CrashUtils.runNextTick(()->init(worlds));
+        CrashUtils.runNextTick(() -> init(worlds));
 
     }
 
-    public void init(List<ServerWorld> worlds){
+    public void init(List<ServerWorld> worlds) {
         for (World world : worlds) {
             ChunkManager chunkManager = ((ServerChunkProvider) world.getChunkProvider()).chunkManager;
             TicketManager ticketManager = chunkManager.getTicketManager();
@@ -157,20 +157,20 @@ public class LoadedChunkData {
     }
 
 
-    public List<CUOption> getTicketsAsDropdownOptions(String filter){
+    public List<CUOption> getTicketsAsDropdownOptions(String filter) {
         return getCuDropDownOptions(filter, chunksByTicketName);
     }
 
-    public List<CUOption> getStatesAsDropdownOptions(String filter){
+    public List<CUOption> getStatesAsDropdownOptions(String filter) {
         return getCuDropDownOptions(filter, chunksByLocationType);
     }
 
     private List<CUOption> getCuDropDownOptions(String filter, Map<String, Set<ChunkPos>> chunkMap) {
         List<CUOption> list = new ArrayList<>();
-        if(filter.isEmpty()){
-            chunkMap.forEach((string, set)-> list.add(new CUOption(string,set.size())));
+        if (filter.isEmpty()) {
+            chunkMap.forEach((string, set) -> list.add(new CUOption(string, set.size())));
         } else {
-            chunkMap.get(filter).forEach(chunkPos-> list.add(new CUOption(chunkPos)));
+            chunkMap.get(filter).forEach(chunkPos -> list.add(new CUOption(chunkPos)));
         }
         return list;
     }

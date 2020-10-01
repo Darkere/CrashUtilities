@@ -25,7 +25,7 @@ public enum CUTab {
     }
 
     public void drawTab(MatrixStack stack, AbstractGui gui, int i, int j, CUTab icon, float iconScale) {
-        gui.blit(stack,i, j, x, y, cx, cy);
-        gui.blit(stack,i + 5, j + 6, gui.getBlitOffset(), (float) icon.x / iconScale, (float) icon.y / iconScale, 17, 17, (int) (256f / iconScale), (int) (256f / iconScale));
+        gui.blit(stack, i, j, x, y, cx, cy);
+        gui.blit(stack, i + 5, j + 6, gui.getBlitOffset(), (float) icon.x / iconScale, (float) icon.y / iconScale, 17, 17, (int) (256f / iconScale), (int) (256f / iconScale));
     }
 }

@@ -55,8 +55,8 @@ public class LoadedChunksCommand {
                     break;
                 }
             }
-        }catch (CommandSyntaxException e){
-            context.getSource().sendFeedback(new StringTextComponent("Exception getting player"),true);
+        } catch (CommandSyntaxException e) {
+            context.getSource().sendFeedback(new StringTextComponent("Exception getting player"), true);
         }
 
     }

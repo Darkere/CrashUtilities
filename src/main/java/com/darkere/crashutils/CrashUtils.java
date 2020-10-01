@@ -64,7 +64,7 @@ public class CrashUtils {
 
     }
 
-    public void client(FMLClientSetupEvent event){
+    public void client(FMLClientSetupEvent event) {
         ClientEvents.registerKeybindings();
     }
 
@@ -130,7 +130,7 @@ public class CrashUtils {
 
     }
 
-    public static void runNextTick(Runnable run){
+    public static void runNextTick(Runnable run) {
         runnables.add(run);
     }
 
@@ -146,14 +146,14 @@ public class CrashUtils {
 
         if (sparkLoaded && runHeapDump) {
             runHeapDump = false;
-            event.world.getServer().sendMessage(new StringTextComponent("Running Heapdump. Massive Lagspike incoming!"),null);
+            event.world.getServer().sendMessage(new StringTextComponent("Running Heapdump. Massive Lagspike incoming!"), null);
             event.world.getServer().getCommandManager().handleCommand(event.world.getServer().getCommandSource(), "/spark heapdump");
         }
-        if(intwoTicks){
+        if (intwoTicks) {
             intwoTicks = false;
             return;
         }
-        if(!runnables.isEmpty()){
+        if (!runnables.isEmpty()) {
             runnables.forEach(Runnable::run);
             runnables.clear();
         }

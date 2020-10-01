@@ -63,8 +63,8 @@ public class MapGUI extends CUContentPane {
         });
     }
 
-    public void render(MatrixStack stack, int centerX, int centerY,int mx, int my, float partialTicks) {
-        super.render(stack, centerX, centerY,mx,my,partialTicks);
+    public void render(MatrixStack stack, int centerX, int centerY, int mx, int my, float partialTicks) {
+        super.render(stack, centerX, centerY, mx, my, partialTicks);
         List<FillMany.ColoredRectangle> list = new ArrayList<>();
         for (int i = 0; i < XAcross; i++) {
             for (int j = 0; j < YAcross; j++) {
@@ -114,11 +114,11 @@ public class MapGUI extends CUContentPane {
                 break;
             case ENTITIES:
                 if (DataHolder.getLatestEntityData() == null) return -1;
-                counts = DataHolder.getLatestEntityData().getCountForChunk(new ChunkPos(posX, posY),entityFilter);
+                counts = DataHolder.getLatestEntityData().getCountForChunk(new ChunkPos(posX, posY), entityFilter);
                 break;
             case TILEENTITIES:
                 if (DataHolder.getLatestTileEntityData() == null) return -1;
-                counts = DataHolder.getLatestTileEntityData().getCountForChunk(new ChunkPos(posX, posY),entityFilter);
+                counts = DataHolder.getLatestTileEntityData().getCountForChunk(new ChunkPos(posX, posY), entityFilter);
                 break;
 
         }
@@ -191,13 +191,13 @@ public class MapGUI extends CUContentPane {
     public String getEntityCountFor(int x, int y) {
         ChunkPos pos = getChunkFor(x, y);
         if (DataHolder.getLatestEntityData() == null) return null;
-        return String.valueOf(DataHolder.getLatestEntityData().getCountForChunk(pos,entityFilter));
+        return String.valueOf(DataHolder.getLatestEntityData().getCountForChunk(pos, entityFilter));
     }
 
     public String getTileEntityCountFor(int x, int y) {
         ChunkPos pos = getChunkFor(x, y);
         if (DataHolder.getLatestTileEntityData() == null) return null;
-        return String.valueOf(DataHolder.getLatestTileEntityData().getCountForChunk(pos,entityFilter));
+        return String.valueOf(DataHolder.getLatestTileEntityData().getCountForChunk(pos, entityFilter));
     }
 
     public ChunkPos getChunkFor(int x, int y) {

@@ -45,14 +45,14 @@ public abstract class LocationData {
     public int getCountForChunk(ChunkPos chunkPos, String filter) {
         if (chunkMap == null) return 0;
         fillChunkMaps(filter);
-        if(chunkMap.get(chunkPos) == null) return 0;
+        if (chunkMap.get(chunkPos) == null) return 0;
         return chunkMap.get(chunkPos).size();
     }
 
     public List<CUOption> getAsCUOptions() {
         List<CUOption> list = new ArrayList<>();
-        map.forEach((type, chunks) ->{
-            if(!chunks.isEmpty())list.add(new CUOption(type, chunks.size()));
+        map.forEach((type, chunks) -> {
+            if (!chunks.isEmpty()) list.add(new CUOption(type, chunks.size()));
         });
         return list;
     }
@@ -61,7 +61,7 @@ public abstract class LocationData {
         List<CUOption> list = new ArrayList<>();
         fillChunkMaps(name.toString());
         chunkMap.forEach((chunk, listPos) -> {
-            if(!listPos.isEmpty()) list.add(new CUOption(chunk, listPos.size(),name));
+            if (!listPos.isEmpty()) list.add(new CUOption(chunk, listPos.size(), name));
         });
         return list;
     }
@@ -70,11 +70,11 @@ public abstract class LocationData {
     public List<CUOption> getInChunkAsCUOptions(ChunkPos chunkPos, ResourceLocation name) {
         List<CUOption> list = new ArrayList<>();
         fillChunkMaps(name.toString());
-        chunkMap.get(chunkPos).forEach(pos -> list.add(new CUOption(pos.pos,pos.id)));
+        chunkMap.get(chunkPos).forEach(pos -> list.add(new CUOption(pos.pos, pos.id)));
         return list;
     }
 
-    public void resetChunkMap(){
+    public void resetChunkMap() {
         lastFill = "THISWILLRELOADTHECHUNKMAP";
     }
 }

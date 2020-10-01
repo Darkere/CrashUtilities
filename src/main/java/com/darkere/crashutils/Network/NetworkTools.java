@@ -43,7 +43,7 @@ public class NetworkTools {
     }
 
     public static RegistryKey<World> readWorldKey(PacketBuffer buf) {
-        return RegistryKey.getOrCreateKey(Registry.WORLD_KEY,buf.readResourceLocation());
+        return RegistryKey.getOrCreateKey(Registry.WORLD_KEY, buf.readResourceLocation());
     }
 
     public static void writeWorldPos(WorldPos pos, PacketBuffer buf) {
@@ -53,7 +53,7 @@ public class NetworkTools {
     }
 
     public static WorldPos readWorldPos(PacketBuffer buf) {
-        return new WorldPos(buf.readBlockPos(), readWorldKey(buf),buf.readUniqueId());
+        return new WorldPos(buf.readBlockPos(), readWorldKey(buf), buf.readUniqueId());
     }
 
     public static void writeRLWPMap(Map<ResourceLocation, List<WorldPos>> map, PacketBuffer buf) {
@@ -62,7 +62,7 @@ public class NetworkTools {
             buf.writeResourceLocation(x);
             buf.writeInt(y.size());
             y.forEach(e -> {
-                writeWorldPos(e,buf);
+                writeWorldPos(e, buf);
             });
         });
     }
@@ -82,7 +82,7 @@ public class NetworkTools {
         return map;
     }
 
-    public static boolean returnOnNull(Object... objects){
+    public static boolean returnOnNull(Object... objects) {
         return Arrays.stream(objects).anyMatch(Objects::isNull);
     }
 }

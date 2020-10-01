@@ -27,15 +27,15 @@ public class ClientEvents {
     public static final KeyBinding OPENSCREEN =
         new KeyBinding("Open the Crash Utilities Screen",
             KeyConflictContext.IN_GAME, KeyModifier.CONTROL,
-            InputMappings.Type.KEYSYM, GLFW.GLFW_KEY_U,"Crash Utilities");
+            InputMappings.Type.KEYSYM, GLFW.GLFW_KEY_U, "Crash Utilities");
     public static final KeyBinding COPYCLASS =
         new KeyBinding("Copy the class of the current container to the clipboard",
-            KeyConflictContext.GUI, InputMappings.INPUT_INVALID,"Crash Utilities");
+            KeyConflictContext.GUI, InputMappings.INPUT_INVALID, "Crash Utilities");
     public static final KeyBinding TOGGLEINDEXES =
         new KeyBinding("Show/Hide index of container slots as tooltip",
-            KeyConflictContext.IN_GAME, InputMappings.INPUT_INVALID,"Crash Utilities");
+            KeyConflictContext.IN_GAME, InputMappings.INPUT_INVALID, "Crash Utilities");
 
-    public static void registerKeybindings(){
+    public static void registerKeybindings() {
         ClientRegistry.registerKeyBinding(OPENSCREEN);
         ClientRegistry.registerKeyBinding(COPYCLASS);
         ClientRegistry.registerKeyBinding(TOGGLEINDEXES);

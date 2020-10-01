@@ -20,7 +20,7 @@ public class WorldPos {
     }
 
     public static WorldPos getPosFromEntity(Entity entity) {
-        return new WorldPos(new BlockPos(entity.getPositionVec()), entity.getEntityWorld().getDimensionKey(),entity.getUniqueID());
+        return new WorldPos(new BlockPos(entity.getPositionVec()), entity.getEntityWorld().getDimensionKey(), entity.getUniqueID());
     }
 
     public static WorldPos getPosFromTileEntity(TileEntity entity) {

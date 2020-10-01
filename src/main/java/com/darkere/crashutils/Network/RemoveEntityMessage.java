@@ -16,7 +16,7 @@ public class RemoveEntityMessage {
     boolean tile;
     boolean force;
 
-    public RemoveEntityMessage(RegistryKey<World> worldRegistryKey, UUID id, boolean tile,boolean force) {
+    public RemoveEntityMessage(RegistryKey<World> worldRegistryKey, UUID id, boolean tile, boolean force) {
         this.worldRegistryKey = worldRegistryKey;
         this.id = id;
         this.tile = tile;
@@ -32,7 +32,7 @@ public class RemoveEntityMessage {
 
 
     public static RemoveEntityMessage decode(PacketBuffer buf) {
-        return new RemoveEntityMessage(NetworkTools.readWorldKey(buf), buf.readUniqueId(), buf.readBoolean(),buf.readBoolean());
+        return new RemoveEntityMessage(NetworkTools.readWorldKey(buf), buf.readUniqueId(), buf.readBoolean(), buf.readBoolean());
     }
 
     public static boolean handle(RemoveEntityMessage data, Supplier<NetworkEvent.Context> ctx) {
@@ -40,7 +40,7 @@ public class RemoveEntityMessage {
             ServerPlayerEntity player = ctx.get().getSender();
             if (player == null || !player.hasPermissionLevel(4)) return;
             if (data.tile) {
-                WorldUtils.removeTileEntity(player.getServer().getWorld(data.worldRegistryKey), data.id,data.force);
+                WorldUtils.removeTileEntity(player.getServer().getWorld(data.worldRegistryKey), data.id, data.force);
             } else {
                 WorldUtils.removeEntity(player.getServer().getWorld(data.worldRegistryKey), data.id, data.force);
             }

@@ -50,8 +50,8 @@ public class UpdateDataRequestMessage {
             switch (data.type) {
                 case LOADEDCHUNKDATA: {
                     LoadedChunkData loadedChunkData = new LoadedChunkData(worlds);
-                    CrashUtils.runNextTick(()->Network.sendToPlayer(ctx.get().getSender(), new LoadedChunkDataStateMessage(loadedChunkData.getChunksByLocationType())));
-                    CrashUtils.runNextTick(()->Network.sendToPlayer(ctx.get().getSender(), new LoadedChunkDataTicketsMessage(loadedChunkData.getChunksByTicketName())));
+                    CrashUtils.runNextTick(() -> Network.sendToPlayer(ctx.get().getSender(), new LoadedChunkDataStateMessage(loadedChunkData.getChunksByLocationType())));
+                    CrashUtils.runNextTick(() -> Network.sendToPlayer(ctx.get().getSender(), new LoadedChunkDataTicketsMessage(loadedChunkData.getChunksByTicketName())));
                     break;
                 }
                 case ENTITYDATA: {

@@ -13,7 +13,7 @@ public class PlayerData {
     List<String> playerNames = new ArrayList<>();
 
     public void createLists(List<ServerWorld> worlds) {
-        playerNames = worlds.get(0).getServer().getPlayerProfileCache().func_242117_a(1000).map(e->e.getGameProfile().getName()).collect(Collectors.toList());
+        playerNames = worlds.get(0).getServer().getPlayerProfileCache().func_242117_a(1000).map(e -> e.getGameProfile().getName()).collect(Collectors.toList());
     }
 
     public List<String> getPlayerNames(String requestingPlayer) {

@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class TeleportCommand implements Command<CommandSource> {
     private static final TeleportCommand cmd = new TeleportCommand();
+
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("tp")
             .then(Commands.argument("player", StringArgumentType.string())
@@ -28,7 +29,7 @@ public class TeleportCommand implements Command<CommandSource> {
                         .executes(cmd)))
                 .then(Commands.argument("name", StringArgumentType.string())
                     .suggests(CommandUtils.PROFILEPROVIDER)
-                        .executes(cmd)));
+                    .executes(cmd)));
 
 
     }
@@ -46,30 +47,30 @@ public class TeleportCommand implements Command<CommandSource> {
             //NOOP
         }
         try {
-            otherPlayer = context.getSource().getServer().getPlayerList().getPlayerByUsername(StringArgumentType.getString(context,"name"));
-        }catch (IllegalArgumentException e){
+            otherPlayer = context.getSource().getServer().getPlayerList().getPlayerByUsername(StringArgumentType.getString(context, "name"));
+        } catch (IllegalArgumentException e) {
 
         }
         try {
             pos = BlockPosArgument.getBlockPos(context, "pos");
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
 
         }
         if (destWorld == null) {
             destWorld = playerWorld;
         }
         try {
-            player = context.getSource().getServer().getPlayerList().getPlayerByUsername(StringArgumentType.getString(context,"player"));
-        } catch (IllegalArgumentException e){
+            player = context.getSource().getServer().getPlayerList().getPlayerByUsername(StringArgumentType.getString(context, "player"));
+        } catch (IllegalArgumentException e) {
 
         }
-        if(player == null) return 0;
-        if(pos == null){
-            if(context.getSource().getServer().getPlayerList().getPlayers().contains(otherPlayer)){
-              pos = new BlockPos(otherPlayer.getPositionVec());
+        if (player == null) return 0;
+        if (pos == null) {
+            if (context.getSource().getServer().getPlayerList().getPlayers().contains(otherPlayer)) {
+                pos = new BlockPos(otherPlayer.getPositionVec());
             } else {
                 AtomicReference<BlockPos> offlinePlayerPos = new AtomicReference<>();
-                WorldUtils.applyToPlayer(otherPlayer.getName().getString(),context.getSource().getServer(),fakePlayer->{
+                WorldUtils.applyToPlayer(otherPlayer.getName().getString(), context.getSource().getServer(), fakePlayer -> {
                     offlinePlayerPos.set(new BlockPos(fakePlayer.getPositionVec()));
                 });
                 pos = offlinePlayerPos.get();

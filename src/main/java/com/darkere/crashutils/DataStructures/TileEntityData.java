@@ -12,9 +12,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 
-public class TileEntityData extends LocationData{
+public class TileEntityData extends LocationData {
     Map<ResourceLocation, Boolean> tickmap = new HashMap<>();
-    public static Map<UUID,WorldPos> TEID = new HashMap<>();
+    public static Map<UUID, WorldPos> TEID = new HashMap<>();
     int totalticking = 0;
 
     public TileEntityData() {
@@ -34,8 +34,8 @@ public class TileEntityData extends LocationData{
         worlds.forEach(x -> ticking.addAll(x.tickableTileEntities));
         for (TileEntity tileEntity : tileEntities) {
             WorldPos pos = WorldPos.getPosFromTileEntity(tileEntity);
-            if(pos != null){
-                TEID.put(pos.getID(),pos);
+            if (pos != null) {
+                TEID.put(pos.getID(), pos);
                 map.get(tileEntity.getType().getRegistryName()).add(pos);
             }
         }
@@ -51,7 +51,7 @@ public class TileEntityData extends LocationData{
             map.entrySet().stream().filter(x -> x.getValue().size() != 0).sorted(Comparator.comparingInt(e -> e.getValue().size())).forEach((e) -> {
                 CommandUtils.sendFindTEMessage(source, e.getKey(), e.getValue().size(), tickmap.containsKey(e.getKey()));
             });
-            CommandUtils.sendNormalMessage(source, total + " TE's , " + totalticking + "ticking",  TextFormatting.DARK_AQUA);
+            CommandUtils.sendNormalMessage(source, total + " TE's , " + totalticking + "ticking", TextFormatting.DARK_AQUA);
 
         } else {
             map.get(res).forEach(x -> CommandUtils.sendTEMessage(source, x, true));

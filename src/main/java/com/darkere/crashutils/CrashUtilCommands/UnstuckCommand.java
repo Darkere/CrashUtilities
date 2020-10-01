@@ -35,11 +35,11 @@ public class UnstuckCommand implements Command<CommandSource> {
                 ServerWorld overworld = context.getSource().getServer().getWorld(World.OVERWORLD);
                 BlockPos spawn = overworld.getSpawnPoint();
                 fakePlayer.setWorld(overworld);
-                fakePlayer.setPosition(spawn.getX(),spawn.getY(),spawn.getZ());
+                fakePlayer.setPosition(spawn.getX(), spawn.getY(), spawn.getZ());
             });
         } else {
             BlockPos p = context.getSource().getServer().getWorld(World.OVERWORLD).getSpawnPoint();
-            WorldUtils.teleportPlayer(player,player.getServerWorld(),player.getServer().getWorld(World.OVERWORLD),p);
+            WorldUtils.teleportPlayer(player, player.getServerWorld(), player.getServer().getWorld(World.OVERWORLD), p);
         }
         context.getSource().sendFeedback(new StringTextComponent("Sent Player " + name + " to Spawn"), true);
         return 0;

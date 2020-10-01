@@ -40,6 +40,7 @@ public class PlayerInvScreen extends ContainerScreen<PlayerInvContainer> {
         curioLeft = 110;
 
     }
+
     @Override
     protected void drawGuiContainerForegroundLayer(MatrixStack p_230451_1_, int p_230451_2_, int p_230451_3_) {
 
@@ -47,7 +48,7 @@ public class PlayerInvScreen extends ContainerScreen<PlayerInvContainer> {
 
     @Override //drawGuiContainerBackgroundLayer
     protected void drawGuiContainerBackgroundLayer(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
-        renderTooltip(stack ,new StringTextComponent( mouseX + " " + mouseY), mouseX, mouseY);
+        renderTooltip(stack, new StringTextComponent(mouseX + " " + mouseY), mouseX, mouseY);
         Minecraft.getInstance().textureManager.bindTexture(texture);
         blit(stack, centerX - doubleinv.width / 2, centerY - doubleinv.height / 2, doubleinv.x, doubleinv.y, doubleinv.width, doubleinv.height);
         if (CrashUtils.curiosLoaded) {
@@ -80,7 +81,7 @@ public class PlayerInvScreen extends ContainerScreen<PlayerInvContainer> {
         } else {
             int dist = leftSlot.width + ((numberOfSlots - 2) * (middleSlot.width));
             blit(stack, x, y, leftSlot.x, leftSlot.y, leftSlot.width, leftSlot.height);
-            blit(stack,x + dist, y, rightSlot.x, rightSlot.y, rightSlot.width, rightSlot.height);
+            blit(stack, x + dist, y, rightSlot.x, rightSlot.y, rightSlot.width, rightSlot.height);
             for (int i = 0; i < numberOfSlots - 2; i++) {
                 int dist2 = leftSlot.width + i * (middleSlot.width);
                 blit(stack, x + dist2, y, middleSlot.x, middleSlot.y, middleSlot.width, middleSlot.height);

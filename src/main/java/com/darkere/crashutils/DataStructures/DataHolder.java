@@ -34,25 +34,26 @@ public class DataHolder {
     }
 
     //----------------------------------------------------------------------------------------------------------------
-    public static void addStateData(Map<String, Set<ChunkPos>> data){
-        if(ticketData == null){
+    public static void addStateData(Map<String, Set<ChunkPos>> data) {
+        if (ticketData == null) {
             stateData = data;
         } else {
-            addLoadedChunkData(new LoadedChunkData(ticketData,data));
+            addLoadedChunkData(new LoadedChunkData(ticketData, data));
             ticketData = null;
             stateData = null;
         }
     }
 
-    public static void addTicketData(Map<String, Set<ChunkPos>> data){
-        if(stateData == null){
+    public static void addTicketData(Map<String, Set<ChunkPos>> data) {
+        if (stateData == null) {
             ticketData = data;
         } else {
-            addLoadedChunkData(new LoadedChunkData(data,stateData));
+            addLoadedChunkData(new LoadedChunkData(data, stateData));
             ticketData = null;
             stateData = null;
         }
     }
+
     public static void addLoadedChunkData(LoadedChunkData data) {
         if (LOADED_CHUNK_DATA_HOLDER.size() > 3) {
             LOADED_CHUNK_DATA_HOLDER.removeLast();
@@ -103,7 +104,7 @@ public class DataHolder {
         return null;
     }
 
-    public static void requestImmediateUpdate(RegistryKey<World> dim){
+    public static void requestImmediateUpdate(RegistryKey<World> dim) {
         Network.INSTANCE.sendToServer(new UpdateDataRequestMessage(currentDataType, dim));
     }
 
@@ -131,7 +132,7 @@ public class DataHolder {
     }
 
     public static void notifyListener() {
-        if(listener != null){
+        if (listener != null) {
             listener.run();
         }
     }
@@ -145,7 +146,7 @@ public class DataHolder {
     }
 
     public static void resetFilters() {
-        if(getLatestEntityData() != null) getLatestEntityData().resetChunkMap();
-        if(getLatestTileEntityData() != null) getLatestTileEntityData().resetChunkMap();
+        if (getLatestEntityData() != null) getLatestEntityData().resetChunkMap();
+        if (getLatestTileEntityData() != null) getLatestTileEntityData().resetChunkMap();
     }
 }

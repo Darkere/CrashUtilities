@@ -50,7 +50,7 @@ public class RemoveEntitiesMessage {
         if (buf.readBoolean()) {
             pos = new ChunkPos(buf.readLong());
         }
-        return new RemoveEntitiesMessage(world, rl, pos, tile,force);
+        return new RemoveEntitiesMessage(world, rl, pos, tile, force);
     }
 
     public static boolean handle(RemoveEntitiesMessage data, Supplier<NetworkEvent.Context> ctx) {
@@ -59,16 +59,16 @@ public class RemoveEntitiesMessage {
             if (player == null || !player.hasPermissionLevel(4)) return;
             World world = player.getServer().getWorld(data.worldRegistryKey);
             if (data.pos == null) {
-                if(data.tile){
-                    WorldUtils.removeTileEntityType(world,data.rl,data.force);
-                } else{
-                    WorldUtils.removeEntityType(world, data.rl,data.force);
+                if (data.tile) {
+                    WorldUtils.removeTileEntityType(world, data.rl, data.force);
+                } else {
+                    WorldUtils.removeEntityType(world, data.rl, data.force);
                 }
             } else {
-                if(data.tile){
-                    WorldUtils.removeTileEntitiesInChunk(world,data.pos,data.rl,data.force);
+                if (data.tile) {
+                    WorldUtils.removeTileEntitiesInChunk(world, data.pos, data.rl, data.force);
                 } else {
-                    WorldUtils.removeEntitiesInChunk(world, data.pos, data.rl,data.force);
+                    WorldUtils.removeEntitiesInChunk(world, data.pos, data.rl, data.force);
                 }
             }
         });

@@ -17,8 +17,8 @@ public class LoadedChunkDataStateMessage {
     }
 
     public static void encode(LoadedChunkDataStateMessage data, PacketBuffer buf) {
-        if(NetworkTools.returnOnNull(data.loadedChunkStateData))return;
-        NetworkTools.writeSChPMap(buf,data.loadedChunkStateData);
+        if (NetworkTools.returnOnNull(data.loadedChunkStateData)) return;
+        NetworkTools.writeSChPMap(buf, data.loadedChunkStateData);
     }
 
     public static LoadedChunkDataStateMessage decode(PacketBuffer buf) {

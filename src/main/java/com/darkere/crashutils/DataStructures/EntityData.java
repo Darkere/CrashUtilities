@@ -52,7 +52,7 @@ public class EntityData extends LocationData {
 
     private void sendEntityChunkMapCommand(CommandSource source, ResourceLocation res) {
         fillChunkMaps(res.toString());
-        CommandUtils.sendNormalMessage(source, res.toString(),TextFormatting.DARK_BLUE);
+        CommandUtils.sendNormalMessage(source, res.toString(), TextFormatting.DARK_BLUE);
         chunkMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.comparingInt(List::size))).forEach((k) -> CommandUtils.sendChunkEntityMessage(source, k.getValue().size(), tpPos.get(k.getKey()).pos, tpPos.get(k.getKey()).type, true));
     }
 }

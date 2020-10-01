@@ -23,7 +23,7 @@ import org.apache.logging.log4j.Logger;
 public class CommandUtils {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final SuggestionProvider<CommandSource> PROFILEPROVIDER = (ctx, builder) ->
-        ISuggestionProvider.suggest(ctx.getSource().getServer().getPlayerProfileCache().func_242117_a(1000).map(e->e.getGameProfile().getName()), builder);
+        ISuggestionProvider.suggest(ctx.getSource().getServer().getPlayerProfileCache().func_242117_a(1000).map(e -> e.getGameProfile().getName()), builder);
 
     public static void sendNormalMessage(CommandSource source, String msg, TextFormatting color) {
         IFormattableTextComponent text = new StringTextComponent(msg);

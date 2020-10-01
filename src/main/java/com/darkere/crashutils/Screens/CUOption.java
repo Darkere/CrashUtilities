@@ -46,7 +46,7 @@ public class CUOption {
     public CUOption(ChunkPos chunkPos, int number, ResourceLocation rl) {
         this.chunkPos = chunkPos;
         this.number = number;
-        this.rl =rl;
+        this.rl = rl;
     }
 
     public CUOption(ResourceLocation rl) {

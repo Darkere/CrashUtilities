@@ -61,7 +61,7 @@ public class ClearItemTask extends TimerTask {
                             list.forEach(Entity::remove);
                             world.getServer().sendMessage(new StringTextComponent(size + " Items cleared"), Util.DUMMY_UUID);
                         } else {
-                            world.getServer().sendMessage(new StringTextComponent("Item Clear prevented. Only " + size + " items on the ground"),Util.DUMMY_UUID);
+                            world.getServer().sendMessage(new StringTextComponent("Item Clear prevented. Only " + size + " items on the ground"), Util.DUMMY_UUID);
                         }
 
                     }
@@ -73,7 +73,7 @@ public class ClearItemTask extends TimerTask {
             new java.util.Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    world.getServer().sendMessage(message,Util.DUMMY_UUID);
+                    world.getServer().sendMessage(message, Util.DUMMY_UUID);
                 }
             }, (last - integer) * 1000);
 

@@ -51,7 +51,7 @@ public abstract class CUContentPane extends AbstractGui {
         return (mx >= XTopLeft && mx <= XTopLeft + XAcross && my >= YTopLeft && my <= YTopLeft + YAcross);
     }
 
-    public void render(MatrixStack stack, int centerX, int centerY,int mx, int my, float partialTicks) {
+    public void render(MatrixStack stack, int centerX, int centerY, int mx, int my, float partialTicks) {
         updateRenderValues(centerX, centerY);
         fill(stack, XTopLeft, YTopLeft, XAcross + XTopLeft, YAcross + YTopLeft, 0xFF000000);
     }
