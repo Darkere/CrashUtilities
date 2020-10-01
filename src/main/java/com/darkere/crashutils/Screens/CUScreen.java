@@ -53,7 +53,7 @@ public class CUScreen extends Screen {
         centerY = height / 2;
         centerX = width / 2;
         if(!keep){
-            contentGUI = new GridChunkGUI(this, dim, initial);
+            contentGUI = new MapGUI(this, dim, initial);
             DataHolder.setRequestType(DataRequestType.LOADEDCHUNKDATA);
             button = new ExtendedButton(centerX + 174, centerY - 103, 20, 10, new StringTextComponent(String.valueOf(contentGUI.updateSpeed)),
                 (x) -> {
@@ -95,8 +95,8 @@ public class CUScreen extends Screen {
         IFormattableTextComponent tooltips = new StringTextComponent("");
         //tooltips.add(mx+ " " + my);
         if (contentGUI.isMouseOver(mx, my, centerX, centerY)) {
-            if (contentGUI instanceof GridChunkGUI) {
-                GridChunkGUI gui = (GridChunkGUI) contentGUI;
+            if (contentGUI instanceof MapGUI) {
+                MapGUI gui = (MapGUI) contentGUI;
                 ChunkPos chunkPos = gui.getChunkFor(mx, my);
                 tooltips.append(new StringTextComponent("Chunk: X: " + chunkPos.x + " Z: " + chunkPos.z + "\n"));
                 String loc = gui.getLocFor(mx, my);
@@ -220,8 +220,8 @@ public class CUScreen extends Screen {
             if (contentGUI.isMouseOver(mx, my, centerX, centerY)) {
                 if (Math.sqrt(((oldClickX - mx) * (oldClickX - mx)) + ((OldClickY - my) * (OldClickY - my))) > 5)
                     return super.mouseClicked(mx, my, mouseButton);
-                if (contentGUI instanceof GridChunkGUI) {
-                    GridChunkGUI gui = (GridChunkGUI) contentGUI;
+                if (contentGUI instanceof MapGUI) {
+                    MapGUI gui = (MapGUI) contentGUI;
                     BlockPos pos = gui.getChunkFor((int) mx, (int) my).asBlockPos();
                     Network.INSTANCE.sendToServer(new TeleportMessage(dim, dim, pos));
                     return true;
@@ -250,7 +250,7 @@ public class CUScreen extends Screen {
         topDropDowns.clear();
         switch (activeTab) {
             case 0:
-                contentGUI = new GridChunkGUI(this, dim, initial);
+                contentGUI = new MapGUI(this, dim, initial);
                 keep = false;
                 break;
             case 1:

@@ -143,4 +143,9 @@ public class DataHolder {
     public static void setRequestType(DataRequestType type) {
         currentDataType = type;
     }
+
+    public static void resetFilters() {
+        if(getLatestEntityData() != null) getLatestEntityData().resetChunkMap();
+        if(getLatestTileEntityData() != null) getLatestTileEntityData().resetChunkMap();
+    }
 }

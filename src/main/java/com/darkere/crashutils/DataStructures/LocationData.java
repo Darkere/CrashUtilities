@@ -40,12 +40,12 @@ public abstract class LocationData {
             chunkMap.get(chunkPos).add(pos);
             tpPos.put(chunkPos, pos);
         }
-
     }
 
     public int getCountForChunk(ChunkPos chunkPos, String filter) {
         if (chunkMap == null) return 0;
         fillChunkMaps(filter);
+        if(chunkMap.get(chunkPos) == null) return 0;
         return chunkMap.get(chunkPos).size();
     }
 
@@ -72,5 +72,9 @@ public abstract class LocationData {
         fillChunkMaps(name.toString());
         chunkMap.get(chunkPos).forEach(pos -> list.add(new CUOption(pos.pos,pos.id)));
         return list;
+    }
+
+    public void resetChunkMap(){
+        lastFill = "THISWILLRELOADTHECHUNKMAP";
     }
 }

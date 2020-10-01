@@ -198,7 +198,7 @@ public class CUDropDown extends AbstractGui {
                         if (!selected.isEmpty()) {
                             options.add(selected);
                         }
-                        selected = options.get(se - 1);
+                        selected = options.get(se - 1 + currentOffset);
                         widget.setText(selected);
                         options.remove(selected);
                         parent.updateSelection(type, selected);

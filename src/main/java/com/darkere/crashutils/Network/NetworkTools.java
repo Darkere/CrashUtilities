@@ -38,12 +38,12 @@ public class NetworkTools {
     }
 
     public static void writeWorldKey(RegistryKey<World> worldKey, PacketBuffer buf) {
-        ResourceLocation loc = worldKey.func_240901_a_();
+        ResourceLocation loc = worldKey.getLocation();
         buf.writeResourceLocation(loc);
     }
 
     public static RegistryKey<World> readWorldKey(PacketBuffer buf) {
-        return RegistryKey.func_240903_a_(Registry.WORLD_KEY,buf.readResourceLocation());
+        return RegistryKey.getOrCreateKey(Registry.WORLD_KEY,buf.readResourceLocation());
     }
 
     public static void writeWorldPos(WorldPos pos, PacketBuffer buf) {

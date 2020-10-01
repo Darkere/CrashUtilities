@@ -4,8 +4,8 @@ import com.darkere.crashutils.CommandUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.Color;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
 public class EntityData extends LocationData {
 
     public EntityData() {
-        for (Map.Entry<ResourceLocation, EntityType<?>> entry : ForgeRegistries.ENTITIES.getEntries()) {
-            map.put(entry.getKey(), new ArrayList<>());
+        for (Map.Entry<RegistryKey<EntityType<?>>, EntityType<?>> entry : ForgeRegistries.ENTITIES.getEntries()) {
+            map.put(entry.getKey().getLocation(), new ArrayList<>());
         }
     }
 
@@ -42,7 +42,7 @@ public class EntityData extends LocationData {
             map.entrySet().stream().filter(x -> x.getValue().size() != 0).sorted(Comparator.comparingInt(e -> e.getValue().size())).forEach((e) -> {
                 CommandUtils.sendFindEMessage(source, e.getKey(), e.getValue().size());
             });
-            CommandUtils.sendNormalMessage(source, total + " Entities", Color.func_240744_a_(TextFormatting.DARK_AQUA));
+            CommandUtils.sendNormalMessage(source, total + " Entities", TextFormatting.DARK_AQUA);
 
         } else {
             sendEntityChunkMapCommand(source, res);
@@ -52,7 +52,7 @@ public class EntityData extends LocationData {
 
     private void sendEntityChunkMapCommand(CommandSource source, ResourceLocation res) {
         fillChunkMaps(res.toString());
-        CommandUtils.sendNormalMessage(source, res.toString(), Color.func_240744_a_(TextFormatting.DARK_BLUE));
+        CommandUtils.sendNormalMessage(source, res.toString(),TextFormatting.DARK_BLUE);
         chunkMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.comparingInt(List::size))).forEach((k) -> CommandUtils.sendChunkEntityMessage(source, k.getValue().size(), tpPos.get(k.getKey()).pos, tpPos.get(k.getKey()).type, true));
     }
 }

@@ -4,8 +4,8 @@ import com.darkere.crashutils.CommandUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.Color;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -18,8 +18,8 @@ public class TileEntityData extends LocationData{
     int totalticking = 0;
 
     public TileEntityData() {
-        for (Map.Entry<ResourceLocation, TileEntityType<?>> entry : ForgeRegistries.TILE_ENTITIES.getEntries()) {
-            map.put(entry.getKey(), new ArrayList<>());
+        for (Map.Entry<RegistryKey<TileEntityType<?>>, TileEntityType<?>> entry : ForgeRegistries.TILE_ENTITIES.getEntries()) {
+            map.put(entry.getKey().getLocation(), new ArrayList<>());
         }
     }
 
@@ -51,7 +51,7 @@ public class TileEntityData extends LocationData{
             map.entrySet().stream().filter(x -> x.getValue().size() != 0).sorted(Comparator.comparingInt(e -> e.getValue().size())).forEach((e) -> {
                 CommandUtils.sendFindTEMessage(source, e.getKey(), e.getValue().size(), tickmap.containsKey(e.getKey()));
             });
-            CommandUtils.sendNormalMessage(source, total + " TE's , " + totalticking + "ticking", Color.func_240744_a_( TextFormatting.DARK_AQUA));
+            CommandUtils.sendNormalMessage(source, total + " TE's , " + totalticking + "ticking",  TextFormatting.DARK_AQUA);
 
         } else {
             map.get(res).forEach(x -> CommandUtils.sendTEMessage(source, x, true));

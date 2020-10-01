@@ -34,7 +34,7 @@ public class ActivityCommand {
     }
 
     private static int listActivityByDate(CommandContext<CommandSource> context, String time) {
-        PlayerActivityHistory history = new PlayerActivityHistory(context.getSource().getServer().getWorld(World.field_234918_g_));
+        PlayerActivityHistory history = new PlayerActivityHistory(context.getSource().getServer().getWorld(World.OVERWORLD));
         context.getSource().sendFeedback(new StringTextComponent("Active Players in the last " + time), false);
         StringBuilder b = new StringBuilder();
         switch (time) {

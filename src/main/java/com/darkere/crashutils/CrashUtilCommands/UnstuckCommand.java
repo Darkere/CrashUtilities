@@ -32,14 +32,14 @@ public class UnstuckCommand implements Command<CommandSource> {
         ServerPlayerEntity player = context.getSource().getServer().getPlayerList().getPlayerByUsername(name);
         if (player == null) {
             WorldUtils.applyToPlayer(name, context.getSource().getServer(), (fakePlayer) -> {
-                ServerWorld overworld = context.getSource().getServer().getWorld(World.field_234918_g_);
-                BlockPos spawn = overworld.func_241135_u_();
+                ServerWorld overworld = context.getSource().getServer().getWorld(World.OVERWORLD);
+                BlockPos spawn = overworld.getSpawnPoint();
                 fakePlayer.setWorld(overworld);
                 fakePlayer.setPosition(spawn.getX(),spawn.getY(),spawn.getZ());
             });
         } else {
-            BlockPos p = context.getSource().getServer().getWorld(World.field_234918_g_).func_241135_u_();
-            WorldUtils.teleportPlayer(player,player.getServerWorld(),player.getServer().getWorld(World.field_234918_g_),p);
+            BlockPos p = context.getSource().getServer().getWorld(World.OVERWORLD).getSpawnPoint();
+            WorldUtils.teleportPlayer(player,player.getServerWorld(),player.getServer().getWorld(World.OVERWORLD),p);
         }
         context.getSource().sendFeedback(new StringTextComponent("Sent Player " + name + " to Spawn"), true);
         return 0;

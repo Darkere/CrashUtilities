@@ -71,7 +71,7 @@ public class ClientEvents {
         if (Minecraft.getInstance().player == null || Minecraft.getInstance().world == null) return;
         if (event.getAction() != GLFW.GLFW_PRESS) return;
         if (OPENSCREEN.isPressed()) {
-            RegistryKey<World> worldKey = Minecraft.getInstance().player.getEntityWorld().func_234923_W_();
+            RegistryKey<World> worldKey = Minecraft.getInstance().player.getEntityWorld().getDimensionKey();
             if (Minecraft.getInstance().player.hasPermissionLevel(4)) {
                 Minecraft.getInstance().displayGuiScreen(CUScreen.openCUScreen(worldKey, new BlockPos(Minecraft.getInstance().player.getPositionVec())));
             } else {

@@ -47,12 +47,12 @@ public class RemoveEntitiesCommand {
     private static int removeEntities(CommandContext<CommandSource> context, ResourceLocation type) {
         counter = 0;
         List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
-        worlds.forEach(world -> world.getEntities().filter(x -> {
+        worlds.forEach(world -> world.getEntities().filter(entity -> {
             if (type == null) {
-                return !x.hasCustomName();
+                return !entity.hasCustomName();
             } else {
-                if (x.getType().getRegistryName() != null) {
-                    return x.getType().getRegistryName().equals(type);
+                if (entity.getType().getRegistryName() != null) {
+                    return entity.getType().getRegistryName().equals(type);
                 }
             }
             return false;

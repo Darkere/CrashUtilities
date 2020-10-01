@@ -51,7 +51,7 @@ public class WorldUtils {
 
     public static void teleportPlayer(PlayerEntity player, World startWorld, World destWorld, BlockPos newPos) {
         if (player.world.isRemote) {
-            Network.sendToServer(new TeleportMessage(startWorld.func_234923_W_(), destWorld.func_234923_W_(), newPos));
+            Network.sendToServer(new TeleportMessage(startWorld.getDimensionKey(), destWorld.getDimensionKey(), newPos));
         }
         if (newPos.getY() == 0) {
             IChunk chunk = destWorld.getChunkAt(newPos);
@@ -80,13 +80,13 @@ public class WorldUtils {
             if (profile == null) {
                 return;
             }
-            FakePlayer fakePlayer = new FakePlayer(server.getWorld(World.field_234918_g_), profile);
-            CompoundNBT nbt = server.playerDataManager.func_237336_b_(fakePlayer);
+
+            FakePlayer fakePlayer = new FakePlayer(server.getWorld(World.OVERWORLD), profile);
+            CompoundNBT nbt = server.playerDataManager.loadPlayerData(fakePlayer);
             if (nbt == null) return;
             fakePlayer.read(nbt);
             consumer.accept(fakePlayer);
-            server.playerDataManager.func_237335_a_(fakePlayer);
-
+            server.playerDataManager.savePlayerData(fakePlayer);
 
         } else {
             consumer.accept(player);
@@ -102,7 +102,7 @@ public class WorldUtils {
     public static void removeEntity(World world, UUID id, boolean force) {
         if(NetworkTools.returnOnNull(world,id))return;
         if (world.isRemote) {
-            Network.sendToServer(new RemoveEntityMessage(world.func_234923_W_(), id, false, force));
+            Network.sendToServer(new RemoveEntityMessage(world.getDimensionKey(), id, false, force));
             return;
         }
         Entity e = ((ServerWorld) world).getEntityByUuid(id);
@@ -117,7 +117,7 @@ public class WorldUtils {
     public static void removeEntityType(World world, ResourceLocation rl, boolean force) {
         if(NetworkTools.returnOnNull(world,rl))return;
         if (world.isRemote) {
-            Network.sendToServer(new RemoveEntitiesMessage(world.func_234923_W_(), rl, null, false, force));
+            Network.sendToServer(new RemoveEntitiesMessage(world.getDimensionKey(), rl, null, false, force));
             return;
         }
         ((ServerWorld) world).getEntities().filter(entity -> Objects.equals(entity.getType().getRegistryName(), rl)).forEach(e -> {
@@ -132,7 +132,7 @@ public class WorldUtils {
     public static void removeEntitiesInChunk(World world, ChunkPos pos, ResourceLocation rl, boolean force) {
         if(NetworkTools.returnOnNull(world,pos,rl))return;
         if (world.isRemote) {
-            Network.sendToServer(new RemoveEntitiesMessage(world.func_234923_W_(), rl, pos, false, force));
+            Network.sendToServer(new RemoveEntitiesMessage(world.getDimensionKey(), rl, pos, false, force));
             return;
         }
         Vector3d start = new Vector3d(pos.getXStart(), 0, pos.getZStart());
@@ -149,7 +149,7 @@ public class WorldUtils {
     public static void removeTileEntity(World world, UUID id, boolean force) {
         if(NetworkTools.returnOnNull(world,id))return;
         if (world.isRemote) {
-            Network.sendToServer(new RemoveEntityMessage(world.func_234923_W_(), id, true, force));
+            Network.sendToServer(new RemoveEntityMessage(world.getDimensionKey(), id, true, force));
             return;
         }
         if(force){
@@ -163,7 +163,7 @@ public class WorldUtils {
     public static void removeTileEntityType(World world, ResourceLocation rl, boolean force) {
         if(NetworkTools.returnOnNull(world,rl))return;
         if (world.isRemote) {
-            Network.sendToServer(new RemoveEntitiesMessage(world.func_234923_W_(), rl, null, true,force));
+            Network.sendToServer(new RemoveEntitiesMessage(world.getDimensionKey(), rl, null, true,force));
             return;
         }
         world.loadedTileEntityList.stream().filter(te-> Objects.equals(te.getType().getRegistryName(), rl)).forEach(te->{
@@ -179,7 +179,7 @@ public class WorldUtils {
     public static void removeTileEntitiesInChunk(World world, ChunkPos pos, ResourceLocation rl, boolean force) {
         if(NetworkTools.returnOnNull(world,pos,rl))return;
         if (world.isRemote) {
-            Network.sendToServer(new RemoveEntitiesMessage(world.func_234923_W_(), rl, pos, true,force));
+            Network.sendToServer(new RemoveEntitiesMessage(world.getDimensionKey(), rl, pos, true,force));
             return;
         }
         Vector3d start = new Vector3d(pos.getXStart(), 0, pos.getZStart());

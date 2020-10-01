@@ -5,7 +5,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.Util;
-import net.minecraft.util.text.*;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.server.ServerWorld;
 
 import java.util.Comparator;
@@ -67,7 +69,7 @@ public class ClearItemTask extends TimerTask {
 
             }
             String intText = text.replaceFirst("%", integer.toString());
-            ITextComponent message = new StringTextComponent("[=== ").append(new StringTextComponent(intText).setStyle(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.RED)))).append(new StringTextComponent(" ===]"));
+            ITextComponent message = new StringTextComponent("[=== ").append(new StringTextComponent(intText).mergeStyle(TextFormatting.RED)).append(new StringTextComponent(" ===]"));
             new java.util.Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {

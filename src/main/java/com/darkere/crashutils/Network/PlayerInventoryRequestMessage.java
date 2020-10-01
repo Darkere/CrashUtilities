@@ -47,8 +47,8 @@ public class PlayerInventoryRequestMessage {
                     player.sendMessage(new StringTextComponent("Cannot find Player"),new UUID(0,0));
                     return;
                 }
-                otherPlayer = new FakePlayer(server.getWorld(World.field_234918_g_),profile);
-                CompoundNBT nbt = server.playerDataManager.func_237336_b_(otherPlayer);
+                otherPlayer = new FakePlayer(server.getWorld(World.OVERWORLD),profile);
+                CompoundNBT nbt = server.playerDataManager.loadPlayerData(otherPlayer);
                 if(nbt == null){
                     player.sendMessage(new StringTextComponent("Cannot load playerData"),new UUID(0,0));
                     return;

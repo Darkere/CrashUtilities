@@ -9,7 +9,10 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.util.text.*;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.List;
 
@@ -47,16 +50,16 @@ public class MemoryCommand {
 
         for (double i = 0.1D; i <= 1; i += 0.1D) {
             if (i < percentUsed) {
-                text.append(CommandUtils.coloredComponent("I", Color.func_240744_a_(TextFormatting.RED)));
+                text.append(CommandUtils.coloredComponent("I", TextFormatting.RED));
             } else if (i < percentTotal) {
-                text.append(CommandUtils.coloredComponent("I", Color.func_240744_a_(TextFormatting.YELLOW)));
+                text.append(CommandUtils.coloredComponent("I", TextFormatting.YELLOW));
             } else {
-                text.append(CommandUtils.coloredComponent("I", Color.func_240744_a_(TextFormatting.GREEN)));
+                text.append(CommandUtils.coloredComponent("I", TextFormatting.GREEN));
             }
         }
         int usedpercent = (int) (percentUsed * 100);
         int allocatedpercent = (int) (percentTotal * 100);
-        text.append(CommandUtils.coloredComponent("] " + usedpercent + " % Used " + allocatedpercent + " % Allocated", Color.func_240744_a_(TextFormatting.WHITE)));
+        text.append(CommandUtils.coloredComponent("] " + usedpercent + " % Used " + allocatedpercent + " % Allocated", TextFormatting.WHITE));
 
         return text;
     }

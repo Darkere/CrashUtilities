@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class GridChunkGUI extends CUContentPane {
+public class MapGUI extends CUContentPane {
     int XOffset = -50;
     int YOffset = -50;
     Map<String, Integer> colormap = new HashMap<>();
@@ -32,7 +32,7 @@ public class GridChunkGUI extends CUContentPane {
     long blinkTime = 0;
     private String entityFilter;
 
-    GridChunkGUI(CUScreen screen, RegistryKey<World> dim, BlockPos initial) {
+    MapGUI(CUScreen screen, RegistryKey<World> dim, BlockPos initial) {
         super(dim, screen);
         goTo(initial);
         DataHolder.setRequestType(DataRequestType.LOADEDCHUNKDATA);
@@ -59,6 +59,7 @@ public class GridChunkGUI extends CUContentPane {
             TICKETS.updateOptions(DataHolder.getLatestChunkData() == null ? new ArrayList<>() : new ArrayList<>(DataHolder.getLatestChunkData().getChunksByTicketName().keySet()));
             ENTITIES.updateOptions(DataHolder.getLatestEntityData() == null ? new ArrayList<>() : DataHolder.getLatestEntityData().getMap().keySet().stream().map(ResourceLocation::toString).collect(Collectors.toList()));
             TILEENTITIES.updateOptions(DataHolder.getLatestTileEntityData() == null ? new ArrayList<>() : DataHolder.getLatestTileEntityData().getMap().keySet().stream().map(ResourceLocation::toString).collect(Collectors.toList()));
+            DataHolder.resetFilters();
         });
     }
 
@@ -239,6 +240,7 @@ public class GridChunkGUI extends CUContentPane {
                 if (type == null) return;
                 setRenderType(type);
                 setRenderFilter(null);
+                DataHolder.resetFilters();
                 entityFilter = "";
                 screen.topDropDowns.forEach(x -> x.setEnabled(false));
                 RENDERTYPES.setEnabled(true);

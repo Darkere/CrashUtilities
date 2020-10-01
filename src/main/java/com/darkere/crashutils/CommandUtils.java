@@ -10,7 +10,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.*;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.World;
@@ -22,11 +25,11 @@ public class CommandUtils {
     public static final SuggestionProvider<CommandSource> PROFILEPROVIDER = (ctx, builder) ->
         ISuggestionProvider.suggest(ctx.getSource().getServer().getPlayerProfileCache().func_242117_a(1000).map(e->e.getGameProfile().getName()), builder);
 
-    public static void sendNormalMessage(CommandSource source, String msg, Color color) {
+    public static void sendNormalMessage(CommandSource source, String msg, TextFormatting color) {
         IFormattableTextComponent text = new StringTextComponent(msg);
         Style style = Style.EMPTY;
-        style.setColor(color);
         text = text.setStyle(style);
+        text.mergeStyle(color);
         source.sendFeedback(text, true);
     }
 
@@ -47,37 +50,37 @@ public class CommandUtils {
     public static void sendTEMessage(CommandSource source, WorldPos worldPos, boolean runDirectly) {
         BlockPos pos = worldPos.pos;
         String position = " - " + "[" + pos.getX() + "," + pos.getY() + "," + pos.getZ() + "]";
-        IFormattableTextComponent text = new StringTextComponent(position).setStyle(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.GREEN)));
+        IFormattableTextComponent text = new StringTextComponent(position).mergeStyle(TextFormatting.GREEN);
         ServerPlayerEntity player = null;
         try {
             player = source.asPlayer();
         } catch (CommandSyntaxException e) {
             e.printStackTrace();
         }
-        sendCommandMessage(source, text, "/cu tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + worldPos.type.func_240901_a_(), runDirectly);
+        sendCommandMessage(source, text, "/cu tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + worldPos.type.getLocation(), runDirectly);
     }
 
     public static void sendFindTEMessage(CommandSource source, ResourceLocation res, int count, boolean ticking) {
-        IFormattableTextComponent text = new StringTextComponent(res.toString()).setStyle(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.AQUA)));
-        text.append(new StringTextComponent(" Count ").setStyle(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.DARK_RED))));
-        text.append(new StringTextComponent(Integer.toString(count)).setStyle(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.GREEN))));
+        IFormattableTextComponent text = new StringTextComponent(res.toString()).mergeStyle(TextFormatting.AQUA);
+        text.append(new StringTextComponent(" Count ").mergeStyle(TextFormatting.DARK_RED));
+        text.append(new StringTextComponent(Integer.toString(count)).mergeStyle(TextFormatting.GREEN));
         if (ticking)
-            text.append(new StringTextComponent(" ticking").setStyle(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.RED))));
+            text.append(new StringTextComponent(" ticking").mergeStyle(TextFormatting.RED));
         sendCommandMessage(source, text, "/cu findLoadedTileEntities " + res.toString(), true);
 
     }
 
     public static void sendChunkEntityMessage(CommandSource source, int count, BlockPos pos, RegistryKey<World> type, boolean runDirectly) {
-        IFormattableTextComponent text = new StringTextComponent("- " + pos.toString()).setStyle(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.GREEN)));
-        text.append(coloredComponent(" Count ", Color.func_240744_a_(TextFormatting.RED)));
-        text.append(coloredComponent(Integer.toString(count), Color.func_240744_a_(TextFormatting.GREEN)));
+        IFormattableTextComponent text = new StringTextComponent("- " + pos.toString()).mergeStyle(TextFormatting.GREEN);
+        text.append(coloredComponent(" Count ", TextFormatting.RED));
+        text.append(coloredComponent(Integer.toString(count), TextFormatting.GREEN));
         ServerPlayerEntity player = null;
         try {
             player = source.asPlayer();
         } catch (CommandSyntaxException e) {
 
         }
-        sendCommandMessage(source, text, "/cu tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + type.func_240901_a_(), runDirectly);
+        sendCommandMessage(source, text, "/cu tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + type.getLocation(), runDirectly);
     }
 
     public static void sendFindEMessage(CommandSource source, ResourceLocation res, int count) {
@@ -88,12 +91,12 @@ public class CommandUtils {
 
     }
 
-    public static IFormattableTextComponent coloredComponent(String text, Color color) {
-        return new StringTextComponent(text).setStyle(Style.EMPTY.setColor(color));
+    public static IFormattableTextComponent coloredComponent(String text, TextFormatting color) {
+        return new StringTextComponent(text).mergeStyle(color);
     }
 
     public static void sendItemInventoryRemovalMessage(CommandSource source, String name, ItemStack itemStack, String inventoryType, int i) {
-        IFormattableTextComponent text = new StringTextComponent("[" + i + "] ").setStyle(Style.EMPTY.setColor(Color.func_240744_a_(TextFormatting.DARK_BLUE)));
+        IFormattableTextComponent text = new StringTextComponent("[" + i + "] ").mergeStyle(TextFormatting.DARK_BLUE);
         text.append(itemStack.getTextComponent());
         String Command = "/cu removeItemFromInventorySlot " + name + " " + inventoryType + " " + i;
         sendCommandMessage(source, text, Command, false);
@@ -115,10 +118,10 @@ public class CommandUtils {
         Style style = Style.EMPTY;
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, toCopy);
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Copy Contents to Clipboard"));
-        style.setClickEvent(clickEvent);
-        style.setHoverEvent(hoverEvent);
-        style.setColor(Color.func_240744_a_(TextFormatting.GREEN));
+        style = style.mergeStyle(style.setClickEvent(clickEvent));
+        style = style.mergeStyle(style.setHoverEvent(hoverEvent));
         text.setStyle(style);
+        text.mergeStyle(TextFormatting.GREEN);
         return text;
     }
 
@@ -129,8 +132,8 @@ public class CommandUtils {
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Click to execute \u00A76" + command + "\u00A7r"));
         style = style.mergeStyle(style.setClickEvent(clickEvent));
         style = style.mergeStyle(style.setHoverEvent(hoverEvent));
-        style = style.mergeStyle(style.setColor(Color.func_240744_a_(TextFormatting.GOLD)));
         text.setStyle(style);
+        text.mergeStyle(TextFormatting.GOLD);
         return text;
     }
 }
