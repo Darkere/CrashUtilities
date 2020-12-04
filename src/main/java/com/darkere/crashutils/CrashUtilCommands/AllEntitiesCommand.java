@@ -18,6 +18,7 @@ public class AllEntitiesCommand implements Command<CommandSource> {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("allEntities")
+            .requires(x->x.hasPermissionLevel(4))
             .then(Commands.argument("dim", DimensionArgument.getDimension()).executes(cmd))
             .executes(cmd);
 

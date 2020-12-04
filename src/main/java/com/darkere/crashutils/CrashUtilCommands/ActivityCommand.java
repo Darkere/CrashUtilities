@@ -18,6 +18,7 @@ public class ActivityCommand {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("playerActivity")
+            .requires(x->x.hasPermissionLevel(4))
             .executes(ActivityCommand::listActivity)
             .then(Commands.argument("time", StringArgumentType.word())
                 .suggests(sugg)

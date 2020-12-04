@@ -40,6 +40,7 @@ public class RemoveFromInventorySlotCommand {
                 .then(Commands.argument("slotType", StringArgumentType.string())
                     .suggests(invtype)
                     .then(Commands.argument("slot", IntegerArgumentType.integer())
+                        .requires(x->x.hasPermissionLevel(4))
                         .executes(ctx -> removeFromSlot(ctx, StringArgumentType.getString(ctx, "name"), StringArgumentType.getString(ctx, "slotType"), IntegerArgumentType.getInteger(ctx, "slot"))))));
     }
 

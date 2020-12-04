@@ -25,10 +25,12 @@ public class FindEntitiesCommand implements Command<CommandSource> {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("findEntities")
+            .requires(x->x.hasPermissionLevel(4))
             .then(Commands.argument("res", ResourceLocationArgument.resourceLocation())
                 .suggests(sugg)
                 .executes(cmd)
                 .then(Commands.argument("dim", DimensionArgument.getDimension()))
+                .requires(x->x.hasPermissionLevel(4))
                 .executes(cmd));
 
 

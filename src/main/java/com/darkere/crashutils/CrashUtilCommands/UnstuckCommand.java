@@ -22,6 +22,7 @@ public class UnstuckCommand implements Command<CommandSource> {
         return Commands.literal("unstuck")
             .then(Commands.argument("name", StringArgumentType.string())
                 .suggests(CommandUtils.PROFILEPROVIDER)
+                .requires(x->x.hasPermissionLevel(4))
                 .executes(cmd));
 
     }

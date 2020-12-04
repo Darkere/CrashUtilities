@@ -19,6 +19,7 @@ public class InventoryLookCommand {
         return Commands.literal("readInventory")
             .then(Commands.argument("name", StringArgumentType.string())
                 .suggests(CommandUtils.PROFILEPROVIDER)
+                .requires(x->x.hasPermissionLevel(4))
                 .executes(ctx -> printInventory(ctx, StringArgumentType.getString(ctx, "name"))));
     }
 

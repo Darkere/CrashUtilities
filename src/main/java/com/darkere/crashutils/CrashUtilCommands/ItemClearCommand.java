@@ -15,8 +15,9 @@ public class ItemClearCommand implements Command<CommandSource> {
     private static final ItemClearCommand cmd = new ItemClearCommand();
 
     public static ArgumentBuilder<CommandSource, ?> register() {
-        return Commands.literal("callItemClear").
-            executes(cmd);
+        return Commands.literal("callItemClear")
+            .requires(x->x.hasPermissionLevel(4))
+            .executes(cmd);
 
     }
 

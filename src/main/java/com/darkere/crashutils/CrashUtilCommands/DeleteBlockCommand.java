@@ -13,7 +13,10 @@ public class DeleteBlockCommand implements Command<CommandSource> {
 
 
     public static ArgumentBuilder<CommandSource, ?> register() {
-        return Commands.literal("deleteTE").then(Commands.argument("pos", BlockPosArgument.blockPos()).executes(new DeleteBlockCommand()));
+        return Commands.literal("deleteTE")
+            .requires(x->x.hasPermissionLevel(4))
+            .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                .executes(new DeleteBlockCommand()));
 
     }
 

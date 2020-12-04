@@ -20,8 +20,10 @@ public class MemoryCommand {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("memoryCheck")
+            .requires(x->x.hasPermissionLevel(4))
             .executes(ctx -> run(ctx, 10))
             .then(Commands.argument("count", IntegerArgumentType.integer())
+                .requires(x->x.hasPermissionLevel(4))
                 .executes(ctx -> run(ctx, IntegerArgumentType.getInteger(ctx, "count"))));
     }
 

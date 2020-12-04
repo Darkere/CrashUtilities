@@ -26,8 +26,11 @@ public class FindLoadedTEsCommand implements Command<CommandSource> {
         return Commands.literal("findLoadedTileEntities")
             .then(Commands.argument("res", ResourceLocationArgument.resourceLocation())
                 .suggests(sugg)
+                .requires(x->x.hasPermissionLevel(4))
                 .executes(cmd)
+
                 .then(Commands.argument("dim", DimensionArgument.getDimension()))
+                .requires(x->x.hasPermissionLevel(4))
                 .executes(cmd));
 
 

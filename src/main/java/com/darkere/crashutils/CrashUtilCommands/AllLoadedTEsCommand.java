@@ -18,6 +18,7 @@ public class AllLoadedTEsCommand implements Command<CommandSource> {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("allLoadedTileEntities")
+            .requires(x->x.hasPermissionLevel(4))
             .then(Commands.argument("dim", DimensionArgument.getDimension()).executes(cmd))
             .executes(cmd);
 

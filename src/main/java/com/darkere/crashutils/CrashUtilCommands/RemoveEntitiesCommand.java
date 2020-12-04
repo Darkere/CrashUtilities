@@ -29,16 +29,21 @@ public class RemoveEntitiesCommand {
         return Commands.literal("removeEntities")
             .then(Commands.argument("force", StringArgumentType.word())
                 .suggests(boolsugg)
+                .requires(x->x.hasPermissionLevel(4))
                 .executes(ctx -> removeEntities(ctx, null))
                 .then(Commands.literal("byType")
                     .then(Commands.argument("type", ResourceLocationArgument.resourceLocation())
                         .suggests(sugg)
+                        .requires(x->x.hasPermissionLevel(4))
                         .executes(ctx -> removeEntities(ctx, ResourceLocationArgument.getResourceLocation(ctx, "type")))))
                 .then(Commands.literal("items")
+                    .requires(x->x.hasPermissionLevel(4))
                     .executes(ctx -> removeItems(ctx, null))
                     .then(Commands.argument("name", StringArgumentType.word())
+                        .requires(x->x.hasPermissionLevel(4))
                         .executes(ctx -> removeItems(ctx, StringArgumentType.getString(ctx, "name")))))
                 .then(Commands.literal("hostile")
+                    .requires(x->x.hasPermissionLevel(4))
                     .executes(RemoveEntitiesCommand::removeMonsters)));
 
 
