@@ -23,6 +23,7 @@ public class TeleportCommand implements Command<CommandSource> {
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("tp")
             .then(Commands.argument("player", StringArgumentType.string())
+                .suggests(CommandUtils.PROFILEPROVIDER)
                 .then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .executes(cmd)
                     .then(Commands.argument("dim", DimensionArgument.getDimension())

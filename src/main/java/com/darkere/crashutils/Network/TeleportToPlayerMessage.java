@@ -25,7 +25,7 @@ public class TeleportToPlayerMessage {
 
 
     public static TeleportToPlayerMessage decode(PacketBuffer buf) {
-        return new TeleportToPlayerMessage(buf.readString());
+        return new TeleportToPlayerMessage(buf.readString(100));
     }
 
     public static void handle(TeleportToPlayerMessage data, Supplier<NetworkEvent.Context> ctx) {

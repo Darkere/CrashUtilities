@@ -314,7 +314,8 @@ public class CUScreen extends Screen {
     }
 
     public static CUScreen openCUScreen(RegistryKey<World> world, BlockPos pos) {
-        if (stored == null || !keep) {
+        if (stored == null || !keep || !world.equals(stored.dim)) {
+            keep = false;
             stored = new CUScreen(world, pos);
         }
         DataHolder.notifyListener();
