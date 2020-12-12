@@ -23,7 +23,7 @@ public class FindLoadedTEsCommand implements Command<CommandSource> {
     private static final SuggestionProvider<CommandSource> sugg = (ctx, builder) -> ISuggestionProvider.func_212476_a(ForgeRegistries.TILE_ENTITIES.getKeys().stream(), builder);
 
     public static ArgumentBuilder<CommandSource, ?> register() {
-        return Commands.literal("findLoadedTileEntities")
+        return Commands.literal("find")
             .then(Commands.argument("res", ResourceLocationArgument.resourceLocation())
                 .suggests(sugg)
                 .executes(cmd)

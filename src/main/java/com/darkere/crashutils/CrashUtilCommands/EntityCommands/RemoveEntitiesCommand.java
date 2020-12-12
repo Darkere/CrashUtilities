@@ -26,7 +26,7 @@ public class RemoveEntitiesCommand {
     private static int counter = 0;
 
     public static ArgumentBuilder<CommandSource, ?> register() {
-        return Commands.literal("kill")
+        return Commands.literal("remove")
             .executes(ctx -> removeEntities(ctx, null))
             .then(Commands.literal("byType")
                 .then(Commands.argument("type", ResourceLocationArgument.resourceLocation())
@@ -35,15 +35,24 @@ public class RemoveEntitiesCommand {
                         .suggests(boolsugg)
                         .executes(ctx -> removeEntities(ctx, ResourceLocationArgument.getResourceLocation(ctx, "type"))))))
             .then(Commands.literal("items")
+                .then(Commands.argument("force", StringArgumentType.word())
+                    .suggests(boolsugg))
                 .executes(ctx -> removeItems(ctx, null))
                 .then(Commands.argument("name", StringArgumentType.word())
                     .then(Commands.argument("force", StringArgumentType.word())
                         .suggests(boolsugg)
                         .executes(ctx -> removeItems(ctx, StringArgumentType.getString(ctx, "name"))))))
             .then(Commands.literal("hostile")
+                .executes(RemoveEntitiesCommand::removeMonsters)
                 .then(Commands.argument("force", StringArgumentType.word())
                     .suggests(boolsugg)
-                    .executes(RemoveEntitiesCommand::removeMonsters)));
+                    .executes(RemoveEntitiesCommand::removeMonsters)))
+            .then(Commands.literal("regex")
+                .then(Commands.argument("regex", StringArgumentType.greedyString())
+                    .executes(ctx -> removeEntitiesByRegEx(ctx, StringArgumentType.getString(ctx, "regex")))
+                    .then(Commands.argument("force", StringArgumentType.word())
+                        .suggests(boolsugg)
+                        .executes(ctx -> removeEntitiesByRegEx(ctx, StringArgumentType.getString(ctx, "regex"))))));
 
 
     }
@@ -57,6 +66,23 @@ public class RemoveEntitiesCommand {
             } else {
                 if (entity.getType().getRegistryName() != null) {
                     return entity.getType().getRegistryName().equals(type);
+                }
+            }
+            return false;
+        }).forEach(x -> removeEntity(context, world, x)));
+        respond(context);
+        return 1;
+    }
+
+    private static int removeEntitiesByRegEx(CommandContext<CommandSource> context, String regex) {
+        counter = 0;
+        List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
+        worlds.forEach(world -> world.getEntities().filter(entity -> {
+            if (regex == null) {
+                return !entity.hasCustomName();
+            } else {
+                if (entity != null && entity.getType().getRegistryName() != null) {
+                    return (entity.getType().getRegistryName().toString().matches(regex));
                 }
             }
             return false;
@@ -82,8 +108,14 @@ public class RemoveEntitiesCommand {
     }
 
     private static void removeEntity(CommandContext<CommandSource> context, ServerWorld world, Entity x) {
-        String forced = StringArgumentType.getString(context, "force");
-        boolean force = forced.equals("force");
+        boolean force = false;
+        try {
+            String forced = StringArgumentType.getString(context, "force");
+            force = forced.equals("force");
+        }catch (Exception e){
+
+        }
+
         if (force) {
             world.removeEntityComplete(x, false);
         } else {

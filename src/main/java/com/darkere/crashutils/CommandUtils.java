@@ -57,7 +57,7 @@ public class CommandUtils {
         } catch (CommandSyntaxException e) {
             e.printStackTrace();
         }
-        sendCommandMessage(source, text, "/cu player tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + worldPos.type.getLocation(), runDirectly);
+        sendCommandMessage(source, text, "/cu tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + worldPos.type.getLocation(), runDirectly);
     }
 
     public static void sendFindTEMessage(CommandSource source, ResourceLocation res, int count, boolean ticking) {
@@ -80,7 +80,7 @@ public class CommandUtils {
         } catch (CommandSyntaxException e) {
 
         }
-        sendCommandMessage(source, text, "/cu player tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + type.getLocation(), runDirectly);
+        sendCommandMessage(source, text, "/cu tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + type.getLocation(), runDirectly);
     }
 
     public static void sendFindEMessage(CommandSource source, ResourceLocation res, int count) {

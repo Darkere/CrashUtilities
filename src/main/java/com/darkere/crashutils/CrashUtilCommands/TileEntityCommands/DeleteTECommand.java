@@ -12,7 +12,7 @@ public class DeleteTECommand implements Command<CommandSource> {
 
 
     public static ArgumentBuilder<CommandSource, ?> register() {
-        return Commands.literal("deleteTE")
+        return Commands.literal("delete")
             .then(Commands.argument("pos", BlockPosArgument.blockPos())
                 .executes(new DeleteTECommand()));
 
