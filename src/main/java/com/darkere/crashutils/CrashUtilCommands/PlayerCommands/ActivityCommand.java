@@ -1,4 +1,4 @@
-package com.darkere.crashutils.CrashUtilCommands;
+package com.darkere.crashutils.CrashUtilCommands.PlayerCommands;
 
 import com.darkere.crashutils.DataStructures.PlayerActivityHistory;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -17,8 +17,7 @@ public class ActivityCommand {
     private static final SuggestionProvider<CommandSource> sugg = (ctx, builder) -> ISuggestionProvider.suggest(Arrays.asList("week", "day", "month"), builder);
 
     public static ArgumentBuilder<CommandSource, ?> register() {
-        return Commands.literal("playerActivity")
-            .requires(x->x.hasPermissionLevel(4))
+        return Commands.literal("activity")
             .executes(ActivityCommand::listActivity)
             .then(Commands.argument("time", StringArgumentType.word())
                 .suggests(sugg)

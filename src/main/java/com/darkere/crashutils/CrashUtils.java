@@ -1,9 +1,19 @@
 package com.darkere.crashutils;
 
-import com.darkere.crashutils.CrashUtilCommands.*;
+import com.darkere.crashutils.CrashUtilCommands.EntityCommands.EntitiesCommands;
+import com.darkere.crashutils.CrashUtilCommands.GetLogCommand;
+import com.darkere.crashutils.CrashUtilCommands.InventoryCommands.InventoryCommands;
+import com.darkere.crashutils.CrashUtilCommands.ItemClearCommand;
+import com.darkere.crashutils.CrashUtilCommands.LoadedChunksCommand;
+import com.darkere.crashutils.CrashUtilCommands.MemoryCommand;
+import com.darkere.crashutils.CrashUtilCommands.PlayerCommands.ActivityCommand;
+import com.darkere.crashutils.CrashUtilCommands.PlayerCommands.TeleportCommand;
+import com.darkere.crashutils.CrashUtilCommands.PlayerCommands.UnstuckCommand;
+import com.darkere.crashutils.CrashUtilCommands.TileEntityCommands.TileEntitiesCommands;
 import com.darkere.crashutils.Network.Network;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -85,26 +95,35 @@ public class CrashUtils {
         curiosLoaded = ModList.get().isLoaded("curios");
         sparkLoaded = ModList.get().isLoaded("spark");
         CommandDispatcher<CommandSource> dispatcher = event.getDispatcher();
+        CommandNode<CommandSource> entitiesCommands = EntitiesCommands.register();
+        CommandNode<CommandSource> tileEntitiesCommands = TileEntitiesCommands.register();
+        CommandNode<CommandSource> inventoryCommands = InventoryCommands.register();
+
         LiteralCommandNode<CommandSource> cmd = dispatcher.register(LiteralArgumentBuilder.<CommandSource>literal(MODID)
             .requires(x -> x.hasPermissionLevel(4))
-            .then(AllLoadedTEsCommand.register())
-            .then(FindLoadedTEsCommand.register())
-            .then(AllEntitiesCommand.register())
-            .then(FindEntitiesCommand.register())
             .then(TeleportCommand.register())
             .then(UnstuckCommand.register())
             .then(MemoryCommand.register())
             .then(ItemClearCommand.register())
-            .then(InventoryLookCommand.register())
-            .then(RemoveFromInventorySlotCommand.register())
             .then(GetLogCommand.register())
             //.then(ProfilingCommands.register())
             .then(LoadedChunksCommand.register())
-            .then(RemoveEntitiesCommand.register())
             .then(ActivityCommand.register())
+            .then(entitiesCommands)
+            .then(Commands.literal("e")
+                .redirect(entitiesCommands))
+            .then(tileEntitiesCommands)
+            .then(Commands.literal("te")
+                .redirect(tileEntitiesCommands))
+            .then(inventoryCommands)
+            .then(Commands.literal("i")
+                .redirect(inventoryCommands))
 
         );
-        dispatcher.register(Commands.literal("cu").redirect(cmd));
+        dispatcher.register(Commands.literal("cu")
+            .requires(x -> x.hasPermissionLevel(4))
+            .redirect(cmd)
+        );
 
     }
 
@@ -115,7 +134,7 @@ public class CrashUtils {
 
     @SubscribeEvent
     public void ServerStarted(FMLServerStartedEvent event) {
-        timer = new Timer();
+        timer = new Timer(true);
         task = new ClearItemTask();
         task.setup();
         int time = SERVER_CONFIG.getTimer() * 60 * 1000;

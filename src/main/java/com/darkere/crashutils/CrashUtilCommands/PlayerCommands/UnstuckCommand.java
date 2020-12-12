@@ -1,4 +1,4 @@
-package com.darkere.crashutils.CrashUtilCommands;
+package com.darkere.crashutils.CrashUtilCommands.PlayerCommands;
 
 import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.WorldUtils;
@@ -22,7 +22,6 @@ public class UnstuckCommand implements Command<CommandSource> {
         return Commands.literal("unstuck")
             .then(Commands.argument("name", StringArgumentType.string())
                 .suggests(CommandUtils.PROFILEPROVIDER)
-                .requires(x->x.hasPermissionLevel(4))
                 .executes(cmd));
 
     }

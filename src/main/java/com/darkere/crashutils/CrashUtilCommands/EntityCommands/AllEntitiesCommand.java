@@ -1,4 +1,4 @@
-package com.darkere.crashutils.CrashUtilCommands;
+package com.darkere.crashutils.CrashUtilCommands.EntityCommands;
 
 import com.darkere.crashutils.DataStructures.EntityData;
 import com.darkere.crashutils.WorldUtils;
@@ -17,9 +17,9 @@ public class AllEntitiesCommand implements Command<CommandSource> {
     private static final AllEntitiesCommand cmd = new AllEntitiesCommand();
 
     public static ArgumentBuilder<CommandSource, ?> register() {
-        return Commands.literal("allEntities")
-            .requires(x->x.hasPermissionLevel(4))
-            .then(Commands.argument("dim", DimensionArgument.getDimension()).executes(cmd))
+        return Commands.literal("list")
+            .then(Commands.argument("dim", DimensionArgument.getDimension())
+                .executes(cmd))
             .executes(cmd);
 
     }

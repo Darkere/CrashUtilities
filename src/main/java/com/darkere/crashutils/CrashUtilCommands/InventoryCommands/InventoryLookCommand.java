@@ -1,4 +1,4 @@
-package com.darkere.crashutils.CrashUtilCommands;
+package com.darkere.crashutils.CrashUtilCommands.InventoryCommands;
 
 import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.CrashUtils;
@@ -16,10 +16,9 @@ import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 public class InventoryLookCommand {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
-        return Commands.literal("readInventory")
+        return Commands.literal("read")
             .then(Commands.argument("name", StringArgumentType.string())
                 .suggests(CommandUtils.PROFILEPROVIDER)
-                .requires(x->x.hasPermissionLevel(4))
                 .executes(ctx -> printInventory(ctx, StringArgumentType.getString(ctx, "name"))));
     }
 

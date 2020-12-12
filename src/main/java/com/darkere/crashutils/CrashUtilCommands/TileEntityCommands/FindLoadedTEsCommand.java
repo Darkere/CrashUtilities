@@ -1,6 +1,6 @@
-package com.darkere.crashutils.CrashUtilCommands;
+package com.darkere.crashutils.CrashUtilCommands.TileEntityCommands;
 
-import com.darkere.crashutils.DataStructures.EntityData;
+import com.darkere.crashutils.DataStructures.TileEntityData;
 import com.darkere.crashutils.WorldUtils;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -18,19 +18,16 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 
-public class FindEntitiesCommand implements Command<CommandSource> {
-
-    private static final FindEntitiesCommand cmd = new FindEntitiesCommand();
-    private static final SuggestionProvider<CommandSource> sugg = (ctx, builder) -> ISuggestionProvider.func_212476_a(ForgeRegistries.ENTITIES.getKeys().stream(), builder);
+public class FindLoadedTEsCommand implements Command<CommandSource> {
+    private static final FindLoadedTEsCommand cmd = new FindLoadedTEsCommand();
+    private static final SuggestionProvider<CommandSource> sugg = (ctx, builder) -> ISuggestionProvider.func_212476_a(ForgeRegistries.TILE_ENTITIES.getKeys().stream(), builder);
 
     public static ArgumentBuilder<CommandSource, ?> register() {
-        return Commands.literal("findEntities")
-            .requires(x->x.hasPermissionLevel(4))
+        return Commands.literal("findLoadedTileEntities")
             .then(Commands.argument("res", ResourceLocationArgument.resourceLocation())
                 .suggests(sugg)
                 .executes(cmd)
                 .then(Commands.argument("dim", DimensionArgument.getDimension()))
-                .requires(x->x.hasPermissionLevel(4))
                 .executes(cmd));
 
 
@@ -38,7 +35,7 @@ public class FindEntitiesCommand implements Command<CommandSource> {
 
     @Override
     public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-        EntityData list = new EntityData();
+        TileEntityData list = new TileEntityData();
         List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
         list.createLists(worlds);
         ResourceLocation res = ResourceLocationArgument.getResourceLocation(context, "res");

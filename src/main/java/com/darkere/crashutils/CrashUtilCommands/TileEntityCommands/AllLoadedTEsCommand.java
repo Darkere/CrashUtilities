@@ -1,4 +1,4 @@
-package com.darkere.crashutils.CrashUtilCommands;
+package com.darkere.crashutils.CrashUtilCommands.TileEntityCommands;
 
 import com.darkere.crashutils.DataStructures.TileEntityData;
 import com.darkere.crashutils.WorldUtils;
@@ -18,8 +18,8 @@ public class AllLoadedTEsCommand implements Command<CommandSource> {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("allLoadedTileEntities")
-            .requires(x->x.hasPermissionLevel(4))
-            .then(Commands.argument("dim", DimensionArgument.getDimension()).executes(cmd))
+            .then(Commands.argument("dim", DimensionArgument.getDimension())
+                .executes(cmd))
             .executes(cmd);
 
     }

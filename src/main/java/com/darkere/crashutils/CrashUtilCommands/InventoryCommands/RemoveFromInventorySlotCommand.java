@@ -1,4 +1,4 @@
-package com.darkere.crashutils.CrashUtilCommands;
+package com.darkere.crashutils.CrashUtilCommands.InventoryCommands;
 
 import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.CrashUtils;
@@ -30,18 +30,19 @@ public class RemoveFromInventorySlotCommand {
     public static ArgumentBuilder<CommandSource, ?> register() {
         if (CrashUtils.curiosLoaded && CuriosApi.getSlotHelper() != null) {
             invTypes.addAll(CuriosApi.getSlotHelper().getSlotTypeIds());
-
-
         }
+
         invtype = (ctx, builder) -> ISuggestionProvider.suggest(invTypes.stream(), builder);
-        return Commands.literal("removeItemFromInventorySlot")
+
+        return Commands.literal("remove")
             .then(Commands.argument("name", StringArgumentType.string())
                 .suggests(CommandUtils.PROFILEPROVIDER)
                 .then(Commands.argument("slotType", StringArgumentType.string())
                     .suggests(invtype)
                     .then(Commands.argument("slot", IntegerArgumentType.integer())
-                        .requires(x->x.hasPermissionLevel(4))
-                        .executes(ctx -> removeFromSlot(ctx, StringArgumentType.getString(ctx, "name"), StringArgumentType.getString(ctx, "slotType"), IntegerArgumentType.getInteger(ctx, "slot"))))));
+                        .executes(ctx -> removeFromSlot(ctx, StringArgumentType.getString(ctx, "name"), StringArgumentType.getString(ctx, "slotType"), IntegerArgumentType.getInteger(ctx, "slot")))))
+                .then(Commands.argument("slot", IntegerArgumentType.integer())
+                    .executes(ctx -> removeFromSlot(ctx, StringArgumentType.getString(ctx, "name"), "inventory", IntegerArgumentType.getInteger(ctx, "slot")))));
     }
 
     private static int removeFromSlot(CommandContext<CommandSource> context, String name, String inventoryType, int slot) throws CommandSyntaxException {

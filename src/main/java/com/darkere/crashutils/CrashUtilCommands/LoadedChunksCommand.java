@@ -22,15 +22,12 @@ public class LoadedChunksCommand {
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("loadedChunks")
             .then(Commands.argument("dim", DimensionArgument.getDimension()).executes(x -> run(x, 0, null)))
-            .requires(x->x.hasPermissionLevel(4))
             .executes(x -> run(x, 0, null))
             .then(Commands.literal("byLocation")
                 .then(Commands.argument("loc", StringArgumentType.word())
-                    .requires(x->x.hasPermissionLevel(4))
                     .executes(x -> run(x, 1, StringArgumentType.getString(x, "loc")))))
             .then(Commands.literal("byTicket")
                 .then(Commands.argument("tic", StringArgumentType.word())
-                    .requires(x->x.hasPermissionLevel(4))
                     .executes(x -> run(x, 2, StringArgumentType.getString(x, "tic")))));
     }
 

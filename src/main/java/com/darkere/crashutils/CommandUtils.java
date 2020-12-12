@@ -57,7 +57,7 @@ public class CommandUtils {
         } catch (CommandSyntaxException e) {
             e.printStackTrace();
         }
-        sendCommandMessage(source, text, "/cu tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + worldPos.type.getLocation(), runDirectly);
+        sendCommandMessage(source, text, "/cu player tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + worldPos.type.getLocation(), runDirectly);
     }
 
     public static void sendFindTEMessage(CommandSource source, ResourceLocation res, int count, boolean ticking) {
@@ -66,7 +66,7 @@ public class CommandUtils {
         text.append(new StringTextComponent(Integer.toString(count)).mergeStyle(TextFormatting.GREEN));
         if (ticking)
             text.append(new StringTextComponent(" ticking").mergeStyle(TextFormatting.RED));
-        sendCommandMessage(source, text, "/cu findLoadedTileEntities " + res.toString(), true);
+        sendCommandMessage(source, text, "/cu tileentities find " + res.toString(), true);
 
     }
 
@@ -80,14 +80,14 @@ public class CommandUtils {
         } catch (CommandSyntaxException e) {
 
         }
-        sendCommandMessage(source, text, "/cu tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + type.getLocation(), runDirectly);
+        sendCommandMessage(source, text, "/cu player tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + type.getLocation(), runDirectly);
     }
 
     public static void sendFindEMessage(CommandSource source, ResourceLocation res, int count) {
         IFormattableTextComponent text = new StringTextComponent(String.valueOf(count)).mergeStyle(TextFormatting.BLUE);
         text.append(new StringTextComponent("x ").mergeStyle(TextFormatting.YELLOW));
         text.append(new StringTextComponent(res.toString()).mergeStyle(TextFormatting.AQUA));
-        sendCommandMessage(source, text, "/cu findEntities " + res.toString(), true);
+        sendCommandMessage(source, text, "/cu entities find " + res.toString(), true);
 
     }
 
@@ -98,7 +98,7 @@ public class CommandUtils {
     public static void sendItemInventoryRemovalMessage(CommandSource source, String name, ItemStack itemStack, String inventoryType, int i) {
         IFormattableTextComponent text = new StringTextComponent("[" + i + "] ").mergeStyle(TextFormatting.DARK_BLUE);
         text.append(itemStack.getTextComponent());
-        String Command = "/cu removeItemFromInventorySlot " + name + " " + inventoryType + " " + i;
+        String Command = "/cu inventory remove " + name + " " + inventoryType + " " + i;
         sendCommandMessage(source, text, Command, false);
     }
 

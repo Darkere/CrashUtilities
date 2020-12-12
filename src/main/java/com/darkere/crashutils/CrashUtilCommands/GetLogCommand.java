@@ -16,19 +16,15 @@ import java.nio.file.Path;
 public class GetLogCommand {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
-        return Commands.literal("getLog")
-            .requires(x->x.hasPermissionLevel(4))
+        return Commands.literal("log")
             .executes(GetLogCommand::getLogOverview)
             .then(Commands.literal("uploadCrashReport")
-                .requires(x->x.hasPermissionLevel(4))
                 .executes(GetLogCommand::uploadCrashReport)
             )
             .then(Commands.literal("uploadLatestLog")
-                .requires(x->x.hasPermissionLevel(4))
                 .executes(GetLogCommand::uploadLatestLog)
             )
             .then(Commands.literal("uploadArchivedLog")
-                .requires(x->x.hasPermissionLevel(4))
                 .executes(GetLogCommand::uploadArchivedLog));
     }
 

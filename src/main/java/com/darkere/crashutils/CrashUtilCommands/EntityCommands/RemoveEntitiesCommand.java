@@ -1,4 +1,4 @@
-package com.darkere.crashutils.CrashUtilCommands;
+package com.darkere.crashutils.CrashUtilCommands.EntityCommands;
 
 import com.darkere.crashutils.WorldUtils;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -17,33 +17,32 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class RemoveEntitiesCommand {
     private static final SuggestionProvider<CommandSource> sugg = (ctx, builder) -> ISuggestionProvider.func_212476_a(ForgeRegistries.ENTITIES.getKeys().stream(), builder);
-    private static final SuggestionProvider<CommandSource> boolsugg = (ctx, builder) -> ISuggestionProvider.suggest(Arrays.asList("byForce", "normally"), builder);
+    private static final SuggestionProvider<CommandSource> boolsugg = (ctx, builder) -> ISuggestionProvider.suggest(Collections.singletonList("force"), builder);
     private static int counter = 0;
 
     public static ArgumentBuilder<CommandSource, ?> register() {
-        return Commands.literal("removeEntities")
-            .then(Commands.argument("force", StringArgumentType.word())
-                .suggests(boolsugg)
-                .requires(x->x.hasPermissionLevel(4))
-                .executes(ctx -> removeEntities(ctx, null))
-                .then(Commands.literal("byType")
-                    .then(Commands.argument("type", ResourceLocationArgument.resourceLocation())
-                        .suggests(sugg)
-                        .requires(x->x.hasPermissionLevel(4))
-                        .executes(ctx -> removeEntities(ctx, ResourceLocationArgument.getResourceLocation(ctx, "type")))))
-                .then(Commands.literal("items")
-                    .requires(x->x.hasPermissionLevel(4))
-                    .executes(ctx -> removeItems(ctx, null))
-                    .then(Commands.argument("name", StringArgumentType.word())
-                        .requires(x->x.hasPermissionLevel(4))
-                        .executes(ctx -> removeItems(ctx, StringArgumentType.getString(ctx, "name")))))
-                .then(Commands.literal("hostile")
-                    .requires(x->x.hasPermissionLevel(4))
+        return Commands.literal("kill")
+            .executes(ctx -> removeEntities(ctx, null))
+            .then(Commands.literal("byType")
+                .then(Commands.argument("type", ResourceLocationArgument.resourceLocation())
+                    .suggests(sugg)
+                    .then(Commands.argument("force", StringArgumentType.word())
+                        .suggests(boolsugg)
+                        .executes(ctx -> removeEntities(ctx, ResourceLocationArgument.getResourceLocation(ctx, "type"))))))
+            .then(Commands.literal("items")
+                .executes(ctx -> removeItems(ctx, null))
+                .then(Commands.argument("name", StringArgumentType.word())
+                    .then(Commands.argument("force", StringArgumentType.word())
+                        .suggests(boolsugg)
+                        .executes(ctx -> removeItems(ctx, StringArgumentType.getString(ctx, "name"))))))
+            .then(Commands.literal("hostile")
+                .then(Commands.argument("force", StringArgumentType.word())
+                    .suggests(boolsugg)
                     .executes(RemoveEntitiesCommand::removeMonsters)));
 
 
@@ -84,7 +83,7 @@ public class RemoveEntitiesCommand {
 
     private static void removeEntity(CommandContext<CommandSource> context, ServerWorld world, Entity x) {
         String forced = StringArgumentType.getString(context, "force");
-        boolean force = forced.equals("byForce");
+        boolean force = forced.equals("force");
         if (force) {
             world.removeEntityComplete(x, false);
         } else {

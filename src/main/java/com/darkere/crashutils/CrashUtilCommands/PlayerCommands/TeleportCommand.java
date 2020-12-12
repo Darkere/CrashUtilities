@@ -1,4 +1,4 @@
-package com.darkere.crashutils.CrashUtilCommands;
+package com.darkere.crashutils.CrashUtilCommands.PlayerCommands;
 
 import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.WorldUtils;
@@ -24,14 +24,11 @@ public class TeleportCommand implements Command<CommandSource> {
         return Commands.literal("tp")
             .then(Commands.argument("player", StringArgumentType.string())
                 .then(Commands.argument("pos", BlockPosArgument.blockPos())
-                    .requires(x->x.hasPermissionLevel(4))
                     .executes(cmd)
                     .then(Commands.argument("dim", DimensionArgument.getDimension())
-                        .requires(x->x.hasPermissionLevel(4))
                         .executes(cmd)))
                 .then(Commands.argument("name", StringArgumentType.string())
                     .suggests(CommandUtils.PROFILEPROVIDER)
-                    .requires(x->x.hasPermissionLevel(4))
                     .executes(cmd)));
 
 
