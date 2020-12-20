@@ -33,7 +33,6 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
-import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.network.FMLNetworkConstants;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
@@ -57,7 +56,6 @@ public class CrashUtils {
     ClearItemTask clearItemTask;
     public static MemoryChecker memoryChecker = null;
     public static boolean curiosLoaded = false;
-    Timer timer;
     Timer chunkcleaner;
     public static boolean runHeapDump = false;
     public static boolean sparkLoaded = false;
@@ -137,11 +135,6 @@ public class CrashUtils {
     }
 
     @SubscribeEvent
-    public void ServerStopping(FMLServerStoppingEvent event) {
-        timer.cancel();
-    }
-
-    @SubscribeEvent
     public void ServerStarted(FMLServerStartedEvent event) {
         clearItemTask = new ClearItemTask();
         memoryChecker = new MemoryChecker();
@@ -152,7 +145,7 @@ public class CrashUtils {
     private void setupFtbChunksUnloading(ServerWorld world) {
         if (SERVER_CONFIG.shouldChunksExpire()) {
             chunkcleaner = new Timer(true);
-            timer.scheduleAtFixedRate(new TimerTask() {
+            chunkcleaner.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
                     PlayerActivityHistory history = new PlayerActivityHistory(world);
