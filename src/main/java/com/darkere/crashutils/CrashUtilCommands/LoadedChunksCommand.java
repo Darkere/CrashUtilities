@@ -20,7 +20,7 @@ public class LoadedChunksCommand {
 
 
     public static ArgumentBuilder<CommandSource, ?> register() {
-        return Commands.literal("loadedChunks")
+        return Commands.literal("chunks")
             .then(Commands.argument("dim", DimensionArgument.getDimension()).executes(x -> run(x, 0, null)))
             .executes(x -> run(x, 0, null))
             .then(Commands.literal("byLocation")

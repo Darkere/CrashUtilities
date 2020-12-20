@@ -2,6 +2,7 @@ package com.darkere.crashutils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
 import java.util.TimerTask;
 
 public class MemoryChecker extends TimerTask {
@@ -12,6 +13,16 @@ public class MemoryChecker extends TimerTask {
     long warnDelta;
     boolean ranHeapDump = false;
     boolean heapDumpEnabled;
+    Timer timer;
+
+    public void startStopMemoryChecker(){
+        if (CrashUtils.SERVER_CONFIG.getMemoryChecker()) {
+            setup();
+            timer = new Timer(true);
+            int time = CrashUtils.SERVER_CONFIG.getMemoryTimer() * 1000;
+            timer.scheduleAtFixedRate(this, time, time);
+        }
+    }
 
     public void setup() {
         logTimer = CrashUtils.SERVER_CONFIG.getMemoryLogTimer() * 1000;

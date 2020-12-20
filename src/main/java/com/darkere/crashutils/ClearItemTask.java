@@ -29,14 +29,20 @@ public class ClearItemTask extends TimerTask {
         scheduled = true;
     }
 
-    public void setup(Timer timer) {
-        this.timer = timer;
+    public void startStopTask(){
+        timer.cancel();
+        timer = new Timer(true);
+        setup();
+    }
+
+    public void setup() {
         enabled = CrashUtils.SERVER_CONFIG.getEnabled();
         maxItems = CrashUtils.SERVER_CONFIG.getMaximum();
         list = CrashUtils.SERVER_CONFIG.getWarnings();
         list.sort(Comparator.comparing(Integer::intValue));
         int time = CrashUtils.SERVER_CONFIG.getTimer() * 60 * 1000;
-        timer.scheduleAtFixedRate(this, time, time);
+        if(enabled)
+            timer.scheduleAtFixedRate(this, time, time);
     }
 
     public void checkItemCounts(ServerWorld world) {
@@ -51,7 +57,6 @@ public class ClearItemTask extends TimerTask {
 
 
     private void runClear(ServerWorld world) {
-        setup(timer);
         String text = CrashUtils.SERVER_CONFIG.getWarningText();
         PlayerList playerList = world.getServer().getPlayerList();
         int last = list.get(list.size() - 1);
