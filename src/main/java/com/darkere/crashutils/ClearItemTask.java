@@ -12,6 +12,7 @@ import net.minecraft.world.server.ServerWorld;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Timer;
 import java.util.TimerTask;
 import java.util.stream.Collectors;
 
@@ -21,17 +22,21 @@ public class ClearItemTask extends TimerTask {
     public boolean enabled;
     int maxItems;
     List<Integer> list;
+    Timer timer;
 
     @Override
     public void run() {
         scheduled = true;
     }
 
-    public void setup() {
+    public void setup(Timer timer) {
+        this.timer = timer;
         enabled = CrashUtils.SERVER_CONFIG.getEnabled();
         maxItems = CrashUtils.SERVER_CONFIG.getMaximum();
         list = CrashUtils.SERVER_CONFIG.getWarnings();
         list.sort(Comparator.comparing(Integer::intValue));
+        int time = CrashUtils.SERVER_CONFIG.getTimer() * 60 * 1000;
+        timer.scheduleAtFixedRate(this, time, time);
     }
 
     public void checkItemCounts(ServerWorld world) {
@@ -46,7 +51,7 @@ public class ClearItemTask extends TimerTask {
 
 
     private void runClear(ServerWorld world) {
-        setup();
+        setup(timer);
         String text = CrashUtils.SERVER_CONFIG.getWarningText();
         PlayerList playerList = world.getServer().getPlayerList();
         int last = list.get(list.size() - 1);

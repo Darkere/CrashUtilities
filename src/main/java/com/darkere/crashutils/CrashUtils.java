@@ -10,6 +10,7 @@ import com.darkere.crashutils.CrashUtilCommands.PlayerCommands.ActivityCommand;
 import com.darkere.crashutils.CrashUtilCommands.PlayerCommands.TeleportCommand;
 import com.darkere.crashutils.CrashUtilCommands.PlayerCommands.UnstuckCommand;
 import com.darkere.crashutils.CrashUtilCommands.TileEntityCommands.TileEntitiesCommands;
+import com.darkere.crashutils.DataStructures.PlayerActivityHistory;
 import com.darkere.crashutils.Network.Network;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -17,7 +18,9 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
+import net.minecraft.command.arguments.GameProfileArgument;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -43,6 +46,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
+import java.util.TimerTask;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(CrashUtils.MODID)
@@ -56,6 +60,7 @@ public class CrashUtils {
     public static MemoryChecker memoryChecker = null;
     public static boolean curiosLoaded = false;
     Timer timer;
+    Timer chunkcleaner;
     public static boolean runHeapDump = false;
     public static boolean sparkLoaded = false;
     public static List<Runnable> runnables = new ArrayList<>();
@@ -85,7 +90,7 @@ public class CrashUtils {
 
     @SubscribeEvent
     public void configReload(ModConfig.Reloading event) {
-        task.setup();
+        task.setup(timer);
         memoryChecker.setup();
     }
 
@@ -100,29 +105,29 @@ public class CrashUtils {
         CommandNode<CommandSource> inventoryCommands = InventoryCommands.register();
 
         LiteralCommandNode<CommandSource> cmd = dispatcher.register(LiteralArgumentBuilder.<CommandSource>literal(MODID)
-            .requires(x -> x.hasPermissionLevel(4))
-            .then(TeleportCommand.register())
-            .then(UnstuckCommand.register())
-            .then(MemoryCommand.register())
-            .then(ItemClearCommand.register())
-            .then(GetLogCommand.register())
-            //.then(ProfilingCommands.register())
-            .then(LoadedChunksCommand.register())
-            .then(ActivityCommand.register())
-            .then(entitiesCommands)
-            .then(Commands.literal("e")
-                .redirect(entitiesCommands))
-            .then(tileEntitiesCommands)
-            .then(Commands.literal("te")
-                .redirect(tileEntitiesCommands))
-            .then(inventoryCommands)
-            .then(Commands.literal("i")
-                .redirect(inventoryCommands))
+                .requires(x -> x.hasPermissionLevel(4))
+                .then(TeleportCommand.register())
+                .then(UnstuckCommand.register())
+                .then(MemoryCommand.register())
+                .then(ItemClearCommand.register())
+                .then(GetLogCommand.register())
+                //.then(ProfilingCommands.register())
+                .then(LoadedChunksCommand.register())
+                .then(ActivityCommand.register())
+                .then(entitiesCommands)
+                .then(Commands.literal("e")
+                        .redirect(entitiesCommands))
+                .then(tileEntitiesCommands)
+                .then(Commands.literal("te")
+                        .redirect(tileEntitiesCommands))
+                .then(inventoryCommands)
+                .then(Commands.literal("i")
+                        .redirect(inventoryCommands))
 
         );
         dispatcher.register(Commands.literal("cu")
-            .requires(x -> x.hasPermissionLevel(4))
-            .redirect(cmd)
+                .requires(x -> x.hasPermissionLevel(4))
+                .redirect(cmd)
         );
 
     }
@@ -136,17 +141,33 @@ public class CrashUtils {
     public void ServerStarted(FMLServerStartedEvent event) {
         timer = new Timer(true);
         task = new ClearItemTask();
-        task.setup();
-        int time = SERVER_CONFIG.getTimer() * 60 * 1000;
-        timer.scheduleAtFixedRate(task, time, time);
+        task.setup(timer);
+
 
         if (SERVER_CONFIG.getMemoryChecker()) {
             memoryChecker = new MemoryChecker();
             memoryChecker.setup();
-            time = SERVER_CONFIG.getMemoryTimer() * 1000;
+            int time = SERVER_CONFIG.getMemoryTimer() * 1000;
             timer.scheduleAtFixedRate(memoryChecker, time, time);
         }
+        if (SERVER_CONFIG.shouldChunksExpire()) {
+            chunkcleaner = new Timer(true);
+            timer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    clearPlayerChunks(event.getServer().getWorld(World.OVERWORLD));
+                }
+            }, 5, 60*60*1000);
+        }
+    }
 
+    private void clearPlayerChunks(ServerWorld world) {
+        PlayerActivityHistory history = new PlayerActivityHistory(world);
+        for (String player : history.getPlayersInChunkClearTime()) {
+            LOGGER.warn("Unloading " + player + "'s Chunks");
+            world.getServer().getCommandManager().handleCommand(world.getServer().getCommandSource(),
+                    "ftbchunks unload_all " + player);
+        }
     }
 
     public static void runNextTick(Runnable run) {
