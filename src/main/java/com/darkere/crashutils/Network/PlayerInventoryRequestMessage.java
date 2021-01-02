@@ -40,7 +40,7 @@ public class PlayerInventoryRequestMessage {
         ctx.get().enqueueWork(() -> {
             ServerPlayerEntity player = ctx.get().getSender();
             MinecraftServer server = player.getServer();
-            if(!player.hasPermissionLevel(4)) return;
+            if(!player.hasPermissionLevel(2)) return;
             PlayerEntity otherPlayer = ctx.get().getSender().getServer().getPlayerList().getPlayerByUsername(data.playerName);
             if (otherPlayer == null) {
                 GameProfile profile = server.getPlayerProfileCache().getGameProfileForUsername(data.playerName);

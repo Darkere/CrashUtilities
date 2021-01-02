@@ -32,7 +32,7 @@ public class TeleportToPlayerMessage {
         ctx.get().enqueueWork(() -> {
             ServerPlayerEntity player = ctx.get().getSender();
             if (player == null) return;
-            if (!player.hasPermissionLevel(4)) return;
+            if (!player.hasPermissionLevel(2)) return;
             World ori = player.getEntityWorld();
             AtomicReference<World> dest = new AtomicReference<>();
             AtomicReference<BlockPos> otherPos = new AtomicReference<>();

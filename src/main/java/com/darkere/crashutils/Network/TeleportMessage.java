@@ -41,7 +41,7 @@ public class TeleportMessage {
         ctx.get().enqueueWork(() -> {
             ServerPlayerEntity player = ctx.get().getSender();
             if (player == null) return;
-            if(!player.hasPermissionLevel(4)) return;
+            if(!player.hasPermissionLevel(2)) return;
             ServerWorld ori = player.getServer().getWorld(data.origin);
             ServerWorld dest = player.getServer().getWorld(data.dest);
             WorldUtils.teleportPlayer(player, ori, dest, data.pos);

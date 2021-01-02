@@ -29,7 +29,6 @@ public class FindEntitiesCommand implements Command<CommandSource> {
                 .suggests(sugg)
                 .executes(cmd)
                 .then(Commands.argument("dim", DimensionArgument.getDimension()))
-                .requires(x->x.hasPermissionLevel(4))
                 .executes(cmd));
 
 
