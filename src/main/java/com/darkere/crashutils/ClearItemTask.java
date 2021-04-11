@@ -4,6 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.Util;
+import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -42,7 +43,7 @@ public class ClearItemTask extends TimerTask {
             INSTANCE.timer.cancel();
         }
 
-        INSTANCE.timer = new Timer(true);
+        INSTANCE.timer = new Timer("CU Clear Item Task",true);
         enabled = CrashUtils.SERVER_CONFIG.getEnabled();
         maxItems = CrashUtils.SERVER_CONFIG.getMaximum();
         list = CrashUtils.SERVER_CONFIG.getWarnings();
@@ -72,9 +73,9 @@ public class ClearItemTask extends TimerTask {
                         int size = list.size();
                         if (size > maxItems) {
                             list.forEach(Entity::remove);
-                            world.getServer().sendMessage(new StringTextComponent(size + " Items cleared"), Util.NIL_UUID);
+                            world.getServer().getPlayerList().broadcastMessage(new StringTextComponent(size + " Items cleared"), ChatType.SYSTEM, Util.NIL_UUID);
                         } else {
-                            world.getServer().sendMessage(new StringTextComponent("Item Clear prevented. Only " + size + " items on the ground"), Util.NIL_UUID);
+                            world.getServer().getPlayerList().broadcastMessage(new StringTextComponent("Item Clear prevented. Only " + size + " items on the ground"),ChatType.SYSTEM, Util.NIL_UUID);
                         }
 
                     }
@@ -86,7 +87,7 @@ public class ClearItemTask extends TimerTask {
             new java.util.Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    world.getServer().sendMessage(message, Util.NIL_UUID);
+                    world.getServer().getPlayerList().broadcastMessage(message, ChatType.SYSTEM,Util.NIL_UUID);
                 }
             }, (last - integer) * 1000L);
 
