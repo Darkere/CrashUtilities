@@ -19,7 +19,7 @@ public class PlayerDataMessage {
     public static void encode(PlayerDataMessage data, PacketBuffer buf) {
         List<String> names = data.data.getPlayerNames(null);
         buf.writeInt(names.size());
-        names.forEach(buf::writeString);
+        names.forEach(buf::writeUtf);
     }
 
 
@@ -27,7 +27,7 @@ public class PlayerDataMessage {
         List<String> names = new ArrayList<>();
         int size = buf.readInt();
         for (int i = 0; i < size; i++) {
-            names.add(buf.readString());
+            names.add(buf.readUtf());
         }
         return new PlayerDataMessage(new PlayerData(names));
     }

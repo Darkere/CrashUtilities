@@ -36,13 +36,13 @@ public class WorldUtils {
     public static List<ServerWorld> getWorldsFromDimensionArgument(CommandContext<CommandSource> context) {
         ServerWorld world = null;
         try {
-            world = DimensionArgument.getDimensionArgument(context, "dim");
+            world = DimensionArgument.getDimension(context, "dim");
         } catch (IllegalArgumentException | CommandSyntaxException e) {
             //NO OP
         }
         List<ServerWorld> worlds = new ArrayList<>();
         if (world == null) {
-            context.getSource().getServer().getWorlds().forEach(worlds::add);
+            context.getSource().getServer().getAllLevels().forEach(worlds::add);
         } else {
             worlds.add(world);
         }
@@ -50,12 +50,12 @@ public class WorldUtils {
     }
 
     public static void teleportPlayer(PlayerEntity player, World startWorld, World destWorld, BlockPos newPos) {
-        if (player.world.isRemote) {
-            Network.sendToServer(new TeleportMessage(startWorld.getDimensionKey(), destWorld.getDimensionKey(), newPos));
+        if (player.level.isClientSide) {
+            Network.sendToServer(new TeleportMessage(startWorld.dimension(), destWorld.dimension(), newPos));
         }
         if (newPos.getY() == 0) {
             IChunk chunk = destWorld.getChunkAt(newPos);
-            int y = chunk.getTopBlockY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, newPos.getX(), newPos.getZ());
+            int y = chunk.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, newPos.getX(), newPos.getZ());
             newPos = new BlockPos(newPos.getX(), y, newPos.getZ());
         }
         if (startWorld != destWorld) {
@@ -64,29 +64,29 @@ public class WorldUtils {
                 @Override
                 public Entity placeEntity(Entity entity, ServerWorld currentWorld, ServerWorld destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
                     Entity entity1 = repositionEntity.apply(false);
-                    entity1.setPositionAndUpdate(finalNewPos.getX(), finalNewPos.getY() + 1, finalNewPos.getZ());
+                    entity1.teleportTo(finalNewPos.getX(), finalNewPos.getY() + 1, finalNewPos.getZ());
                     return entity1;
                 }
             });
         } else {
-            player.setPositionAndUpdate(newPos.getX(), newPos.getY() + 1, newPos.getZ());
+            player.teleportTo(newPos.getX(), newPos.getY() + 1, newPos.getZ());
         }
     }
 
     public static void applyToPlayer(String playerName, MinecraftServer server, Consumer<ServerPlayerEntity> consumer) {
-        ServerPlayerEntity player = server.getPlayerList().getPlayerByUsername(playerName);
+        ServerPlayerEntity player = server.getPlayerList().getPlayerByName(playerName);
         if (player == null) {
-            GameProfile profile = server.getPlayerProfileCache().getGameProfileForUsername(playerName);
+            GameProfile profile = server.getProfileCache().get(playerName);
             if (profile == null) {
                 return;
             }
 
-            FakePlayer fakePlayer = new FakePlayer(server.getWorld(World.OVERWORLD), profile);
-            CompoundNBT nbt = server.playerDataManager.loadPlayerData(fakePlayer);
+            FakePlayer fakePlayer = new FakePlayer(server.getLevel(World.OVERWORLD), profile);
+            CompoundNBT nbt = server.playerDataStorage.load(fakePlayer);
             if (nbt == null) return;
-            fakePlayer.read(nbt);
+            fakePlayer.load(nbt);
             consumer.accept(fakePlayer);
-            server.playerDataManager.savePlayerData(fakePlayer);
+            server.playerDataStorage.save(fakePlayer);
 
         } else {
             consumer.accept(player);
@@ -94,18 +94,18 @@ public class WorldUtils {
     }
 
     public static BlockPos getChunkCenter(ChunkPos pos) {
-        int x = pos.getXStart() + 8;
-        int z = pos.getZStart() + 8;
+        int x = pos.getMinBlockX() + 8;
+        int z = pos.getMinBlockZ() + 8;
         return new BlockPos(x, 0, z);
     }
 
     public static void removeEntity(World world, UUID id, boolean force) {
         if (NetworkTools.returnOnNull(world, id)) return;
-        if (world.isRemote) {
-            Network.sendToServer(new RemoveEntityMessage(world.getDimensionKey(), id, false, force));
+        if (world.isClientSide) {
+            Network.sendToServer(new RemoveEntityMessage(world.dimension(), id, false, force));
             return;
         }
-        Entity e = ((ServerWorld) world).getEntityByUuid(id);
+        Entity e = ((ServerWorld) world).getEntity(id);
         if (e == null) return;
         if (force) {
             ((ServerWorld) world).removeEntityComplete(e, false);
@@ -116,8 +116,8 @@ public class WorldUtils {
 
     public static void removeEntityType(World world, ResourceLocation rl, boolean force) {
         if (NetworkTools.returnOnNull(world, rl)) return;
-        if (world.isRemote) {
-            Network.sendToServer(new RemoveEntitiesMessage(world.getDimensionKey(), rl, null, false, force));
+        if (world.isClientSide) {
+            Network.sendToServer(new RemoveEntitiesMessage(world.dimension(), rl, null, false, force));
             return;
         }
         ((ServerWorld) world).getEntities().filter(entity -> Objects.equals(entity.getType().getRegistryName(), rl)).forEach(e -> {
@@ -131,13 +131,13 @@ public class WorldUtils {
 
     public static void removeEntitiesInChunk(World world, ChunkPos pos, ResourceLocation rl, boolean force) {
         if (NetworkTools.returnOnNull(world, pos, rl)) return;
-        if (world.isRemote) {
-            Network.sendToServer(new RemoveEntitiesMessage(world.getDimensionKey(), rl, pos, false, force));
+        if (world.isClientSide) {
+            Network.sendToServer(new RemoveEntitiesMessage(world.dimension(), rl, pos, false, force));
             return;
         }
-        Vector3d start = new Vector3d(pos.getXStart(), 0, pos.getZStart());
-        Vector3d end = new Vector3d(pos.getXEnd(), 255, pos.getZEnd());
-        world.getEntitiesInAABBexcluding(null, new AxisAlignedBB(start, end), entity -> Objects.equals(entity.getType().getRegistryName(), rl)).forEach(e -> {
+        Vector3d start = new Vector3d(pos.getMinBlockX(), 0, pos.getMinBlockZ());
+        Vector3d end = new Vector3d(pos.getMaxBlockX(), 255, pos.getMaxBlockZ());
+        world.getEntities((Entity) null, new AxisAlignedBB(start, end), entity -> Objects.equals(entity.getType().getRegistryName(), rl)).forEach(e -> {
             if (force) {
                 ((ServerWorld) world).removeEntityComplete(e, false);
             } else {
@@ -148,49 +148,49 @@ public class WorldUtils {
 
     public static void removeTileEntity(World world, UUID id, boolean force) {
         if (NetworkTools.returnOnNull(world, id)) return;
-        if (world.isRemote) {
-            Network.sendToServer(new RemoveEntityMessage(world.getDimensionKey(), id, true, force));
+        if (world.isClientSide) {
+            Network.sendToServer(new RemoveEntityMessage(world.dimension(), id, true, force));
             return;
         }
         if (force) {
-            world.removeTileEntity(TileEntityData.TEID.get(id).pos);
+            world.removeBlockEntity(TileEntityData.TEID.get(id).pos);
             world.removeBlock(TileEntityData.TEID.get(id).pos, false);
         } else {
-            world.removeTileEntity(TileEntityData.TEID.get(id).pos);
+            world.removeBlockEntity(TileEntityData.TEID.get(id).pos);
         }
     }
 
     public static void removeTileEntityType(World world, ResourceLocation rl, boolean force) {
         if (NetworkTools.returnOnNull(world, rl)) return;
-        if (world.isRemote) {
-            Network.sendToServer(new RemoveEntitiesMessage(world.getDimensionKey(), rl, null, true, force));
+        if (world.isClientSide) {
+            Network.sendToServer(new RemoveEntitiesMessage(world.dimension(), rl, null, true, force));
             return;
         }
-        world.loadedTileEntityList.stream().filter(te -> Objects.equals(te.getType().getRegistryName(), rl)).forEach(te -> {
+        world.blockEntityList.stream().filter(te -> Objects.equals(te.getType().getRegistryName(), rl)).forEach(te -> {
             if (force) {
-                world.removeTileEntity(te.getPos());
-                world.removeBlock(te.getPos(), false);
+                world.removeBlockEntity(te.getBlockPos());
+                world.removeBlock(te.getBlockPos(), false);
             } else {
-                world.removeTileEntity(te.getPos());
+                world.removeBlockEntity(te.getBlockPos());
             }
         });
     }
 
     public static void removeTileEntitiesInChunk(World world, ChunkPos pos, ResourceLocation rl, boolean force) {
         if (NetworkTools.returnOnNull(world, pos, rl)) return;
-        if (world.isRemote) {
-            Network.sendToServer(new RemoveEntitiesMessage(world.getDimensionKey(), rl, pos, true, force));
+        if (world.isClientSide) {
+            Network.sendToServer(new RemoveEntitiesMessage(world.dimension(), rl, pos, true, force));
             return;
         }
-        Vector3d start = new Vector3d(pos.getXStart(), 0, pos.getZStart());
-        Vector3d end = new Vector3d(pos.getXEnd(), 255, pos.getZEnd());
+        Vector3d start = new Vector3d(pos.getMinBlockX(), 0, pos.getMinBlockZ());
+        Vector3d end = new Vector3d(pos.getMaxBlockX(), 255, pos.getMaxBlockZ());
 
-        world.loadedTileEntityList.stream().filter(te -> Objects.equals(te.getType().getRegistryName(), rl) && new AxisAlignedBB(start, end).contains(Vector3d.copyCentered(te.getPos()))).forEach(te -> {
+        world.blockEntityList.stream().filter(te -> Objects.equals(te.getType().getRegistryName(), rl) && new AxisAlignedBB(start, end).contains(Vector3d.atCenterOf(te.getBlockPos()))).forEach(te -> {
             if (force) {
-                world.removeTileEntity(te.getPos());
-                world.removeBlock(te.getPos(), false);
+                world.removeBlockEntity(te.getBlockPos());
+                world.removeBlock(te.getBlockPos(), false);
             } else {
-                world.removeTileEntity(te.getPos());
+                world.removeBlockEntity(te.getBlockPos());
             }
         });
     }

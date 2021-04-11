@@ -8,7 +8,7 @@ import java.util.List;
 public class ProfilingData {
 
     public ProfilingData(IProfileResult result) {
-        List<DataPoint> data = result.getDataPoints("root");
+        List<DataPoint> data = result.getTimes("root");
     }
 
 }

@@ -30,10 +30,10 @@ public class ClientEvents {
             InputMappings.Type.KEYSYM, GLFW.GLFW_KEY_U, "Crash Utilities");
     public static final KeyBinding COPYCLASS =
         new KeyBinding("Copy Container Class",
-            KeyConflictContext.GUI, InputMappings.INPUT_INVALID, "Crash Utilities");
+            KeyConflictContext.GUI, InputMappings.UNKNOWN, "Crash Utilities");
     public static final KeyBinding TOGGLEINDEXES =
         new KeyBinding("Show Slot Index Tooltips",
-            KeyConflictContext.IN_GAME, InputMappings.INPUT_INVALID, "Crash Utilities");
+            KeyConflictContext.IN_GAME, InputMappings.UNKNOWN, "Crash Utilities");
 
     private static boolean renderslotnumbers;
 
@@ -57,30 +57,30 @@ public class ClientEvents {
     @SubscribeEvent
     public void GUIKeyEvent(GuiScreenEvent.KeyboardKeyPressedEvent.Post event) {
         if (Minecraft.getInstance().player == null || !(event.getGui() instanceof ContainerScreen)) return;
-        if (COPYCLASS.isPressed()) {
-            if (Minecraft.getInstance().player.openContainer != null) {
-                String toCopy = Minecraft.getInstance().player.openContainer.getClass().getName();
-                Minecraft.getInstance().keyboardListener.setClipboardString(toCopy);
+        if (COPYCLASS.consumeClick()) {
+            if (Minecraft.getInstance().player.containerMenu != null) {
+                String toCopy = Minecraft.getInstance().player.containerMenu.getClass().getName();
+                Minecraft.getInstance().keyboardHandler.setClipboard(toCopy);
             }
         }
-        if (TOGGLEINDEXES.isPressed()) {
+        if (TOGGLEINDEXES.consumeClick()) {
             renderslotnumbers = !renderslotnumbers;
         }
     }
 
     @SubscribeEvent
     public void keyEvent(InputEvent.KeyInputEvent event) {
-        if (Minecraft.getInstance().player == null || Minecraft.getInstance().world == null) return;
+        if (Minecraft.getInstance().player == null || Minecraft.getInstance().level == null) return;
         if (event.getAction() != GLFW.GLFW_PRESS) return;
-        if (OPENSCREEN.isPressed()) {
-            RegistryKey<World> worldKey = Minecraft.getInstance().player.getEntityWorld().getDimensionKey();
-            if (Minecraft.getInstance().player.hasPermissionLevel(2)) {
-                Minecraft.getInstance().displayGuiScreen(CUScreen.openCUScreen(worldKey, new BlockPos(Minecraft.getInstance().player.getPositionVec())));
+        if (OPENSCREEN.consumeClick()) {
+            RegistryKey<World> worldKey = Minecraft.getInstance().player.getCommandSenderWorld().dimension();
+            if (Minecraft.getInstance().player.hasPermissions(2)) {
+                Minecraft.getInstance().setScreen(CUScreen.openCUScreen(worldKey, new BlockPos(Minecraft.getInstance().player.position())));
             } else {
-                if (!Minecraft.getInstance().isSingleplayer()) {
-                    Minecraft.getInstance().ingameGUI.setOverlayMessage(new StringTextComponent("You need to be OP to use the Crash Utils GUI"), false);
+                if (!Minecraft.getInstance().hasSingleplayerServer()) {
+                    Minecraft.getInstance().gui.setOverlayMessage(new StringTextComponent("You need to be OP to use the Crash Utils GUI"), false);
                 } else {
-                    Minecraft.getInstance().ingameGUI.setOverlayMessage(new StringTextComponent("Cheats need to be enabled to use the Crash Utils GUI"), false);
+                    Minecraft.getInstance().gui.setOverlayMessage(new StringTextComponent("Cheats need to be enabled to use the Crash Utils GUI"), false);
                 }
 
             }
@@ -92,7 +92,7 @@ public class ClientEvents {
         PlayerEntity player = Minecraft.getInstance().player;
         if (player == null) return;
         PlayerInvContainer c = new PlayerInvContainer(player, null, id, playerName, curios, curios.values().stream().mapToInt(x -> x).sum());
-        player.openContainer = c;
-        Minecraft.getInstance().displayGuiScreen(new PlayerInvScreen(c, player.inventory, new StringTextComponent("cuinventoryscreen")));
+        player.containerMenu = c;
+        Minecraft.getInstance().setScreen(new PlayerInvScreen(c, player.inventory, new StringTextComponent("cuinventoryscreen")));
     }
 }

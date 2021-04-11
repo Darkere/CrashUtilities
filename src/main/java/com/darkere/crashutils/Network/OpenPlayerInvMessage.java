@@ -21,10 +21,10 @@ public class OpenPlayerInvMessage {
 
     public static void encode(OpenPlayerInvMessage data, PacketBuffer buf) {
         buf.writeInt(data.windowID);
-        buf.writeString(data.otherPlayerName);
+        buf.writeUtf(data.otherPlayerName);
         buf.writeInt(data.slotAmounts.size());
         data.slotAmounts.forEach((s, i) -> {
-            buf.writeString(s);
+            buf.writeUtf(s);
             buf.writeInt(i);
         });
 
@@ -33,10 +33,10 @@ public class OpenPlayerInvMessage {
     public static OpenPlayerInvMessage decode(PacketBuffer buf) {
         Map<String, Integer> curios = new LinkedHashMap<>();
         int id = buf.readInt();
-        String name = buf.readString();
+        String name = buf.readUtf();
         int size = buf.readInt();
         for (int i = 0; i < size; i++) {
-            curios.put(buf.readString(), buf.readInt());
+            curios.put(buf.readUtf(), buf.readInt());
         }
         return new OpenPlayerInvMessage(id, name, curios);
     }

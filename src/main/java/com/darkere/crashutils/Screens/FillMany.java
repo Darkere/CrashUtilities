@@ -45,7 +45,7 @@ public class FillMany {
 
     public static void drawStrings(MatrixStack stack, FontRenderer renderer, List<Text> texts) {
         for (Text text : texts) {
-            renderer.drawString(stack, text.text, text.x, text.y, text.color);
+            renderer.draw(stack, text.text, text.x, text.y, text.color);
         }
     }
 
@@ -54,15 +54,15 @@ public class FillMany {
         RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
 
-        BufferBuilder bufferbuilder = Tessellator.getInstance().getBuffer();
+        BufferBuilder bufferbuilder = Tessellator.getInstance().getBuilder();
         bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 
         for (ColoredRectangle rect : rects) {
             addRectangle(bufferbuilder, matrix, rect.x0, rect.y0, rect.x1, rect.y1, rect.color);
         }
 
-        bufferbuilder.finishDrawing();
-        WorldVertexBufferUploader.draw(bufferbuilder);
+        bufferbuilder.end();
+        WorldVertexBufferUploader.end(bufferbuilder);
 
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
@@ -83,9 +83,9 @@ public class FillMany {
         float cr = (float) (color >> 16 & 255) / 255.0F;
         float cg = (float) (color >> 8 & 255) / 255.0F;
         float cb = (float) (color & 255) / 255.0F;
-        bufferbuilder.pos(matrix, (float) x0, (float) y1, 0.0F).color(cr, cg, cb, ca).endVertex();
-        bufferbuilder.pos(matrix, (float) x1, (float) y1, 0.0F).color(cr, cg, cb, ca).endVertex();
-        bufferbuilder.pos(matrix, (float) x1, (float) y0, 0.0F).color(cr, cg, cb, ca).endVertex();
-        bufferbuilder.pos(matrix, (float) x0, (float) y0, 0.0F).color(cr, cg, cb, ca).endVertex();
+        bufferbuilder.vertex(matrix, (float) x0, (float) y1, 0.0F).color(cr, cg, cb, ca).endVertex();
+        bufferbuilder.vertex(matrix, (float) x1, (float) y1, 0.0F).color(cr, cg, cb, ca).endVertex();
+        bufferbuilder.vertex(matrix, (float) x1, (float) y0, 0.0F).color(cr, cg, cb, ca).endVertex();
+        bufferbuilder.vertex(matrix, (float) x0, (float) y0, 0.0F).color(cr, cg, cb, ca).endVertex();
     }
 }

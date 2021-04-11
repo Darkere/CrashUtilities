@@ -1,7 +1,6 @@
 package com.darkere.crashutils.DataStructures;
 
 import com.darkere.crashutils.CrashUtils;
-import com.darkere.crashutils.ServerConfig;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.commons.io.FilenameUtils;
@@ -28,7 +27,7 @@ public class PlayerActivityHistory {
     public PlayerActivityHistory(ServerWorld world) {
         long current = Instant.now().getEpochSecond();
         try {
-            Files.list(world.getServer().playerDataManager.getPlayerDataFolder().toPath()).forEach(x -> {
+            Files.list(world.getServer().playerDataStorage.getPlayerDataFolder().toPath()).forEach(x -> {
                 if (x.toFile().isDirectory()
                         || x.getFileName().toString().endsWith("old")
                         || !x.getFileName().toString().endsWith("dat")) {
@@ -43,7 +42,7 @@ public class PlayerActivityHistory {
                 long diff = current - fileTime;
                 if (diff < monthTime) {
                     String uuid = FilenameUtils.removeExtension(x.getFileName().toString());
-                    GameProfile profile = world.getServer().getPlayerProfileCache().getProfileByUUID(UUID.fromString(uuid));
+                    GameProfile profile = world.getServer().getProfileCache().get(UUID.fromString(uuid));
                     if (profile == null) return;
                     String playerName = profile.getName();
                     month.add(playerName);

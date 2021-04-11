@@ -29,19 +29,19 @@ public class UnstuckCommand implements Command<CommandSource> {
     @Override
     public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
         String name = StringArgumentType.getString(context, "name");
-        ServerPlayerEntity player = context.getSource().getServer().getPlayerList().getPlayerByUsername(name);
+        ServerPlayerEntity player = context.getSource().getServer().getPlayerList().getPlayerByName(name);
         if (player == null) {
             WorldUtils.applyToPlayer(name, context.getSource().getServer(), (fakePlayer) -> {
-                ServerWorld overworld = context.getSource().getServer().getWorld(World.OVERWORLD);
-                BlockPos spawn = overworld.getSpawnPoint();
-                fakePlayer.setWorld(overworld);
-                fakePlayer.setPosition(spawn.getX(), spawn.getY(), spawn.getZ());
+                ServerWorld overworld = context.getSource().getServer().getLevel(World.OVERWORLD);
+                BlockPos spawn = overworld.getSharedSpawnPos();
+                fakePlayer.setLevel(overworld);
+                fakePlayer.setPos(spawn.getX(), spawn.getY(), spawn.getZ());
             });
         } else {
-            BlockPos p = context.getSource().getServer().getWorld(World.OVERWORLD).getSpawnPoint();
-            WorldUtils.teleportPlayer(player, player.getServerWorld(), player.getServer().getWorld(World.OVERWORLD), p);
+            BlockPos p = context.getSource().getServer().getLevel(World.OVERWORLD).getSharedSpawnPos();
+            WorldUtils.teleportPlayer(player, player.getLevel(), player.getServer().getLevel(World.OVERWORLD), p);
         }
-        context.getSource().sendFeedback(new StringTextComponent("Sent Player " + name + " to Spawn"), true);
+        context.getSource().sendSuccess(new StringTextComponent("Sent Player " + name + " to Spawn"), true);
         return 0;
     }
 

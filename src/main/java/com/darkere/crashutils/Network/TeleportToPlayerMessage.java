@@ -20,25 +20,25 @@ public class TeleportToPlayerMessage {
     }
 
     public static void encode(TeleportToPlayerMessage data, PacketBuffer buf) {
-        buf.writeString(data.name);
+        buf.writeUtf(data.name);
     }
 
 
     public static TeleportToPlayerMessage decode(PacketBuffer buf) {
-        return new TeleportToPlayerMessage(buf.readString(100));
+        return new TeleportToPlayerMessage(buf.readUtf(100));
     }
 
     public static void handle(TeleportToPlayerMessage data, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayerEntity player = ctx.get().getSender();
             if (player == null) return;
-            if (!player.hasPermissionLevel(2)) return;
-            World ori = player.getEntityWorld();
+            if (!player.hasPermissions(2)) return;
+            World ori = player.getCommandSenderWorld();
             AtomicReference<World> dest = new AtomicReference<>();
             AtomicReference<BlockPos> otherPos = new AtomicReference<>();
             WorldUtils.applyToPlayer(data.name, player.server, o -> {
-                dest.set(o.getEntityWorld());
-                otherPos.set(o.getPosition());
+                dest.set(o.getCommandSenderWorld());
+                otherPos.set(o.blockPosition());
             });
             if (otherPos.get() == null) {
                 player.sendMessage(new StringTextComponent("Failed to load Player"), new UUID(0, 0));

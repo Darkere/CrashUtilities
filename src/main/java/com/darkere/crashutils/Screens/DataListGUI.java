@@ -27,7 +27,7 @@ public class DataListGUI extends CUContentPane {
         screen.topDropDowns.add(SELECTOR);
         SELECTOR.setEnabled(true);
         loader.loadOrderedEntityList(false);
-        filterWidget = new TextFieldWidget(Minecraft.getInstance().fontRenderer, centerX - 107, centerY - 104, 150, Minecraft.getInstance().fontRenderer.FONT_HEIGHT + 2, new StringTextComponent("Filter"));
+        filterWidget = new TextFieldWidget(Minecraft.getInstance().font, centerX - 107, centerY - 104, 150, Minecraft.getInstance().font.lineHeight + 2, new StringTextComponent("Filter"));
         filterWidget.setResponder(r -> loader.currentList.updateFilter(r));
     }
 

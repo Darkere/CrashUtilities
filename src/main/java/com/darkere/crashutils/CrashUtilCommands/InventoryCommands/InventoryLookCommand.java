@@ -24,30 +24,30 @@ public class InventoryLookCommand {
 
     public static int printInventory(CommandContext<CommandSource> context, String name) {
         WorldUtils.applyToPlayer(name, context.getSource().getServer(), (playerEntity) -> {
-            context.getSource().sendFeedback(CommandUtils.coloredComponent("Offhand", TextFormatting.DARK_AQUA), true);
-            for (int i = 0; i < playerEntity.inventory.offHandInventory.size(); i++) {
-                if (!playerEntity.inventory.offHandInventory.get(i).isEmpty()) {
-                    CommandUtils.sendItemInventoryRemovalMessage(context.getSource(), name, playerEntity.inventory.offHandInventory.get(i), "offhand", i);
+            context.getSource().sendSuccess(CommandUtils.coloredComponent("Offhand", TextFormatting.DARK_AQUA), true);
+            for (int i = 0; i < playerEntity.inventory.offhand.size(); i++) {
+                if (!playerEntity.inventory.offhand.get(i).isEmpty()) {
+                    CommandUtils.sendItemInventoryRemovalMessage(context.getSource(), name, playerEntity.inventory.offhand.get(i), "offhand", i);
                 }
             }
-            context.getSource().sendFeedback(CommandUtils.coloredComponent("Armor", TextFormatting.DARK_AQUA), true);
-            for (int i = 0; i < playerEntity.inventory.armorInventory.size(); i++) {
-                if (!playerEntity.inventory.armorInventory.get(i).isEmpty()) {
-                    CommandUtils.sendItemInventoryRemovalMessage(context.getSource(), name, playerEntity.inventory.armorInventory.get(i), "armor", i);
+            context.getSource().sendSuccess(CommandUtils.coloredComponent("Armor", TextFormatting.DARK_AQUA), true);
+            for (int i = 0; i < playerEntity.inventory.armor.size(); i++) {
+                if (!playerEntity.inventory.armor.get(i).isEmpty()) {
+                    CommandUtils.sendItemInventoryRemovalMessage(context.getSource(), name, playerEntity.inventory.armor.get(i), "armor", i);
                 }
             }
-            context.getSource().sendFeedback(CommandUtils.coloredComponent("Inventory", TextFormatting.DARK_AQUA), true);
-            for (int i = 0; i < playerEntity.inventory.mainInventory.size(); i++) {
-                if (!playerEntity.inventory.mainInventory.get(i).isEmpty()) {
-                    CommandUtils.sendItemInventoryRemovalMessage(context.getSource(), name, playerEntity.inventory.mainInventory.get(i), "inventory", i);
+            context.getSource().sendSuccess(CommandUtils.coloredComponent("Inventory", TextFormatting.DARK_AQUA), true);
+            for (int i = 0; i < playerEntity.inventory.items.size(); i++) {
+                if (!playerEntity.inventory.items.get(i).isEmpty()) {
+                    CommandUtils.sendItemInventoryRemovalMessage(context.getSource(), name, playerEntity.inventory.items.get(i), "inventory", i);
                 }
             }
             if (CrashUtils.curiosLoaded) {
-                context.getSource().sendFeedback(CommandUtils.coloredComponent("Curios", TextFormatting.DARK_AQUA), true);
+                context.getSource().sendSuccess(CommandUtils.coloredComponent("Curios", TextFormatting.DARK_AQUA), true);
                 LazyOptional<ICuriosItemHandler> itemHandler = CuriosApi.getCuriosHelper().getCuriosHandler(playerEntity);
                 ICuriosItemHandler handler = itemHandler.orElse(null);
                 handler.getCurios().forEach((k, v) -> {
-                    context.getSource().sendFeedback(CommandUtils.coloredComponent(k, TextFormatting.DARK_AQUA), true);
+                    context.getSource().sendSuccess(CommandUtils.coloredComponent(k, TextFormatting.DARK_AQUA), true);
                     for (int i = 0; i < v.getSlots(); i++) {
                         if (!v.getStacks().getStackInSlot(i).isEmpty()) {
                             CommandUtils.sendItemInventoryRemovalMessage(context.getSource(), name, v.getStacks().getStackInSlot(i), k, i);

@@ -25,17 +25,17 @@ public class ActivityCommand {
     }
 
     private static int listActivity(CommandContext<CommandSource> context) {
-        PlayerActivityHistory history = new PlayerActivityHistory(context.getSource().getWorld());
-        context.getSource().sendFeedback(new StringTextComponent("Number of Players active in the last:"), false);
-        context.getSource().sendFeedback(new StringTextComponent("Day: " + history.getDay().size() + " unique players"), false);
-        context.getSource().sendFeedback(new StringTextComponent("Week: " + history.getWeek().size() + " unique players"), false);
-        context.getSource().sendFeedback(new StringTextComponent("Month: " + history.getMonth().size() + " unique players"), false);
+        PlayerActivityHistory history = new PlayerActivityHistory(context.getSource().getLevel());
+        context.getSource().sendSuccess(new StringTextComponent("Number of Players active in the last:"), false);
+        context.getSource().sendSuccess(new StringTextComponent("Day: " + history.getDay().size() + " unique players"), false);
+        context.getSource().sendSuccess(new StringTextComponent("Week: " + history.getWeek().size() + " unique players"), false);
+        context.getSource().sendSuccess(new StringTextComponent("Month: " + history.getMonth().size() + " unique players"), false);
         return 1;
     }
 
     private static int listActivityByDate(CommandContext<CommandSource> context, String time) {
-        PlayerActivityHistory history = new PlayerActivityHistory(context.getSource().getServer().getWorld(World.OVERWORLD));
-        context.getSource().sendFeedback(new StringTextComponent("Active Players in the last " + time), false);
+        PlayerActivityHistory history = new PlayerActivityHistory(context.getSource().getServer().getLevel(World.OVERWORLD));
+        context.getSource().sendSuccess(new StringTextComponent("Active Players in the last " + time), false);
         StringBuilder b = new StringBuilder();
         switch (time) {
             case "month":
@@ -57,7 +57,7 @@ public class ActivityCommand {
                 });
                 break;
         }
-        context.getSource().sendFeedback(new StringTextComponent(b.toString()), false);
+        context.getSource().sendSuccess(new StringTextComponent(b.toString()), false);
         return 1;
     }
 

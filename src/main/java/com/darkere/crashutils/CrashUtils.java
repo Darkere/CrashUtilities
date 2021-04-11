@@ -86,7 +86,7 @@ public class CrashUtils {
 
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server != null) {
-            ServerWorld world = server.getWorld(World.OVERWORLD);
+            ServerWorld world = server.getLevel(World.OVERWORLD);
             if (world != null) {
                 setupFtbChunksUnloading(world);
             }
@@ -102,7 +102,7 @@ public class CrashUtils {
         CommandNode<CommandSource> inventoryCommands = InventoryCommands.register();
 
         LiteralCommandNode<CommandSource> cmd = dispatcher.register(LiteralArgumentBuilder.<CommandSource>literal(MODID)
-                .requires(x -> x.hasPermissionLevel(2))
+                .requires(x -> x.hasPermission(2))
                 .then(TeleportCommand.register())
                 .then(UnstuckCommand.register())
                 .then(MemoryCommand.register())
@@ -124,7 +124,7 @@ public class CrashUtils {
 
         );
         dispatcher.register(Commands.literal("cu")
-                .requires(x -> x.hasPermissionLevel(2))
+                .requires(x -> x.hasPermission(2))
                 .redirect(cmd)
         );
 
@@ -135,7 +135,7 @@ public class CrashUtils {
         //ClearItemTask.restart();
         //MemoryChecker.restart();
 
-        setupFtbChunksUnloading(event.getServer().getWorld(World.OVERWORLD));
+        setupFtbChunksUnloading(event.getServer().getLevel(World.OVERWORLD));
     }
 
     private void setupFtbChunksUnloading(ServerWorld world) {
@@ -149,7 +149,7 @@ public class CrashUtils {
                     LOGGER.info(history.getPlayersInChunkClearTime() + " Player(s) affected ");
                     for (String player : history.getPlayersInChunkClearTime()) {
                         LOGGER.info("Unloading " + player + "'s Chunks");
-                        world.getServer().getCommandManager().handleCommand(world.getServer().getCommandSource(),
+                        world.getServer().getCommands().performCommand(world.getServer().createCommandSourceStack(),
                                 "ftbchunks unload_all " + player);
                     }
                 }
@@ -169,7 +169,7 @@ public class CrashUtils {
 
     @SubscribeEvent
     public void onWorldTick(TickEvent.WorldTickEvent event) {
-        if (event.world.isRemote && event.phase != TickEvent.Phase.END) return;
+        if (event.world.isClientSide && event.phase != TickEvent.Phase.END) return;
 
         if (!runnables.isEmpty()) {
             if (skipNext) {

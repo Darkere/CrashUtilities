@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class RemoveEntitiesCommand {
-    private static final SuggestionProvider<CommandSource> sugg = (ctx, builder) -> ISuggestionProvider.func_212476_a(ForgeRegistries.ENTITIES.getKeys().stream(), builder);
+    private static final SuggestionProvider<CommandSource> sugg = (ctx, builder) -> ISuggestionProvider.suggestResource(ForgeRegistries.ENTITIES.getKeys().stream(), builder);
     private static final SuggestionProvider<CommandSource> boolsugg = (ctx, builder) -> ISuggestionProvider.suggest(Collections.singletonList("force"), builder);
     private static int counter = 0;
 
@@ -29,11 +29,11 @@ public class RemoveEntitiesCommand {
         return Commands.literal("remove")
             .executes(ctx -> removeEntities(ctx, null))
             .then(Commands.literal("byType")
-                .then(Commands.argument("type", ResourceLocationArgument.resourceLocation())
+                .then(Commands.argument("type", ResourceLocationArgument.id())
                     .suggests(sugg)
                     .then(Commands.argument("force", StringArgumentType.word())
                         .suggests(boolsugg)
-                        .executes(ctx -> removeEntities(ctx, ResourceLocationArgument.getResourceLocation(ctx, "type"))))))
+                        .executes(ctx -> removeEntities(ctx, ResourceLocationArgument.getId(ctx, "type"))))))
             .then(Commands.literal("items")
                 .then(Commands.argument("force", StringArgumentType.word())
                     .suggests(boolsugg))
@@ -102,7 +102,7 @@ public class RemoveEntitiesCommand {
     private static int removeMonsters(CommandContext<CommandSource> context) {
         counter = 0;
         List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
-        worlds.forEach(world -> world.getEntities().filter(x -> x.getType().getClassification() == EntityClassification.MONSTER).forEach(x -> removeEntity(context, world, x)));
+        worlds.forEach(world -> world.getEntities().filter(x -> x.getType().getCategory() == EntityClassification.MONSTER).forEach(x -> removeEntity(context, world, x)));
         respond(context);
         return 1;
     }
@@ -125,6 +125,6 @@ public class RemoveEntitiesCommand {
     }
 
     private static void respond(CommandContext<CommandSource> context) {
-        context.getSource().sendFeedback(new StringTextComponent("Removed " + counter + " Entities"), true);
+        context.getSource().sendSuccess(new StringTextComponent("Removed " + counter + " Entities"), true);
     }
 }

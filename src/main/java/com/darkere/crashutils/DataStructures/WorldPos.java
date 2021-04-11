@@ -20,12 +20,12 @@ public class WorldPos {
     }
 
     public static WorldPos getPosFromEntity(Entity entity) {
-        return new WorldPos(new BlockPos(entity.getPositionVec()), entity.getEntityWorld().getDimensionKey(), entity.getUniqueID());
+        return new WorldPos(new BlockPos(entity.position()), entity.getCommandSenderWorld().dimension(), entity.getUUID());
     }
 
     public static WorldPos getPosFromTileEntity(TileEntity entity) {
-        if (entity.getWorld() == null) return null;
-        return new WorldPos(entity.getPos(), entity.getWorld().getDimensionKey(), UUID.randomUUID());
+        if (entity.getLevel() == null) return null;
+        return new WorldPos(entity.getBlockPos(), entity.getLevel().dimension(), UUID.randomUUID());
     }
 
     public UUID getID() {

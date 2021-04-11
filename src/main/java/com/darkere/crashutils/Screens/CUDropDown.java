@@ -58,9 +58,9 @@ public class CUDropDown extends AbstractGui {
         } else {
             this.width = width;
         }
-        widget = new TextFieldWidget(Minecraft.getInstance().fontRenderer, this.posX, this.posY, this.width, height, new StringTextComponent(selected));
-        widget.setText(selected);
-        widget.setCursorPositionZero();
+        widget = new TextFieldWidget(Minecraft.getInstance().font, this.posX, this.posY, this.width, height, new StringTextComponent(selected));
+        widget.setValue(selected);
+        widget.moveCursorToStart();
         maxOffset = options.size() - fitOnScreen;
         if (maxOffset < 0) maxOffset = 0;
 
@@ -95,7 +95,7 @@ public class CUDropDown extends AbstractGui {
             }
         }
         FillMany.fillMany(TransformationMatrix.identity().getMatrix(), list);
-        FillMany.drawStrings(stack, Minecraft.getInstance().fontRenderer, strings);
+        FillMany.drawStrings(stack, Minecraft.getInstance().font, strings);
 
     }
 
@@ -105,7 +105,7 @@ public class CUDropDown extends AbstractGui {
 
     public void updateFilter() {
         if (!isEnabled) return;
-        String f = widget.getText();
+        String f = widget.getValue();
         options.clear();
         options.addAll(allOptions);
         if (allOption) options.add("all");
@@ -138,7 +138,7 @@ public class CUDropDown extends AbstractGui {
     private void updateWidth() {
         if (!allOptions.isEmpty()) {
             String longest = allOptions.stream().max(Comparator.comparingInt(String::length)).orElseGet(() -> "minecraft:baselength");
-            width = Minecraft.getInstance().fontRenderer.getStringWidth(longest) + 4;
+            width = Minecraft.getInstance().font.width(longest) + 4;
         } else {
             width = 30;
         }
@@ -152,19 +152,19 @@ public class CUDropDown extends AbstractGui {
     }
 
     public void setFilter(String filter) {
-        widget.setText(filter);
+        widget.setValue(filter);
         updateFilter();
     }
 
     public void setExpanded(boolean expanded) {
         if (!alwaysExpanded) {
             this.expanded = expanded;
-            widget.setFocused2(expanded);
-            widget.setEnabled(expanded);
+            widget.setFocus(expanded);
+            widget.setEditable(expanded);
         } else {
             this.expanded = true;
-            widget.setFocused2(true);
-            widget.setEnabled(true);
+            widget.setFocus(true);
+            widget.setEditable(true);
         }
 
     }
@@ -178,8 +178,8 @@ public class CUDropDown extends AbstractGui {
         if (alwaysExpanded) {
             if (GuiTools.inArea(x, y, posX, posY, posX + width, posY + height)) {
                 setExpanded(true);
-                oldFilter = widget.getText();
-                widget.setText("");
+                oldFilter = widget.getValue();
+                widget.setValue("");
                 updateFilter();
             }
         }
@@ -187,7 +187,7 @@ public class CUDropDown extends AbstractGui {
             if (!GuiTools.inArea(x, y, posX, posY + height, posX + width, posY + strings.size() * height + height)) {
                 setExpanded(false);
                 this.currentOffset = 0;
-                if (widget.getText().isEmpty()) widget.setText(oldFilter);
+                if (widget.getValue().isEmpty()) widget.setValue(oldFilter);
                 if (alwaysExpanded) return false;
                 return true;
             } else {
@@ -199,7 +199,7 @@ public class CUDropDown extends AbstractGui {
                             options.add(selected);
                         }
                         selected = options.get(se - 1 + currentOffset);
-                        widget.setText(selected);
+                        widget.setValue(selected);
                         options.remove(selected);
                         parent.updateSelection(type, selected);
                     } else {
@@ -213,8 +213,8 @@ public class CUDropDown extends AbstractGui {
         } else {
             if (GuiTools.inArea(x, y, posX, posY, posX + width, posY + height)) {
                 setExpanded(true);
-                oldFilter = widget.getText();
-                widget.setText("");
+                oldFilter = widget.getValue();
+                widget.setValue("");
                 updateFilter();
 
                 return true;

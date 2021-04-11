@@ -33,20 +33,20 @@ public class GetLogCommand {
         if (archivedLog != null) {
             uploadString(context, archivedLog, LogHandler.getStringFromArchive(archivedLog));
         } else {
-            context.getSource().sendFeedback(new StringTextComponent("No Archived Log found"), true);
+            context.getSource().sendSuccess(new StringTextComponent("No Archived Log found"), true);
         }
         return 1;
     }
 
     private static void uploadString(CommandContext<CommandSource> context, Path logPath, String text) {
-        context.getSource().sendFeedback(new StringTextComponent("Uploading..."), false);
+        context.getSource().sendSuccess(new StringTextComponent("Uploading..."), false);
         String description = "Log Created " + LogHandler.getRelativePathDateInMin(logPath) + "min before upload";
         String url = LogHandler.uploadLog(description, logPath.getFileName().toString(), text);
         if (url.startsWith("https")) {
-            context.getSource().sendFeedback(CommandUtils.createURLComponent(url, url), true);
+            context.getSource().sendSuccess(CommandUtils.createURLComponent(url, url), true);
         } else {
-            context.getSource().sendFeedback(new StringTextComponent("Upload Failed: " + url), true);
-            context.getSource().sendFeedback(new StringTextComponent("Try again or use Copy"), true);
+            context.getSource().sendSuccess(new StringTextComponent("Upload Failed: " + url), true);
+            context.getSource().sendSuccess(new StringTextComponent("Try again or use Copy"), true);
         }
     }
 
@@ -59,7 +59,7 @@ public class GetLogCommand {
     private static int uploadCrashReport(CommandContext<CommandSource> context) {
         Path crashreport = LogHandler.getLatestCrashReportPath();
         if (crashreport == null) {
-            context.getSource().sendFeedback(new StringTextComponent("No crash report found"), true);
+            context.getSource().sendSuccess(new StringTextComponent("No crash report found"), true);
             return 1;
         }
         uploadString(context, crashreport, LogHandler.getFileAsStringFromPath(crashreport));
@@ -68,23 +68,23 @@ public class GetLogCommand {
 
 
     private static int getLogOverview(CommandContext<CommandSource> ctx) {
-        IFormattableTextComponent latestlogText = new StringTextComponent("Log from current Game").mergeStyle(TextFormatting.YELLOW);
+        IFormattableTextComponent latestlogText = new StringTextComponent("Log from current Game").withStyle(TextFormatting.YELLOW);
         latestlogText.append(CommandUtils.getCommandTextComponent(" [Upload]", "/cu getLog uploadLatestLog"));
         latestlogText.append(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getFileAsStringFromPath(LogHandler.latestlog)));
-        ctx.getSource().sendFeedback(latestlogText, true);
+        ctx.getSource().sendSuccess(latestlogText, true);
         Path crashreport = LogHandler.getLatestCrashReportPath();
         if (crashreport != null) {
-            IFormattableTextComponent crashreporttext = new StringTextComponent("Latest Crash Report ").mergeStyle(TextFormatting.RED).append(new StringTextComponent(LogHandler.getRelativePathDateInMin(crashreport) + " Minutes old").mergeStyle(TextFormatting.AQUA));
+            IFormattableTextComponent crashreporttext = new StringTextComponent("Latest Crash Report ").withStyle(TextFormatting.RED).append(new StringTextComponent(LogHandler.getRelativePathDateInMin(crashreport) + " Minutes old").withStyle(TextFormatting.AQUA));
             crashreporttext.append(CommandUtils.getCommandTextComponent(" [Upload]", "/cu getLog uploadCrashReport"));
             crashreporttext.append(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getFileAsStringFromPath(crashreport)));
-            ctx.getSource().sendFeedback(crashreporttext, true);
+            ctx.getSource().sendSuccess(crashreporttext, true);
         }
         Path archivedLog = LogHandler.getLatestArchivedLogPath();
         if (archivedLog != null) {
-            IFormattableTextComponent archivedText = new StringTextComponent("Archived Latest.log ").mergeStyle(TextFormatting.GREEN).append(new StringTextComponent(LogHandler.getRelativePathDateInMin(archivedLog) + " Minutes old").mergeStyle(TextFormatting.AQUA));
+            IFormattableTextComponent archivedText = new StringTextComponent("Archived Latest.log ").withStyle(TextFormatting.GREEN).append(new StringTextComponent(LogHandler.getRelativePathDateInMin(archivedLog) + " Minutes old").withStyle(TextFormatting.AQUA));
             archivedText.append(CommandUtils.getCommandTextComponent(" [Upload]", "/cu getLog uploadArchivedLog"));
             archivedText.append(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getStringFromArchive(archivedLog)));
-            ctx.getSource().sendFeedback(archivedText, true);
+            ctx.getSource().sendSuccess(archivedText, true);
         }
         return 1;
 

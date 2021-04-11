@@ -47,43 +47,43 @@ public class LoadedChunkData {
 
     public void init(List<ServerWorld> worlds) {
         for (World world : worlds) {
-            ChunkManager chunkManager = ((ServerChunkProvider) world.getChunkProvider()).chunkManager;
-            TicketManager ticketManager = chunkManager.getTicketManager();
-            total += chunkManager.getLoadedChunkCount();
-            Iterable<ChunkHolder> chunkHolders = chunkManager.getLoadedChunksIterable();
+            ChunkManager chunkManager = ((ServerChunkProvider) world.getChunkSource()).chunkMap;
+            TicketManager ticketManager = chunkManager.getDistanceManager();
+            total += chunkManager.size();
+            Iterable<ChunkHolder> chunkHolders = chunkManager.getChunks();
             chunkHolders.forEach(chunkHolder -> {
-                IChunk chunk = chunkHolder.func_219287_e();
+                IChunk chunk = chunkHolder.getLastAvailable();
                 if (chunk == null) {
-                    chunksByLocationType.merge("PRIMED", new HashSet<>(Collections.singletonList(chunkHolder.getPosition())), (list, newer) -> {
-                        list.add(chunkHolder.getPosition());
+                    chunksByLocationType.merge("PRIMED", new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (list, newer) -> {
+                        list.add(chunkHolder.getPos());
                         return list;
                     });
                 } else {
                     if (chunk instanceof Chunk) {
                         Chunk actualChunk = (Chunk) chunk;
-                        chunksByLocationType.merge(actualChunk.getLocationType().toString(), new HashSet<>(Collections.singletonList(chunkHolder.getPosition())), (list, newer) -> {
-                            list.add(chunkHolder.getPosition());
+                        chunksByLocationType.merge(actualChunk.getFullStatus().toString(), new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (list, newer) -> {
+                            list.add(chunkHolder.getPos());
                             return list;
                         });
                     } else {
                         if (chunk instanceof ChunkPrimer) {
-                            chunksByLocationType.merge(chunk.getStatus().getName().equals("full") ? "FULL" : "PARTIALLYGENERATED", new HashSet<>(Collections.singletonList(chunkHolder.getPosition())), (list, newer) -> {
-                                list.add(chunkHolder.getPosition());
+                            chunksByLocationType.merge(chunk.getStatus().getName().equals("full") ? "FULL" : "PARTIALLYGENERATED", new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (list, newer) -> {
+                                list.add(chunkHolder.getPos());
                                 return list;
                             });
                         }
 
                     }
                 }
-                SortedArraySet<Ticket<?>> tickets = ticketManager.getTicketSet(chunkHolder.getPosition().asLong());
+                SortedArraySet<Ticket<?>> tickets = ticketManager.getTickets(chunkHolder.getPos().toLong());
                 if (tickets.isEmpty()) {
-                    chunksByTicketName.merge("no_ticket", new HashSet<>(Collections.singletonList(chunkHolder.getPosition())), (old, nothing) -> {
-                        old.add(chunkHolder.getPosition());
+                    chunksByTicketName.merge("no_ticket", new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (old, nothing) -> {
+                        old.add(chunkHolder.getPos());
                         return old;
                     });
                 } else {
-                    tickets.forEach(ticket -> chunksByTicketName.merge(ticket.getType().toString(), new HashSet<>(Collections.singletonList(chunkHolder.getPosition())), (old, nothing) -> {
-                        old.add(chunkHolder.getPosition());
+                    tickets.forEach(ticket -> chunksByTicketName.merge(ticket.getType().toString(), new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (old, nothing) -> {
+                        old.add(chunkHolder.getPos());
                         return old;
                     }));
                 }
@@ -93,12 +93,12 @@ public class LoadedChunkData {
     }
 
     public void reply(CommandSource source) {
-        source.sendFeedback(new StringTextComponent("Total loaded Chunks: " + total), true);
-        source.sendFeedback(new StringTextComponent("Loaded Chunks by Type: "), true);
+        source.sendSuccess(new StringTextComponent("Total loaded Chunks: " + total), true);
+        source.sendSuccess(new StringTextComponent("Loaded Chunks by Type: "), true);
         chunksByLocationType.forEach((x, y) -> {
             CommandUtils.sendCommandMessage(source, new StringTextComponent(x + " : " + y.size()), "/cu loadedChunks byLocation " + x, true);
         });
-        source.sendFeedback(new StringTextComponent("Loaded Chunks by Ticket: "), true);
+        source.sendSuccess(new StringTextComponent("Loaded Chunks by Ticket: "), true);
         chunksByTicketName.forEach((x, y) -> {
             CommandUtils.sendCommandMessage(source, new StringTextComponent(x + " : " + y.size()), "/cu loadedChunks byTicket " + x, true);
         });
@@ -106,20 +106,20 @@ public class LoadedChunkData {
     }
 
     public void replyWithLocation(CommandSource source, String word) throws CommandSyntaxException {
-        source.sendFeedback(new StringTextComponent("Chunks with LocationType " + word), true);
+        source.sendSuccess(new StringTextComponent("Chunks with LocationType " + word), true);
         sendChunkPositions(source, chunksByLocationType.get(word));
     }
 
     private void sendChunkPositions(CommandSource source, Set<ChunkPos> chunks) throws CommandSyntaxException {
         for (ChunkPos chunkPos : chunks) {
-            BlockPos pos = chunkPos.asBlockPos();
-            CommandUtils.sendCommandMessage(source, new StringTextComponent(chunkPos.toString()), "/cu tp " + (source.getEntity() instanceof PlayerEntity ? source.asPlayer().getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ(), true);
+            BlockPos pos = chunkPos.getWorldPosition();
+            CommandUtils.sendCommandMessage(source, new StringTextComponent(chunkPos.toString()), "/cu tp " + (source.getEntity() instanceof PlayerEntity ? source.getPlayerOrException().getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ(), true);
         }
     }
 
     public void replyWithTicket(CommandSource source, String word) throws CommandSyntaxException {
         Set<ChunkPos> chunks = chunksByTicketName.get(word);
-        source.sendFeedback(new StringTextComponent("Chunks with " + word + " Ticket"), true);
+        source.sendSuccess(new StringTextComponent("Chunks with " + word + " Ticket"), true);
         sendChunkPositions(source, chunks);
     }
 

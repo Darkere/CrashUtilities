@@ -18,7 +18,7 @@ public class AllLoadedTEsCommand implements Command<CommandSource> {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("list")
-            .then(Commands.argument("dim", DimensionArgument.getDimension())
+            .then(Commands.argument("dim", DimensionArgument.dimension())
                 .executes(cmd))
             .executes(cmd);
 

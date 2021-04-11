@@ -17,6 +17,6 @@ public class GuiTools {
     public static void drawTextToolTip(MatrixStack stack, String s, int x, int y, Screen screen) {
         List<StringTextComponent> text = new ArrayList<>();
         text.add(new StringTextComponent(s));
-        GuiUtils.drawHoveringText(stack, text, x, y, screen.width, screen.height, -1, Minecraft.getInstance().fontRenderer);
+        GuiUtils.drawHoveringText(stack, text, x, y, screen.width, screen.height, -1, Minecraft.getInstance().font);
     }
 }

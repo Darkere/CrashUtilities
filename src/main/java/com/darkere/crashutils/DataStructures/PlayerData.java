@@ -13,7 +13,7 @@ public class PlayerData {
     List<String> playerNames = new ArrayList<>();
 
     public void createLists(List<ServerWorld> worlds) {
-        playerNames = worlds.get(0).getServer().getPlayerProfileCache().func_242117_a(1000).map(e -> e.getGameProfile().getName()).collect(Collectors.toList());
+        playerNames = worlds.get(0).getServer().getProfileCache().getTopMRUProfiles(1000).map(e -> e.getProfile().getName()).collect(Collectors.toList());
     }
 
     public List<String> getPlayerNames(String requestingPlayer) {
@@ -32,8 +32,8 @@ public class PlayerData {
         playerNames.remove(requestingPlayer);
         List<CUOption> list = new ArrayList<>();
         for (String name : playerNames) {
-            list.add(new CUOption(name, !Minecraft.getInstance().isSingleplayer() && Minecraft.getInstance().getCurrentServerData() != null &&
-                    Minecraft.getInstance().getCurrentServerData().playerList.stream().map(ITextComponent::getString).anyMatch(name::equals) ? "(online)" : null));
+            list.add(new CUOption(name, !Minecraft.getInstance().hasSingleplayerServer() && Minecraft.getInstance().getCurrentServer() != null &&
+                    Minecraft.getInstance().getCurrentServer().playerList != null &&  Minecraft.getInstance().getCurrentServer().playerList.stream().map(ITextComponent::getString).anyMatch(name::equals) ? "( online)" : null));
         }
         return list;
     }

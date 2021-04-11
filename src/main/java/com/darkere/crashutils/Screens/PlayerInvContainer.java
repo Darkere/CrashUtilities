@@ -33,13 +33,13 @@ public class PlayerInvContainer extends Container {
     public PlayerInvContainer(PlayerEntity player, PlayerEntity otherPlayer, int id, String otherPlayerName, Map<String, Integer> slotAmounts, int curioSlotcount) {
         super(null, id);
         this.otherPlayerName = otherPlayerName;
-        this.world = player.getEntityWorld();
+        this.world = player.getCommandSenderWorld();
         this.player = player;
         this.playerInventory = new InvWrapper(player.inventory);
         if (otherPlayer == null) {
             Inventory i = new Inventory(41) {
                 @Override
-                public boolean isItemValidForSlot(int index, ItemStack stack) {
+                public boolean canPlaceItem(int index, ItemStack stack) {
                     if (index == 36) {
                         return stack.canEquip(EquipmentSlotType.FEET, player);
                     } else if (index == 37) {
@@ -85,7 +85,7 @@ public class PlayerInvContainer extends Container {
             int finalI = 36 + i;
             addSlot(new SlotItemHandler(playerInventory, finalI, x, y) {
                 @Override
-                public boolean isItemValid(@Nonnull ItemStack stack) {
+                public boolean mayPlace(@Nonnull ItemStack stack) {
                     if (finalI == 36) {
                         return stack.canEquip(EquipmentSlotType.FEET, player);
                     } else if (finalI == 37) {
@@ -146,7 +146,7 @@ public class PlayerInvContainer extends Container {
     }
 
     @Override
-    public boolean canInteractWith(PlayerEntity playerIn) {
+    public boolean stillValid(PlayerEntity playerIn) {
         return true;
     }
 
@@ -177,16 +177,16 @@ public class PlayerInvContainer extends Container {
     }
 
     @Override
-    public void onContainerClosed(PlayerEntity playerIn) {
-        super.onContainerClosed(playerIn);
+    public void removed(PlayerEntity playerIn) {
+        super.removed(playerIn);
 
-        if (!world.isRemote() && !playerIn.getServer().getPlayerList().getPlayers().contains(otherPlayer)) {
-            ((ServerWorld) world).getServer().playerDataManager.savePlayerData(otherPlayer);
+        if (!world.isClientSide() && !playerIn.getServer().getPlayerList().getPlayers().contains(otherPlayer)) {
+            ((ServerWorld) world).getServer().playerDataStorage.save(otherPlayer);
         }
     }
 
     @Override
-    public ItemStack transferStackInSlot(PlayerEntity playerIn, int index) {
+    public ItemStack quickMoveStack(PlayerEntity playerIn, int index) {
         return ItemStack.EMPTY;
     }
 }

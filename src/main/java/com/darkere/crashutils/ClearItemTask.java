@@ -72,9 +72,9 @@ public class ClearItemTask extends TimerTask {
                         int size = list.size();
                         if (size > maxItems) {
                             list.forEach(Entity::remove);
-                            world.getServer().sendMessage(new StringTextComponent(size + " Items cleared"), Util.DUMMY_UUID);
+                            world.getServer().sendMessage(new StringTextComponent(size + " Items cleared"), Util.NIL_UUID);
                         } else {
-                            world.getServer().sendMessage(new StringTextComponent("Item Clear prevented. Only " + size + " items on the ground"), Util.DUMMY_UUID);
+                            world.getServer().sendMessage(new StringTextComponent("Item Clear prevented. Only " + size + " items on the ground"), Util.NIL_UUID);
                         }
 
                     }
@@ -82,11 +82,11 @@ public class ClearItemTask extends TimerTask {
 
             }
             String intText = text.replaceFirst("%", integer.toString());
-            ITextComponent message = new StringTextComponent("[=== ").append(new StringTextComponent(intText).mergeStyle(TextFormatting.RED)).append(new StringTextComponent(" ===]"));
+            ITextComponent message = new StringTextComponent("[=== ").append(new StringTextComponent(intText).withStyle(TextFormatting.RED)).append(new StringTextComponent(" ===]"));
             new java.util.Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    world.getServer().sendMessage(message, Util.DUMMY_UUID);
+                    world.getServer().sendMessage(message, Util.NIL_UUID);
                 }
             }, (last - integer) * 1000L);
 
@@ -96,7 +96,7 @@ public class ClearItemTask extends TimerTask {
         if (!CrashUtils.SERVER_CONFIG.getTitle()) return;
         try {
             if (world.getServer().getPlayerList().getPlayers().size() == 0) return;
-            world.getServer().getCommandManager().getDispatcher().execute("title @a title {\"text\":\"" + CrashUtils.SERVER_CONFIG.getTitleText() + "\",\"color\":\"dark_red\"}", world.getServer().getCommandSource());
+            world.getServer().getCommands().getDispatcher().execute("title @a title {\"text\":\"" + CrashUtils.SERVER_CONFIG.getTitleText() + "\",\"color\":\"dark_red\"}", world.getServer().createCommandSourceStack());
         } catch (CommandSyntaxException e) {
             e.printStackTrace();
         }

@@ -14,10 +14,10 @@ public class NetworkTools {
     public static void writeSChPMap(PacketBuffer buf, Map<String, Set<ChunkPos>> map) {
         buf.writeInt(map.size());
         map.forEach((key, value) -> {
-            buf.writeString(key);
+            buf.writeUtf(key);
             buf.writeInt(value.size());
             value.forEach(x -> {
-                buf.writeLong(x.asLong());
+                buf.writeLong(x.toLong());
             });
         });
     }
@@ -26,7 +26,7 @@ public class NetworkTools {
         HashMap<String, Set<ChunkPos>> map = new HashMap<>();
         int mapsize = buf.readInt();
         for (int i = 0; i < mapsize; i++) {
-            String key = buf.readString();
+            String key = buf.readUtf();
             int listsize = buf.readInt();
             Set<ChunkPos> list = new HashSet<>();
             for (int j = 0; j < listsize; j++) {
@@ -38,22 +38,22 @@ public class NetworkTools {
     }
 
     public static void writeWorldKey(RegistryKey<World> worldKey, PacketBuffer buf) {
-        ResourceLocation loc = worldKey.getLocation();
+        ResourceLocation loc = worldKey.location();
         buf.writeResourceLocation(loc);
     }
 
     public static RegistryKey<World> readWorldKey(PacketBuffer buf) {
-        return RegistryKey.getOrCreateKey(Registry.WORLD_KEY, buf.readResourceLocation());
+        return RegistryKey.create(Registry.DIMENSION_REGISTRY, buf.readResourceLocation());
     }
 
     public static void writeWorldPos(WorldPos pos, PacketBuffer buf) {
         buf.writeBlockPos(pos.pos);
         writeWorldKey(pos.type, buf);
-        buf.writeUniqueId(pos.id);
+        buf.writeUUID(pos.id);
     }
 
     public static WorldPos readWorldPos(PacketBuffer buf) {
-        return new WorldPos(buf.readBlockPos(), readWorldKey(buf), buf.readUniqueId());
+        return new WorldPos(buf.readBlockPos(), readWorldKey(buf), buf.readUUID());
     }
 
     public static void writeRLWPMap(Map<ResourceLocation, List<WorldPos>> map, PacketBuffer buf) {

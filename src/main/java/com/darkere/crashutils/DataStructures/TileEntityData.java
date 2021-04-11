@@ -19,7 +19,7 @@ public class TileEntityData extends LocationData {
 
     public TileEntityData() {
         for (Map.Entry<RegistryKey<TileEntityType<?>>, TileEntityType<?>> entry : ForgeRegistries.TILE_ENTITIES.getEntries()) {
-            map.put(entry.getKey().getLocation(), new ArrayList<>());
+            map.put(entry.getKey().location(), new ArrayList<>());
         }
     }
 
@@ -30,8 +30,8 @@ public class TileEntityData extends LocationData {
     public void createLists(List<ServerWorld> worlds) {
         List<TileEntity> tileEntities = new ArrayList<>();
         List<TileEntity> ticking = new ArrayList<>();
-        worlds.forEach(x -> tileEntities.addAll(x.loadedTileEntityList));
-        worlds.forEach(x -> ticking.addAll(x.tickableTileEntities));
+        worlds.forEach(x -> tileEntities.addAll(x.blockEntityList));
+        worlds.forEach(x -> ticking.addAll(x.tickableBlockEntities));
         for (TileEntity tileEntity : tileEntities) {
             WorldPos pos = WorldPos.getPosFromTileEntity(tileEntity);
             if (pos != null) {

@@ -25,24 +25,24 @@ public class RemoveEntityMessage {
 
     public static void encode(RemoveEntityMessage data, PacketBuffer buf) {
         NetworkTools.writeWorldKey(data.worldRegistryKey, buf);
-        buf.writeUniqueId(data.id);
+        buf.writeUUID(data.id);
         buf.writeBoolean(data.tile);
         buf.writeBoolean(data.force);
     }
 
 
     public static RemoveEntityMessage decode(PacketBuffer buf) {
-        return new RemoveEntityMessage(NetworkTools.readWorldKey(buf), buf.readUniqueId(), buf.readBoolean(), buf.readBoolean());
+        return new RemoveEntityMessage(NetworkTools.readWorldKey(buf), buf.readUUID(), buf.readBoolean(), buf.readBoolean());
     }
 
     public static boolean handle(RemoveEntityMessage data, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayerEntity player = ctx.get().getSender();
-            if (player == null || !player.hasPermissionLevel(2)) return;
+            if (player == null || !player.hasPermissions(2)) return;
             if (data.tile) {
-                WorldUtils.removeTileEntity(player.getServer().getWorld(data.worldRegistryKey), data.id, data.force);
+                WorldUtils.removeTileEntity(player.getServer().getLevel(data.worldRegistryKey), data.id, data.force);
             } else {
-                WorldUtils.removeEntity(player.getServer().getWorld(data.worldRegistryKey), data.id, data.force);
+                WorldUtils.removeEntity(player.getServer().getLevel(data.worldRegistryKey), data.id, data.force);
             }
         });
         return true;

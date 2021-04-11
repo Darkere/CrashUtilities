@@ -42,10 +42,10 @@ public class UpdateDataRequestMessage {
     public static void handle(UpdateDataRequestMessage data, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             if (ctx.get().getSender() == null) return;
-            if (!ctx.get().getSender().hasPermissionLevel(2)) return;
+            if (!ctx.get().getSender().hasPermissions(2)) return;
             MinecraftServer server = ctx.get().getSender().getServer();
             if (server == null) return;
-            ServerWorld world = server.getWorld(data.worldKey);
+            ServerWorld world = server.getLevel(data.worldKey);
             List<ServerWorld> worlds = Collections.singletonList(world);
             switch (data.type) {
                 case LOADEDCHUNKDATA: {

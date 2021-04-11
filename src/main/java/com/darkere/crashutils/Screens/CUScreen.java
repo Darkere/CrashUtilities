@@ -69,7 +69,7 @@ public class CUScreen extends Screen {
     @Override
     public void renderBackground(MatrixStack stack) {
         assert this.minecraft != null;
-        this.minecraft.getTextureManager().bindTexture(WINDOW);
+        this.minecraft.getTextureManager().bind(WINDOW);
         int i = centerX - (400 / 2);
         int j = centerY - (216 / 2);
         blit(stack, i, j, 0, 0, 400, 216, 512, 512);
@@ -134,7 +134,7 @@ public class CUScreen extends Screen {
             tooltips.add(new StringTextComponent("(It may be possible to lag a server using this)"));
         }
         if (!tooltips.isEmpty()) {
-            GuiUtils.drawHoveringText(stack, tooltips, mx, my, width, height, 150, Minecraft.getInstance().fontRenderer);
+            GuiUtils.drawHoveringText(stack, tooltips, mx, my, width, height, 150, Minecraft.getInstance().font);
         }
     }
 
@@ -142,7 +142,7 @@ public class CUScreen extends Screen {
         int x = centerX - (400 / 2);
         int y = centerY - (216 / 2) - 22;
         assert this.minecraft != null;
-        this.minecraft.getTextureManager().bindTexture(TABS);
+        this.minecraft.getTextureManager().bind(TABS);
         float iconScale = 3.75f;
         List<CUTab> tabIcons = new ArrayList<>();
         tabIcons.add(CUTab.MAPTABICON);
@@ -172,8 +172,8 @@ public class CUScreen extends Screen {
     }
 
     @Override
-    public void onClose() {
-        super.onClose();
+    public void removed() {
+        super.removed();
         DataHolder.cancelTimer();
         DataHolder.stopListening();
         stored = this;
@@ -224,7 +224,7 @@ public class CUScreen extends Screen {
                     return super.mouseClicked(mx, my, mouseButton);
                 if (contentGUI instanceof MapGUI) {
                     MapGUI gui = (MapGUI) contentGUI;
-                    BlockPos pos = gui.getChunkFor((int) mx, (int) my).asBlockPos();
+                    BlockPos pos = gui.getChunkFor((int) mx, (int) my).getWorldPosition();
                     Network.INSTANCE.sendToServer(new TeleportMessage(dim, dim, pos));
                     return true;
                 }

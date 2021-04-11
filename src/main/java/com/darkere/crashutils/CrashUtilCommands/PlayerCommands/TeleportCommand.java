@@ -26,7 +26,7 @@ public class TeleportCommand implements Command<CommandSource> {
                 .suggests(CommandUtils.PROFILEPROVIDER)
                 .then(Commands.argument("pos", BlockPosArgument.blockPos())
                     .executes(cmd)
-                    .then(Commands.argument("dim", DimensionArgument.getDimension())
+                    .then(Commands.argument("dim", DimensionArgument.dimension())
                         .executes(cmd)))
                 .then(Commands.argument("name", StringArgumentType.string())
                     .suggests(CommandUtils.PROFILEPROVIDER)
@@ -37,23 +37,23 @@ public class TeleportCommand implements Command<CommandSource> {
 
     @Override
     public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-        ServerWorld playerWorld = context.getSource().getWorld();
+        ServerWorld playerWorld = context.getSource().getLevel();
         ServerWorld destWorld = null;
         ServerPlayerEntity otherPlayer = null;
         ServerPlayerEntity player = null;
         BlockPos pos = null;
         try {
-            destWorld = DimensionArgument.getDimensionArgument(context, "dim");
+            destWorld = DimensionArgument.getDimension(context, "dim");
         } catch (IllegalArgumentException e) {
             //NOOP
         }
         try {
-            otherPlayer = context.getSource().getServer().getPlayerList().getPlayerByUsername(StringArgumentType.getString(context, "name"));
+            otherPlayer = context.getSource().getServer().getPlayerList().getPlayerByName(StringArgumentType.getString(context, "name"));
         } catch (IllegalArgumentException e) {
 
         }
         try {
-            pos = BlockPosArgument.getBlockPos(context, "pos");
+            pos = BlockPosArgument.getOrLoadBlockPos(context, "pos");
         } catch (IllegalArgumentException e) {
 
         }
@@ -61,18 +61,18 @@ public class TeleportCommand implements Command<CommandSource> {
             destWorld = playerWorld;
         }
         try {
-            player = context.getSource().getServer().getPlayerList().getPlayerByUsername(StringArgumentType.getString(context, "player"));
+            player = context.getSource().getServer().getPlayerList().getPlayerByName(StringArgumentType.getString(context, "player"));
         } catch (IllegalArgumentException e) {
 
         }
         if (player == null) return 0;
         if (pos == null) {
             if (context.getSource().getServer().getPlayerList().getPlayers().contains(otherPlayer)) {
-                pos = new BlockPos(otherPlayer.getPositionVec());
+                pos = new BlockPos(otherPlayer.position());
             } else {
                 AtomicReference<BlockPos> offlinePlayerPos = new AtomicReference<>();
                 WorldUtils.applyToPlayer(otherPlayer.getName().getString(), context.getSource().getServer(), fakePlayer -> {
-                    offlinePlayerPos.set(new BlockPos(fakePlayer.getPositionVec()));
+                    offlinePlayerPos.set(new BlockPos(fakePlayer.position()));
                 });
                 pos = offlinePlayerPos.get();
             }
@@ -83,8 +83,8 @@ public class TeleportCommand implements Command<CommandSource> {
             ServerWorld finalDestWorld = destWorld;
             BlockPos finalPos = pos;
             WorldUtils.applyToPlayer(player.getName().getString(), context.getSource().getServer(), fakePlayer -> {
-                fakePlayer.setPosition(finalPos.getX(), finalPos.getY(), finalPos.getZ());
-                fakePlayer.setWorld(finalDestWorld);
+                fakePlayer.setPos(finalPos.getX(), finalPos.getY(), finalPos.getZ());
+                fakePlayer.setLevel(finalDestWorld);
             });
         }
 

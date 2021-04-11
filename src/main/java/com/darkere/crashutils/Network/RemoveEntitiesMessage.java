@@ -36,7 +36,7 @@ public class RemoveEntitiesMessage {
             buf.writeBoolean(false);
         } else {
             buf.writeBoolean(true);
-            buf.writeLong(data.pos.asLong());
+            buf.writeLong(data.pos.toLong());
         }
     }
 
@@ -56,8 +56,8 @@ public class RemoveEntitiesMessage {
     public static boolean handle(RemoveEntitiesMessage data, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayerEntity player = ctx.get().getSender();
-            if (player == null || !player.hasPermissionLevel(2)) return;
-            World world = player.getServer().getWorld(data.worldRegistryKey);
+            if (player == null || !player.hasPermissions(2)) return;
+            World world = player.getServer().getLevel(data.worldRegistryKey);
             if (data.pos == null) {
                 if (data.tile) {
                     WorldUtils.removeTileEntityType(world, data.rl, data.force);

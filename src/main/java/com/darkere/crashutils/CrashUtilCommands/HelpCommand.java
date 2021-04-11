@@ -42,7 +42,7 @@ public class HelpCommand {
             "/cu chunks: report all loaded chunks");
 
         for (String s : text) {
-            context.getSource().sendFeedback(new StringTextComponent(s), true);
+            context.getSource().sendSuccess(new StringTextComponent(s), true);
         }
         return 1;
     }

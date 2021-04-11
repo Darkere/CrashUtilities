@@ -34,7 +34,7 @@ public class DataListLoader {
     Consumer<CUOption> tpAction = option -> {
         PlayerEntity player = Minecraft.getInstance().player;
         if (player == null) return;
-        WorldUtils.teleportPlayer(player, player.getEntityWorld(), player.getEntityWorld(), option.blockPos);
+        WorldUtils.teleportPlayer(player, player.getCommandSenderWorld(), player.getCommandSenderWorld(), option.blockPos);
     };
 
     public DataListLoader(int XTopLeft, int YTopLeft, int XAcross, int YAcross, CUScreen screen, RegistryKey<World> world) {
@@ -70,10 +70,10 @@ public class DataListLoader {
         list.forEach(option -> {
             option.addButton("Remove",
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Remove all entities of this type", x, y, parent),
-                x -> WorldUtils.removeEntityType(Minecraft.getInstance().world, option.rl, false));
+                x -> WorldUtils.removeEntityType(Minecraft.getInstance().level, option.rl, false));
             option.addButton("Wipe",
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Forcefully remove all entities of this type", x, y, parent),
-                x -> WorldUtils.removeEntityType(Minecraft.getInstance().world, option.rl, true));
+                x -> WorldUtils.removeEntityType(Minecraft.getInstance().level, option.rl, true));
         });
         Consumer<CUOption> action = option -> loadChunkListForEntity(option.getRl(), false);
         setCurrentList(list, numberComparer, action, update);
@@ -87,10 +87,10 @@ public class DataListLoader {
         list.forEach(option -> {
             option.addButton("Remove",
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Remove all " + option.rl + " in this chunk", x, y, parent),
-                x -> WorldUtils.removeEntitiesInChunk(Minecraft.getInstance().world, option.chunkPos, option.rl, false));
+                x -> WorldUtils.removeEntitiesInChunk(Minecraft.getInstance().level, option.chunkPos, option.rl, false));
             option.addButton("Wipe",
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Forcefully remove all " + option.rl + " in this chunk", x, y, parent),
-                x -> WorldUtils.removeEntitiesInChunk(Minecraft.getInstance().world, option.chunkPos, option.rl, true));
+                x -> WorldUtils.removeEntitiesInChunk(Minecraft.getInstance().level, option.chunkPos, option.rl, true));
         });
         Consumer<CUOption> action = option -> loadEntitiesInChunkAsList(option.chunkPos, name, false);
         setCurrentList(list, numberComparer, action, update);
@@ -108,10 +108,10 @@ public class DataListLoader {
                 x -> tpAction.accept(option));
             option.addButton("Remove",
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Remove this Entity", x, y, parent),
-                x -> WorldUtils.removeEntity(Minecraft.getInstance().world, option.id, false));
+                x -> WorldUtils.removeEntity(Minecraft.getInstance().level, option.id, false));
             option.addButton("Wipe",
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Forcefully remove this Entity", x, y, parent),
-                x -> WorldUtils.removeEntity(Minecraft.getInstance().world, option.id, true));
+                x -> WorldUtils.removeEntity(Minecraft.getInstance().level, option.id, true));
         });
         setCurrentList(list, positionSorter, null, update);
     }
@@ -124,9 +124,9 @@ public class DataListLoader {
         list.forEach(option -> {
             option.addButton("Remove TE",
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Remove all loaded TileEntities of this type", x, y, parent),
-                b -> WorldUtils.removeTileEntityType(Minecraft.getInstance().world, option.rl, false));
+                b -> WorldUtils.removeTileEntityType(Minecraft.getInstance().level, option.rl, false));
             option.addButton("Remove Block", (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Delete Blocks with this loaded TileEntity", x, y, parent),
-                b -> WorldUtils.removeTileEntityType(Minecraft.getInstance().world, option.rl, true));
+                b -> WorldUtils.removeTileEntityType(Minecraft.getInstance().level, option.rl, true));
         });
         Consumer<CUOption> action = option -> loadChunkListForTileEntity(option.rl, false);
         setCurrentList(list, numberComparer, action, update);
@@ -140,13 +140,13 @@ public class DataListLoader {
         list.forEach(option -> {
             option.addButton("Teleport",
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Teleport to the center of the chunk", x, y, parent),
-                (x) -> WorldUtils.teleportPlayer(Minecraft.getInstance().player, Minecraft.getInstance().player.getEntityWorld(), Minecraft.getInstance().player.getEntityWorld(), WorldUtils.getChunkCenter(option.chunkPos)));
+                (x) -> WorldUtils.teleportPlayer(Minecraft.getInstance().player, Minecraft.getInstance().player.getCommandSenderWorld(), Minecraft.getInstance().player.getCommandSenderWorld(), WorldUtils.getChunkCenter(option.chunkPos)));
             option.addButton("Remove",
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Remove all " + option.rl + " in this chunk", x, y, parent),
-                x -> WorldUtils.removeTileEntitiesInChunk(Minecraft.getInstance().world, option.chunkPos, option.rl, false));
+                x -> WorldUtils.removeTileEntitiesInChunk(Minecraft.getInstance().level, option.chunkPos, option.rl, false));
             option.addButton("Remove Block",
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Delete all " + option.rl + " in this chunk", x, y, parent),
-                x -> WorldUtils.removeTileEntitiesInChunk(Minecraft.getInstance().world, option.chunkPos, option.rl, true));
+                x -> WorldUtils.removeTileEntitiesInChunk(Minecraft.getInstance().level, option.chunkPos, option.rl, true));
         });
         Consumer<CUOption> action = option -> loadTileEntitiesInChunkList(option.chunkPos, name, false);
         setCurrentList(list, numberComparer, action, update);
@@ -164,10 +164,10 @@ public class DataListLoader {
                 x -> tpAction.accept(option));
             option.addButton("Remove",
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Remove TileEntity", x, y, parent),
-                x -> WorldUtils.removeTileEntity(Minecraft.getInstance().world, option.id, false));
+                x -> WorldUtils.removeTileEntity(Minecraft.getInstance().level, option.id, false));
             option.addButton("Remove Block",
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Delete Block of this TileEntity", x, y, parent),
-                x -> WorldUtils.removeTileEntity(Minecraft.getInstance().world, option.id, true));
+                x -> WorldUtils.removeTileEntity(Minecraft.getInstance().level, option.id, true));
         });
         setCurrentList(list, positionSorter, tpAction, update);
     }
@@ -189,7 +189,7 @@ public class DataListLoader {
         list.forEach(option ->
             option.addButton("Teleport",
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Teleport to the center of the chunk", x, y, parent),
-                (x) -> WorldUtils.teleportPlayer(Minecraft.getInstance().player, Minecraft.getInstance().player.getEntityWorld(), Minecraft.getInstance().player.getEntityWorld(), WorldUtils.getChunkCenter(option.chunkPos))));
+                (x) -> WorldUtils.teleportPlayer(Minecraft.getInstance().player, Minecraft.getInstance().player.getCommandSenderWorld(), Minecraft.getInstance().player.getCommandSenderWorld(), WorldUtils.getChunkCenter(option.chunkPos))));
         setCurrentList(list, null, null, update);
     }
 
@@ -210,7 +210,7 @@ public class DataListLoader {
         list.forEach(option ->
             option.addButton("Teleport",
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Teleport to the center of the chunk", x, y, parent),
-                (x) -> WorldUtils.teleportPlayer(Minecraft.getInstance().player, Minecraft.getInstance().player.getEntityWorld(), Minecraft.getInstance().player.getEntityWorld(), WorldUtils.getChunkCenter(option.chunkPos))));
+                (x) -> WorldUtils.teleportPlayer(Minecraft.getInstance().player, Minecraft.getInstance().player.getCommandSenderWorld(), Minecraft.getInstance().player.getCommandSenderWorld(), WorldUtils.getChunkCenter(option.chunkPos))));
         setCurrentList(list, null, null, update);
     }
 

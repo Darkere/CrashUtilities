@@ -20,7 +20,7 @@ public class CUList extends AbstractGui {
     private int currentOffset = 0;
     private int maxOffset;
     private boolean isEnabled;
-    private final int lineHeight = Minecraft.getInstance().fontRenderer.FONT_HEIGHT + 4;
+    private final int lineHeight = Minecraft.getInstance().font.lineHeight + 4;
     private final int fitOnScreen = 14;
     private Consumer<List<CUOption>> sorter;
     private Consumer<CUOption> action;
@@ -59,8 +59,8 @@ public class CUList extends AbstractGui {
             y += lineHeight;
             if (j == currentOffset + fitOnScreen) break;
         }
-        FillMany.drawStrings(stack, Minecraft.getInstance().fontRenderer, text);
-        FillMany.fillMany(stack.getLast().getMatrix(), seps);
+        FillMany.drawStrings(stack, Minecraft.getInstance().font, text);
+        FillMany.fillMany(stack.last().pose(), seps);
 
     }
 

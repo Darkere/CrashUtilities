@@ -73,7 +73,7 @@ public class MapGUI extends CUContentPane {
                 list.add(new FillMany.ColoredRectangle(i + XTopLeft, j + YTopLeft, i + 1 + XTopLeft, j + 1 + YTopLeft, x));
             }
         }
-        FillMany.fillMany(stack.getLast().getMatrix(), list);
+        FillMany.fillMany(stack.last().pose(), list);
     }
 
     private void goTo(BlockPos pos) {

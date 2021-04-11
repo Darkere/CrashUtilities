@@ -28,33 +28,33 @@ public class PlayerInventoryRequestMessage {
 
     public static void encode(PlayerInventoryRequestMessage data, PacketBuffer buf) {
         buf.writeInt(data.playerName.length());
-        buf.writeString(data.playerName);
+        buf.writeUtf(data.playerName);
 
     }
 
     public static PlayerInventoryRequestMessage decode(PacketBuffer buf) {
-        return new PlayerInventoryRequestMessage(buf.readString(buf.readInt()));
+        return new PlayerInventoryRequestMessage(buf.readUtf(buf.readInt()));
     }
 
     public static boolean handle(PlayerInventoryRequestMessage data, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayerEntity player = ctx.get().getSender();
             MinecraftServer server = player.getServer();
-            if(!player.hasPermissionLevel(2)) return;
-            PlayerEntity otherPlayer = ctx.get().getSender().getServer().getPlayerList().getPlayerByUsername(data.playerName);
+            if(!player.hasPermissions(2)) return;
+            PlayerEntity otherPlayer = ctx.get().getSender().getServer().getPlayerList().getPlayerByName(data.playerName);
             if (otherPlayer == null) {
-                GameProfile profile = server.getPlayerProfileCache().getGameProfileForUsername(data.playerName);
+                GameProfile profile = server.getProfileCache().get(data.playerName);
                 if (profile == null) {
                     player.sendMessage(new StringTextComponent("Cannot find Player"), new UUID(0, 0));
                     return;
                 }
-                otherPlayer = new FakePlayer(server.getWorld(World.OVERWORLD), profile);
-                CompoundNBT nbt = server.playerDataManager.loadPlayerData(otherPlayer);
+                otherPlayer = new FakePlayer(server.getLevel(World.OVERWORLD), profile);
+                CompoundNBT nbt = server.playerDataStorage.load(otherPlayer);
                 if (nbt == null) {
                     player.sendMessage(new StringTextComponent("Cannot load playerData"), new UUID(0, 0));
                     return;
                 }
-                otherPlayer.read(nbt);
+                otherPlayer.load(nbt);
             }
 
             Map<String, Integer> curios = new LinkedHashMap<>();
@@ -64,13 +64,13 @@ public class PlayerInventoryRequestMessage {
                 });
             }
 
-            player.closeContainer();
-            player.getNextWindowId();
-            int id = player.currentWindowId;
+            player.doCloseContainer();
+            player.nextContainerCounter();
+            int id = player.containerCounter;
 
             Network.sendToPlayer(player, new OpenPlayerInvMessage(id, data.playerName, curios));
-            player.openContainer = new PlayerInvContainer(player, otherPlayer, id, null, null, 0);
-            player.openContainer.addListener(player);
+            player.containerMenu = new PlayerInvContainer(player, otherPlayer, id, null, null, 0);
+            player.containerMenu.addSlotListener(player);
 
 
         });

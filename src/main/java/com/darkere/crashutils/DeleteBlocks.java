@@ -28,10 +28,10 @@ public class DeleteBlocks {
     }
 
     private boolean isInChunk(BlockPos pos, IChunk chunk) {
-        return pos.getX() > chunk.getPos().getXStart() &&
-            pos.getX() < chunk.getPos().getXEnd() &&
-            pos.getZ() > chunk.getPos().getZStart() &&
-            pos.getZ() < chunk.getPos().getZEnd();
+        return pos.getX() > chunk.getPos().getMinBlockX() &&
+            pos.getX() < chunk.getPos().getMaxBlockX() &&
+            pos.getZ() > chunk.getPos().getMinBlockZ() &&
+            pos.getZ() < chunk.getPos().getMaxBlockZ();
 
 
     }
@@ -39,10 +39,10 @@ public class DeleteBlocks {
     private void deleteBlock(BlockPos pos, IChunk chunk) {
         IWorld world = chunk.getWorldForge();
         if (world != null) {
-            world.setBlockState(pos, Blocks.AIR.getDefaultState(), 01);
+            world.setBlock(pos, Blocks.AIR.defaultBlockState(), 01);
             //  BlockState block = world.getBlockState(pos);
             //    world.removeBlock(pos,false);
-            chunk.removeTileEntity(pos);
+            chunk.removeBlockEntity(pos);
             System.out.println("TE GONE ");
         }
     }

@@ -42,14 +42,14 @@ public class PlayerInvScreen extends ContainerScreen<PlayerInvContainer> {
     }
 
     @Override
-    protected void drawGuiContainerForegroundLayer(MatrixStack p_230451_1_, int p_230451_2_, int p_230451_3_) {
+    protected void renderLabels(MatrixStack p_230451_1_, int p_230451_2_, int p_230451_3_) {
 
     }
 
     @Override //drawGuiContainerBackgroundLayer
-    protected void drawGuiContainerBackgroundLayer(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
+    protected void renderBg(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
         renderTooltip(stack, new StringTextComponent(mouseX + " " + mouseY), mouseX, mouseY);
-        Minecraft.getInstance().textureManager.bindTexture(texture);
+        Minecraft.getInstance().textureManager.bind(texture);
         blit(stack, centerX - doubleinv.width / 2, centerY - doubleinv.height / 2, doubleinv.x, doubleinv.y, doubleinv.width, doubleinv.height);
         if (CrashUtils.curiosLoaded) {
             int y = 45;

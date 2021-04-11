@@ -20,7 +20,7 @@ public class DeleteTECommand implements Command<CommandSource> {
 
     @Override
     public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-        context.getSource().getWorld().removeTileEntity(BlockPosArgument.getBlockPos(context,"pos"));
+        context.getSource().getLevel().removeBlockEntity(BlockPosArgument.getOrLoadBlockPos(context,"pos"));
         return Command.SINGLE_SUCCESS;
     }
 }

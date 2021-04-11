@@ -25,7 +25,7 @@ public class ItemClearCommand implements Command<CommandSource> {
         if (CrashUtils.SERVER_CONFIG.getEnabled()) {
             ClearItemTask.INSTANCE.run();
         } else {
-            context.getSource().sendFeedback(new StringTextComponent("ItemClears are not enabled in the config"), false);
+            context.getSource().sendSuccess(new StringTextComponent("ItemClears are not enabled in the config"), false);
         }
         return 1;
     }

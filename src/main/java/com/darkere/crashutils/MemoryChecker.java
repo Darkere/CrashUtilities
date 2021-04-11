@@ -75,8 +75,8 @@ public class MemoryChecker extends TimerTask {
                 CrashUtils.SERVER_CONFIG.disableHeapDump();
                 ranHeapDump = true;
                 CrashUtils.runNextTick((world)->{
-                    world.getServer().sendMessage(new StringTextComponent("Running Heapdump. Massive Lagspike incoming!"), Util.DUMMY_UUID);
-                    world.getServer().getCommandManager().handleCommand(world.getServer().getCommandSource(), "/spark heapdump");
+                    world.getServer().sendMessage(new StringTextComponent("Running Heapdump. Massive Lagspike incoming!"), Util.NIL_UUID);
+                    world.getServer().getCommands().performCommand(world.getServer().createCommandSourceStack(), "/spark heapdump");
                 });
             }
             CrashUtils.LOGGER.info("Memory full, using" + usedPerc + "% of memory");

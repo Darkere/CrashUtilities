@@ -21,14 +21,14 @@ import java.util.List;
 public class FindEntitiesCommand implements Command<CommandSource> {
 
     private static final FindEntitiesCommand cmd = new FindEntitiesCommand();
-    private static final SuggestionProvider<CommandSource> sugg = (ctx, builder) -> ISuggestionProvider.func_212476_a(ForgeRegistries.ENTITIES.getKeys().stream(), builder);
+    private static final SuggestionProvider<CommandSource> sugg = (ctx, builder) -> ISuggestionProvider.suggestResource(ForgeRegistries.ENTITIES.getKeys().stream(), builder);
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("find")
-            .then(Commands.argument("res", ResourceLocationArgument.resourceLocation())
+            .then(Commands.argument("res", ResourceLocationArgument.id())
                 .suggests(sugg)
                 .executes(cmd)
-                .then(Commands.argument("dim", DimensionArgument.getDimension()))
+                .then(Commands.argument("dim", DimensionArgument.dimension()))
                 .executes(cmd));
 
 
@@ -39,7 +39,7 @@ public class FindEntitiesCommand implements Command<CommandSource> {
         EntityData list = new EntityData();
         List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
         list.createLists(worlds);
-        ResourceLocation res = ResourceLocationArgument.getResourceLocation(context, "res");
+        ResourceLocation res = ResourceLocationArgument.getId(context, "res");
         list.reply(res, context.getSource());
         return Command.SINGLE_SUCCESS;
     }

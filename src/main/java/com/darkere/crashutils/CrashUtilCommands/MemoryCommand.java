@@ -27,7 +27,7 @@ public class MemoryCommand {
 
     private static int run(CommandContext<CommandSource> context, int count) {
         if (!CrashUtils.SERVER_CONFIG.getMemoryChecker()) {
-            context.getSource().sendFeedback(new StringTextComponent("Memory Checker not enabled in Config"), true);
+            context.getSource().sendSuccess(new StringTextComponent("Memory Checker not enabled in Config"), true);
             return 0;
         }
         List<MemoryChecker.MemoryCount> full = MemoryChecker.INSTANCE.counts;
@@ -35,7 +35,7 @@ public class MemoryCommand {
             count = full.size();
         }
         for (int i = full.size() - count; i < full.size(); i++) { //last count elements
-            context.getSource().sendFeedback(createVisualMemoryText(full.get(i)), true);
+            context.getSource().sendSuccess(createVisualMemoryText(full.get(i)), true);
         }
         return Command.SINGLE_SUCCESS;
     }

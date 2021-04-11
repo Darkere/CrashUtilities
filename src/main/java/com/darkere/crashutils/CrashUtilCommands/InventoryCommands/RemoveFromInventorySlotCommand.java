@@ -51,24 +51,24 @@ public class RemoveFromInventorySlotCommand {
         WorldUtils.applyToPlayer(name, context.getSource().getServer(), (player) -> {
             switch (inventoryType) {
                 case "inventory": {
-                    text.set(player.inventory.mainInventory.get(slot).getTextComponent().deepCopy());
-                    player.inventory.mainInventory.set(slot, ItemStack.EMPTY);
+                    text.set(player.inventory.items.get(slot).getDisplayName().copy());
+                    player.inventory.items.set(slot, ItemStack.EMPTY);
                     break;
                 }
                 case "armor": {
-                    text.set(player.inventory.armorInventory.get(slot).getTextComponent().deepCopy());
-                    player.inventory.armorInventory.set(slot, ItemStack.EMPTY);
+                    text.set(player.inventory.armor.get(slot).getDisplayName().copy());
+                    player.inventory.armor.set(slot, ItemStack.EMPTY);
                     break;
                 }
                 case "offHand": {
-                    text.set(player.inventory.offHandInventory.get(slot).getTextComponent().deepCopy());
-                    player.inventory.offHandInventory.set(slot, ItemStack.EMPTY);
+                    text.set(player.inventory.offhand.get(slot).getDisplayName().copy());
+                    player.inventory.offhand.set(slot, ItemStack.EMPTY);
                     break;
                 }
                 default: {
                     if (CrashUtils.curiosLoaded && CuriosApi.getSlotHelper().getSlotTypeIds().contains(inventoryType)) {
                         ICuriosItemHandler handler = CuriosApi.getCuriosHelper().getCuriosHandler(player).orElse(null);
-                        text.set(handler.getStacksHandler(inventoryType).get().getStacks().getStackInSlot(slot).getTextComponent().deepCopy());
+                        text.set(handler.getStacksHandler(inventoryType).get().getStacks().getStackInSlot(slot).getDisplayName().copy());
                         handler.getStacksHandler(inventoryType).get().getStacks().setStackInSlot(slot, ItemStack.EMPTY);
                     }
                 }
@@ -76,9 +76,9 @@ public class RemoveFromInventorySlotCommand {
             success.set(true);
         });
         if(success.get()){
-            context.getSource().sendFeedback(text.get().append(new StringTextComponent(" has been deleted from " + name + "'s InventorySlot")), true);
+            context.getSource().sendSuccess(text.get().append(new StringTextComponent(" has been deleted from " + name + "'s InventorySlot")), true);
         } else {
-            context.getSource().sendFeedback(new StringTextComponent("Failed to delete item from slot"), true);
+            context.getSource().sendSuccess(new StringTextComponent("Failed to delete item from slot"), true);
         }
 
         return 1;

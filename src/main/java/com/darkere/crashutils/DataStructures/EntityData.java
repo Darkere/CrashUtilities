@@ -20,7 +20,7 @@ public class EntityData extends LocationData {
 
     public EntityData() {
         for (Map.Entry<RegistryKey<EntityType<?>>, EntityType<?>> entry : ForgeRegistries.ENTITIES.getEntries()) {
-            map.put(entry.getKey().getLocation(), new ArrayList<>());
+            map.put(entry.getKey().location(), new ArrayList<>());
         }
     }
 
