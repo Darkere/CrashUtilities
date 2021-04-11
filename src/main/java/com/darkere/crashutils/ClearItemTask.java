@@ -3,7 +3,6 @@ package com.darkere.crashutils;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -18,47 +17,51 @@ import java.util.stream.Collectors;
 
 public class ClearItemTask extends TimerTask {
 
-    public static boolean scheduled = false;
+    public static ClearItemTask INSTANCE;
     public boolean enabled;
     int maxItems;
     List<Integer> list;
     Timer timer;
 
-    @Override
-    public void run() {
-        scheduled = true;
+    public static void restart() {
+        if(INSTANCE != null){
+            INSTANCE.shutdown();
+        }
+        INSTANCE = new ClearItemTask();
+        INSTANCE.loadConfigsAndStart();
     }
 
-    public void startStopTask(){
+    private void shutdown() {
         timer.cancel();
-        timer = new Timer(true);
-        setup();
+        list.clear();
+        maxItems = 5000;
     }
 
-    public void setup() {
+    public void loadConfigsAndStart() {
+        if(INSTANCE.timer != null){
+            INSTANCE.timer.cancel();
+        }
+
+        INSTANCE.timer = new Timer(true);
         enabled = CrashUtils.SERVER_CONFIG.getEnabled();
         maxItems = CrashUtils.SERVER_CONFIG.getMaximum();
         list = CrashUtils.SERVER_CONFIG.getWarnings();
         list.sort(Comparator.comparing(Integer::intValue));
         int time = CrashUtils.SERVER_CONFIG.getTimer() * 60 * 1000;
-        if(enabled)
+        if(time == 0) time = 10000;
+        if (enabled)
             timer.scheduleAtFixedRate(this, time, time);
     }
 
-    public void checkItemCounts(ServerWorld world) {
-        if (scheduled && enabled) {
-            scheduled = false;
-            List<Entity> list = world.getEntities().filter(x -> x.getType().equals(EntityType.ITEM)).collect(Collectors.toList());
-            if (list.size() > maxItems) {
-                runClear(world);
-            }
-        }
+    @Override
+    public void run() {
+        CrashUtils.runNextTick(this::runClear);
     }
 
-
     private void runClear(ServerWorld world) {
+        List<Entity> entityList = world.getEntities().filter(x -> x.getType().equals(EntityType.ITEM)).collect(Collectors.toList());
+        if (entityList.size() < maxItems) return;
         String text = CrashUtils.SERVER_CONFIG.getWarningText();
-        PlayerList playerList = world.getServer().getPlayerList();
         int last = list.get(list.size() - 1);
         for (Integer integer : list) {
             if (integer.equals(last)) {
@@ -75,7 +78,7 @@ public class ClearItemTask extends TimerTask {
                         }
 
                     }
-                }, integer * 1000);
+                }, integer * 1000L);
 
             }
             String intText = text.replaceFirst("%", integer.toString());
@@ -85,7 +88,7 @@ public class ClearItemTask extends TimerTask {
                 public void run() {
                     world.getServer().sendMessage(message, Util.DUMMY_UUID);
                 }
-            }, (last - integer) * 1000);
+            }, (last - integer) * 1000L);
 
         }
 

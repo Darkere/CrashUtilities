@@ -1,11 +1,16 @@
 package com.darkere.crashutils;
 
+import net.minecraft.util.Util;
+import net.minecraft.util.text.StringTextComponent;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MemoryChecker extends TimerTask {
+
+    public static MemoryChecker INSTANCE;
     public List<MemoryCount> counts = new ArrayList<>();
     long lastlog;
     int logTimer;
@@ -15,20 +20,32 @@ public class MemoryChecker extends TimerTask {
     boolean heapDumpEnabled;
     Timer timer;
 
-    public void startStopMemoryChecker(){
+    public static void restart(){
+        if(INSTANCE != null){
+            INSTANCE.shutdown();
+        }
+        INSTANCE = new MemoryChecker();
+        INSTANCE.setup();
+    }
+
+    private void shutdown() {
+        timer.cancel();
+        counts.clear();
+    }
+
+    public void setup() {
+        if(timer != null){
+            timer.cancel();
+        }
+
         if (CrashUtils.SERVER_CONFIG.getMemoryChecker()) {
-            setup();
+            logTimer = CrashUtils.SERVER_CONFIG.getMemoryLogTimer() * 1000;
+            warnDelta = CrashUtils.SERVER_CONFIG.getMemoryWarnDelta();
+            heapDumpEnabled = CrashUtils.SERVER_CONFIG.getHeapDump();
             timer = new Timer(true);
             int time = CrashUtils.SERVER_CONFIG.getMemoryTimer() * 1000;
             timer.scheduleAtFixedRate(this, time, time);
         }
-    }
-
-    public void setup() {
-        logTimer = CrashUtils.SERVER_CONFIG.getMemoryLogTimer() * 1000;
-        warnDelta = CrashUtils.SERVER_CONFIG.getMemoryWarnDelta();
-        heapDumpEnabled = CrashUtils.SERVER_CONFIG.getHeapDump();
-
     }
 
     @Override
@@ -56,7 +73,11 @@ public class MemoryChecker extends TimerTask {
             if (!ranHeapDump && CrashUtils.sparkLoaded) {
                 CrashUtils.LOGGER.info("Running Spark Heapdump! LagSpike incoming!");
                 CrashUtils.SERVER_CONFIG.disableHeapDump();
-                CrashUtils.runHeapDump = true;
+                ranHeapDump = true;
+                CrashUtils.runNextTick((world)->{
+                    world.getServer().sendMessage(new StringTextComponent("Running Heapdump. Massive Lagspike incoming!"), Util.DUMMY_UUID);
+                    world.getServer().getCommandManager().handleCommand(world.getServer().getCommandSource(), "/spark heapdump");
+                });
             }
             CrashUtils.LOGGER.info("Memory full, using" + usedPerc + "% of memory");
         }

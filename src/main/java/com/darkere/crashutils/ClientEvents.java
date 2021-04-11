@@ -29,11 +29,13 @@ public class ClientEvents {
             KeyConflictContext.IN_GAME, KeyModifier.CONTROL,
             InputMappings.Type.KEYSYM, GLFW.GLFW_KEY_U, "Crash Utilities");
     public static final KeyBinding COPYCLASS =
-        new KeyBinding("Copy the class of the current container to the clipboard",
+        new KeyBinding("Copy Container Class",
             KeyConflictContext.GUI, InputMappings.INPUT_INVALID, "Crash Utilities");
     public static final KeyBinding TOGGLEINDEXES =
-        new KeyBinding("Show/Hide index of container slots as tooltip",
+        new KeyBinding("Show Slot Index Tooltips",
             KeyConflictContext.IN_GAME, InputMappings.INPUT_INVALID, "Crash Utilities");
+
+    private static boolean renderslotnumbers;
 
     public static void registerKeybindings() {
         ClientRegistry.registerKeyBinding(OPENSCREEN);
@@ -43,7 +45,7 @@ public class ClientEvents {
 
     @SubscribeEvent
     public void drawEvent(GuiScreenEvent.DrawScreenEvent event) {
-        if (!CrashUtils.renderslotnumbers) return;
+        if (!renderslotnumbers) return;
         if (event.getGui() instanceof ContainerScreen) {
             ContainerScreen<?> screen = (ContainerScreen<?>) event.getGui();
             if (screen.getSlotUnderMouse() == null) return;
@@ -62,7 +64,7 @@ public class ClientEvents {
             }
         }
         if (TOGGLEINDEXES.isPressed()) {
-            CrashUtils.renderslotnumbers = !CrashUtils.renderslotnumbers;
+            renderslotnumbers = !renderslotnumbers;
         }
     }
 

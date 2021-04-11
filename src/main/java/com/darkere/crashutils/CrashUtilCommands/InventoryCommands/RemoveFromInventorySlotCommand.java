@@ -7,7 +7,6 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -21,6 +20,7 @@ import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class RemoveFromInventorySlotCommand {
@@ -45,8 +45,9 @@ public class RemoveFromInventorySlotCommand {
                     .executes(ctx -> removeFromSlot(ctx, StringArgumentType.getString(ctx, "name"), "inventory", IntegerArgumentType.getInteger(ctx, "slot")))));
     }
 
-    private static int removeFromSlot(CommandContext<CommandSource> context, String name, String inventoryType, int slot) throws CommandSyntaxException {
+    private static int removeFromSlot(CommandContext<CommandSource> context, String name, String inventoryType, int slot) {
         AtomicReference<IFormattableTextComponent> text = new AtomicReference<>(new StringTextComponent(""));
+        AtomicBoolean success = new AtomicBoolean(false);
         WorldUtils.applyToPlayer(name, context.getSource().getServer(), (player) -> {
             switch (inventoryType) {
                 case "inventory": {
@@ -72,8 +73,13 @@ public class RemoveFromInventorySlotCommand {
                     }
                 }
             }
+            success.set(true);
         });
-        context.getSource().sendFeedback(text.get().append(new StringTextComponent(" has been deleted from " + name + "'s InventorySlot")), true);
+        if(success.get()){
+            context.getSource().sendFeedback(text.get().append(new StringTextComponent(" has been deleted from " + name + "'s InventorySlot")), true);
+        } else {
+            context.getSource().sendFeedback(new StringTextComponent("Failed to delete item from slot"), true);
+        }
 
         return 1;
     }

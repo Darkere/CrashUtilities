@@ -30,7 +30,7 @@ public class MemoryCommand {
             context.getSource().sendFeedback(new StringTextComponent("Memory Checker not enabled in Config"), true);
             return 0;
         }
-        List<MemoryChecker.MemoryCount> full = CrashUtils.memoryChecker.counts;
+        List<MemoryChecker.MemoryCount> full = MemoryChecker.INSTANCE.counts;
         if (full.size() < count) {
             count = full.size();
         }

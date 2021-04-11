@@ -16,7 +16,6 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
@@ -44,27 +43,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.function.Consumer;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(CrashUtils.MODID)
 public class CrashUtils {
     // Directly reference a log4j logger.
     public static final Logger LOGGER = LogManager.getLogger();
-    static boolean renderslotnumbers;
     public static final String MODID = "crashutilities";
     public static final ServerConfig SERVER_CONFIG = new ServerConfig();
-    ClearItemTask clearItemTask;
-    public static MemoryChecker memoryChecker = null;
     public static boolean curiosLoaded = false;
     Timer chunkcleaner;
-    public static boolean runHeapDump = false;
     public static boolean sparkLoaded = false;
-    public static List<Runnable> runnables = new ArrayList<>();
-    public static boolean intwoTicks = false;
+    public static List<Consumer<ServerWorld>> runnables = new ArrayList<>();
+    public static boolean skipNext = false;
 
     public CrashUtils() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::common);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::client);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::configReload);
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> MinecraftForge.EVENT_BUS.register(new ClientEvents()));
         //MinecraftForge.EVENT_BUS.register(new DeleteBlocks());
         MinecraftForge.EVENT_BUS.register(this);
@@ -83,15 +80,14 @@ public class CrashUtils {
         Network.register();
     }
 
-    @SubscribeEvent
     public void configReload(ModConfig.Reloading event) {
-        clearItemTask.startStopTask();
-        memoryChecker.startStopMemoryChecker();
+        ClearItemTask.restart();
+        MemoryChecker.restart();
 
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-        if(server != null){
+        if (server != null) {
             ServerWorld world = server.getWorld(World.OVERWORLD);
-            if(world != null) {
+            if (world != null) {
                 setupFtbChunksUnloading(world);
             }
         }
@@ -106,25 +102,25 @@ public class CrashUtils {
         CommandNode<CommandSource> inventoryCommands = InventoryCommands.register();
 
         LiteralCommandNode<CommandSource> cmd = dispatcher.register(LiteralArgumentBuilder.<CommandSource>literal(MODID)
-            .requires(x -> x.hasPermissionLevel(2))
-            .then(TeleportCommand.register())
-            .then(UnstuckCommand.register())
-            .then(MemoryCommand.register())
-            .then(ItemClearCommand.register())
-            .then(GetLogCommand.register())
-            .then(HelpCommand.register())
-            //.then(ProfilingCommands.register())
-            .then(LoadedChunksCommand.register())
-            .then(ActivityCommand.register())
-            .then(entitiesCommands)
-            .then(Commands.literal("e")
-                .redirect(entitiesCommands))
-            .then(tileEntitiesCommands)
-            .then(Commands.literal("te")
-                .redirect(tileEntitiesCommands))
-            .then(inventoryCommands)
-            .then(Commands.literal("i")
-                .redirect(inventoryCommands))
+                .requires(x -> x.hasPermissionLevel(2))
+                .then(TeleportCommand.register())
+                .then(UnstuckCommand.register())
+                .then(MemoryCommand.register())
+                .then(ItemClearCommand.register())
+                .then(GetLogCommand.register())
+                .then(HelpCommand.register())
+                //.then(ProfilingCommands.register())
+                .then(LoadedChunksCommand.register())
+                .then(ActivityCommand.register())
+                .then(entitiesCommands)
+                .then(Commands.literal("e")
+                        .redirect(entitiesCommands))
+                .then(tileEntitiesCommands)
+                .then(Commands.literal("te")
+                        .redirect(tileEntitiesCommands))
+                .then(inventoryCommands)
+                .then(Commands.literal("i")
+                        .redirect(inventoryCommands))
 
         );
         dispatcher.register(Commands.literal("cu")
@@ -136,8 +132,8 @@ public class CrashUtils {
 
     @SubscribeEvent
     public void ServerStarted(FMLServerStartedEvent event) {
-        clearItemTask = new ClearItemTask();
-        memoryChecker = new MemoryChecker();
+        //ClearItemTask.restart();
+        //MemoryChecker.restart();
 
         setupFtbChunksUnloading(event.getServer().getWorld(World.OVERWORLD));
     }
@@ -154,42 +150,35 @@ public class CrashUtils {
                     for (String player : history.getPlayersInChunkClearTime()) {
                         LOGGER.info("Unloading " + player + "'s Chunks");
                         world.getServer().getCommandManager().handleCommand(world.getServer().getCommandSource(),
-                            "ftbchunks unload_all " + player);
+                                "ftbchunks unload_all " + player);
                     }
                 }
-            }, 5, 60*60*1000);
+            }, 5, 60 * 60 * 1000);
         }
 
     }
 
-    public static void runNextTick(Runnable run) {
+    public static void runNextTick(Consumer<ServerWorld> run) {
         runnables.add(run);
     }
 
-    public static void runInTwoTicks(Runnable run) {
+    public static void runInTwoTicks(Consumer<ServerWorld> run) {
         runnables.add(run);
-        intwoTicks = true;
+        skipNext = true;
     }
 
     @SubscribeEvent
     public void onWorldTick(TickEvent.WorldTickEvent event) {
         if (event.world.isRemote && event.phase != TickEvent.Phase.END) return;
-        clearItemTask.checkItemCounts((ServerWorld) event.world);
 
-        if (sparkLoaded && runHeapDump) {
-            runHeapDump = false;
-            event.world.getServer().sendMessage(new StringTextComponent("Running Heapdump. Massive Lagspike incoming!"), null);
-            event.world.getServer().getCommandManager().handleCommand(event.world.getServer().getCommandSource(), "/spark heapdump");
-        }
-        if (intwoTicks) {
-            intwoTicks = false;
-            return;
-        }
         if (!runnables.isEmpty()) {
-            runnables.forEach(Runnable::run);
+            if (skipNext) {
+                skipNext = false;
+                return;
+            }
+            runnables.forEach(c -> c.accept((ServerWorld) event.world));
             runnables.clear();
         }
-
     }
 
 }

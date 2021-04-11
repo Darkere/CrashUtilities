@@ -41,7 +41,7 @@ public class LoadedChunkData {
     }
 
     public LoadedChunkData(List<ServerWorld> worlds) {
-        CrashUtils.runNextTick(() -> init(worlds));
+        CrashUtils.runNextTick((world) -> init(worlds));
 
     }
 

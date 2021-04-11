@@ -121,7 +121,7 @@ public class CUOption {
         for (Button x : buttons) {
             if (x.isMouseOver(mx, my)) {
                 x.onPress();
-                CrashUtils.runInTwoTicks(() ->
+                CrashUtils.runInTwoTicks((world) ->
                     DataHolder.requestImmediateUpdate(screen.dim)
                 );
 

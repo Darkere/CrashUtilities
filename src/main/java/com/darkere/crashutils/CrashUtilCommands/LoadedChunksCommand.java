@@ -35,7 +35,7 @@ public class LoadedChunksCommand {
     public static int run(CommandContext<CommandSource> context, int type, String word) throws CommandSyntaxException {
         List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
         LoadedChunkData loadedChunkData = new LoadedChunkData(worlds);
-        CrashUtils.runNextTick(() -> reply(type, loadedChunkData, context, word));
+        CrashUtils.runNextTick((world) -> reply(type, loadedChunkData, context, word));
         return Command.SINGLE_SUCCESS;
     }
 
