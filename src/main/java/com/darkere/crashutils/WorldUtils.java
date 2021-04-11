@@ -12,6 +12,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -152,12 +153,14 @@ public class WorldUtils {
             Network.sendToServer(new RemoveEntityMessage(world.dimension(), id, true, force));
             return;
         }
-        if (force) {
-            world.removeBlockEntity(TileEntityData.TEID.get(id).pos);
-            world.removeBlock(TileEntityData.TEID.get(id).pos, false);
-        } else {
-            world.removeBlockEntity(TileEntityData.TEID.get(id).pos);
-        }
+        CrashUtils.runNextTick((wld)-> {
+            if (force) {
+                world.removeBlockEntity(TileEntityData.TEID.get(id).pos);
+                world.removeBlock(TileEntityData.TEID.get(id).pos, false);
+            } else {
+                world.removeBlockEntity(TileEntityData.TEID.get(id).pos);
+            }
+        });
     }
 
     public static void removeTileEntityType(World world, ResourceLocation rl, boolean force) {
@@ -166,14 +169,18 @@ public class WorldUtils {
             Network.sendToServer(new RemoveEntitiesMessage(world.dimension(), rl, null, true, force));
             return;
         }
-        world.blockEntityList.stream().filter(te -> Objects.equals(te.getType().getRegistryName(), rl)).forEach(te -> {
-            if (force) {
-                world.removeBlockEntity(te.getBlockPos());
-                world.removeBlock(te.getBlockPos(), false);
-            } else {
-                world.removeBlockEntity(te.getBlockPos());
+        for (TileEntity te : world.blockEntityList) {
+            if (te.getType().getRegistryName() != null && Objects.equals(te.getType().getRegistryName(), rl)) {
+                CrashUtils.runNextTick((wld)->{
+                    if (force) {
+                        world.removeBlockEntity(te.getBlockPos());
+                        world.removeBlock(te.getBlockPos(), false);
+                    } else {
+                        world.removeBlockEntity(te.getBlockPos());
+                    }
+                });
             }
-        });
+        }
     }
 
     public static void removeTileEntitiesInChunk(World world, ChunkPos pos, ResourceLocation rl, boolean force) {
@@ -186,12 +193,14 @@ public class WorldUtils {
         Vector3d end = new Vector3d(pos.getMaxBlockX(), 255, pos.getMaxBlockZ());
 
         world.blockEntityList.stream().filter(te -> Objects.equals(te.getType().getRegistryName(), rl) && new AxisAlignedBB(start, end).contains(Vector3d.atCenterOf(te.getBlockPos()))).forEach(te -> {
-            if (force) {
-                world.removeBlockEntity(te.getBlockPos());
-                world.removeBlock(te.getBlockPos(), false);
-            } else {
-                world.removeBlockEntity(te.getBlockPos());
-            }
+            CrashUtils.runNextTick((wld)->{
+                if (force) {
+                    world.removeBlockEntity(te.getBlockPos());
+                    world.removeBlock(te.getBlockPos(), false);
+                } else {
+                    world.removeBlockEntity(te.getBlockPos());
+                }
+            });
         });
     }
 

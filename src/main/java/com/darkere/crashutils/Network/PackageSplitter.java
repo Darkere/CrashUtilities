@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PackageSplitter {
-    private static final int max_packet_size = 943718;
+    private static final int max_packet_size = 1000;//943718;
     private static int ID = 0;
     public static final Map<Integer, Map<Integer, byte[]>> packageCache = new HashMap<>();
     public static final Map<Integer, PacketBuffer> fullPackageCache = new HashMap<>();

@@ -30,20 +30,21 @@ public class TileEntityDataMessage {
         int id = PackageSplitter.potentiallySplitPacket(data.player, buffer);
         buf.writeInt(id);
         if (id == -1) {
-            return;
+            buf.writeByteArray(buffer.array());
         }
-        buf.writeByteArray(buf.array());
     }
 
 
     public static TileEntityDataMessage decode(PacketBuffer buf) {
+        //PacketBuffer buffer = new PacketBuffer(Unpooled.buffer());
+        //buffer.writeByteArray(buf.array());
         return new TileEntityDataMessage(buf);
     }
 
     public static void handle(TileEntityDataMessage data, Supplier<NetworkEvent.Context> ctx) {
         int id = data.packetBuffer.readInt();
         if (id == -1) {
-            data.list = new TileEntityData(NetworkTools.readRLWPMap(data.packetBuffer));
+            data.list = new TileEntityData(NetworkTools.readRLWPMap(new PacketBuffer(Unpooled.wrappedBuffer(data.packetBuffer.readByteArray()))));
         } else {
             data.list = new TileEntityData(NetworkTools.readRLWPMap(PackageSplitter.fullPackageCache.get(id)));
             PackageSplitter.onFinishedPackageSplit(id);

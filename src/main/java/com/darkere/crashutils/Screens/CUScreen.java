@@ -318,6 +318,7 @@ public class CUScreen extends Screen {
             keep = false;
             stored = new CUScreen(world, pos);
         }
+        DataHolder.requestImmediateUpdate(stored.dim);
         DataHolder.notifyListener();
         return stored;
     }
