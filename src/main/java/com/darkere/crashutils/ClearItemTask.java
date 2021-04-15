@@ -10,10 +10,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.server.ServerWorld;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ClearItemTask extends TimerTask {
@@ -21,19 +18,23 @@ public class ClearItemTask extends TimerTask {
     public static ClearItemTask INSTANCE;
     public boolean enabled;
     int maxItems;
-    List<Integer> list;
+    List<Integer> list = new ArrayList<>();
     Timer timer;
 
     public static void restart() {
         if(INSTANCE != null){
             INSTANCE.shutdown();
         }
-        INSTANCE = new ClearItemTask();
-        INSTANCE.loadConfigsAndStart();
+        if(CrashUtils.SERVER_CONFIG.getEnabled()){
+            INSTANCE = new ClearItemTask();
+            INSTANCE.loadConfigsAndStart();
+        }
     }
 
     private void shutdown() {
-        timer.cancel();
+        if(timer != null){
+            timer.cancel();
+        }
         list.clear();
         maxItems = 5000;
     }
@@ -42,15 +43,13 @@ public class ClearItemTask extends TimerTask {
         if(INSTANCE.timer != null){
             INSTANCE.timer.cancel();
         }
-
         INSTANCE.timer = new Timer("CU Clear Item Task",true);
-        enabled = CrashUtils.SERVER_CONFIG.getEnabled();
         maxItems = CrashUtils.SERVER_CONFIG.getMaximum();
         list = CrashUtils.SERVER_CONFIG.getWarnings();
         list.sort(Comparator.comparing(Integer::intValue));
         int time = CrashUtils.SERVER_CONFIG.getTimer() * 60 * 1000;
         if(time == 0) time = 10000;
-        if (enabled)
+        if (CrashUtils.SERVER_CONFIG.getEnabled())
             timer.scheduleAtFixedRate(this, time, time);
     }
 

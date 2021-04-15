@@ -21,32 +21,35 @@ public class MemoryChecker extends TimerTask {
     boolean heapDumpEnabled;
     Timer timer;
 
-    public static void restart(){
-        if(INSTANCE != null){
+    public static void restart() {
+        if (INSTANCE != null) {
             INSTANCE.shutdown();
         }
-        INSTANCE = new MemoryChecker();
-        INSTANCE.setup();
+        if (CrashUtils.SERVER_CONFIG.getMemoryChecker()) {
+            INSTANCE = new MemoryChecker();
+            INSTANCE.setup();
+        }
     }
 
     private void shutdown() {
-        timer.cancel();
+        if(timer != null){
+            timer.cancel();
+        }
         counts.clear();
     }
 
     public void setup() {
-        if(timer != null){
+        if (timer != null) {
             timer.cancel();
         }
 
-        if (CrashUtils.SERVER_CONFIG.getMemoryChecker()) {
-            logTimer = CrashUtils.SERVER_CONFIG.getMemoryLogTimer() * 1000;
-            warnDelta = CrashUtils.SERVER_CONFIG.getMemoryWarnDelta();
-            heapDumpEnabled = CrashUtils.SERVER_CONFIG.getHeapDump();
-            timer = new Timer("CU Memory Check Task", true);
-            int time = CrashUtils.SERVER_CONFIG.getMemoryTimer() * 1000;
-            timer.scheduleAtFixedRate(this, time, time);
-        }
+        logTimer = CrashUtils.SERVER_CONFIG.getMemoryLogTimer() * 1000;
+        warnDelta = CrashUtils.SERVER_CONFIG.getMemoryWarnDelta();
+        heapDumpEnabled = CrashUtils.SERVER_CONFIG.getHeapDump();
+        timer = new Timer("CU Memory Check Task", true);
+        int time = CrashUtils.SERVER_CONFIG.getMemoryTimer() * 1000;
+        timer.scheduleAtFixedRate(this, time, time);
+
     }
 
     @Override
@@ -75,8 +78,8 @@ public class MemoryChecker extends TimerTask {
                 CrashUtils.LOGGER.info("Running Spark Heapdump! LagSpike incoming!");
                 CrashUtils.SERVER_CONFIG.disableHeapDump();
                 ranHeapDump = true;
-                CrashUtils.runNextTick((world)->{
-                    world.getServer().getPlayerList().broadcastMessage(new StringTextComponent("Running Heapdump. Massive Lagspike incoming!"), ChatType.SYSTEM,Util.NIL_UUID);
+                CrashUtils.runNextTick((world) -> {
+                    world.getServer().getPlayerList().broadcastMessage(new StringTextComponent("Running Heapdump. Massive Lagspike incoming!"), ChatType.SYSTEM, Util.NIL_UUID);
                     world.getServer().getCommands().performCommand(world.getServer().createCommandSourceStack(), "/spark heapdump");
                 });
             }
