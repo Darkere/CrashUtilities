@@ -20,7 +20,12 @@ public class MemoryChecker extends TimerTask {
     boolean ranHeapDump = false;
     boolean heapDumpEnabled;
     Timer timer;
-
+    public static void start(){
+        if (CrashUtils.SERVER_CONFIG.getMemoryChecker()) {
+            INSTANCE = new MemoryChecker();
+            INSTANCE.setup();
+        }
+    }
     public static void restart() {
         if (INSTANCE != null) {
             INSTANCE.shutdown();
