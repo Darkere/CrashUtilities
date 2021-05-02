@@ -107,7 +107,11 @@ public class LoadedChunkData {
 
     public void replyWithLocation(CommandSource source, String word) throws CommandSyntaxException {
         source.sendSuccess(new StringTextComponent("Chunks with LocationType " + word), true);
-        sendChunkPositions(source, chunksByLocationType.get(word));
+        Set<ChunkPos> chunkPos = chunksByLocationType.get(word);
+        if(chunkPos != null){
+            sendChunkPositions(source, chunkPos);
+        }
+
     }
 
     private void sendChunkPositions(CommandSource source, Set<ChunkPos> chunks) throws CommandSyntaxException {
@@ -119,6 +123,7 @@ public class LoadedChunkData {
 
     public void replyWithTicket(CommandSource source, String word) throws CommandSyntaxException {
         Set<ChunkPos> chunks = chunksByTicketName.get(word);
+        if(chunks == null)return;
         source.sendSuccess(new StringTextComponent("Chunks with " + word + " Ticket"), true);
         sendChunkPositions(source, chunks);
     }
