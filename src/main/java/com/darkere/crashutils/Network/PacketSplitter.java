@@ -32,7 +32,7 @@ public class PacketSplitter {
 
     private int comId = 0;
     private final int maxNumberOfMessages;
-    private int messageToPlayerId;
+    private int ID;
 
     public PacketSplitter(int maxNumberOfMessages, SimpleChannel CHANNEL, ResourceLocation CHANNEL_ID ) {
         this.maxNumberOfMessages = maxNumberOfMessages;
@@ -45,8 +45,8 @@ public class PacketSplitter {
     }
 
     public void sendToPlayer(ServerPlayerEntity player, Object message) {
-        if(messageToPlayerId == 0 ) messageToPlayerId++; // in case we wrapped around, 0 is reserved for server
-        int id = messageToPlayerId++;
+        if(ID == 0 ) ID++; // in case we wrapped around, 0 is reserved for server
+        int id = ID++;
         messageTargets.put(id, player);
         sendPacket(message, id, PacketDistributor.PLAYER.with(() -> player));
     }
@@ -142,7 +142,7 @@ public class PacketSplitter {
                 currentIndex += sliceSize;
 
                 if (packetIndex > maximumPackets) {
-                    LogManager.getLogger().error("Failure Splitting Packets on Channel \"" + CHANNEL_ID + "\"." +
+                    LogManager.getLogger().error("Failure Splitting Packets on Channel \"" + CHANNEL_ID + "\"." + " with " + MSG.getClass() + ". " +
                             " Number of Packets sent " + (packetIndex - 1) + ", expected number of Packets " + expectedPackets + ", maximum number of packets for a message of this type " + packetMaximums.get(packetId));
                     failure = true;
                     break;
@@ -206,7 +206,6 @@ public class PacketSplitter {
     }
 
     public void addPackagePart(int communicationId, int packetIndex, byte[] payload) {
-        System.out.println("Adding packet part " + packetIndex);
         //Sync on the message cache since this is still on the Netty thread.
         synchronized (PacketSplitter.packageCache) {
             PacketSplitter.packageCache.computeIfAbsent(communicationId, (id) -> new ConcurrentHashMap<>());
