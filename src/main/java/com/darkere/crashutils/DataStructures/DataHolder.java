@@ -105,7 +105,7 @@ public class DataHolder {
     }
 
     public static void requestImmediateUpdate(RegistryKey<World> dim) {
-        Network.INSTANCE.sendToServer(new UpdateDataRequestMessage(currentDataType, dim));
+        Network.sendToServer(new UpdateDataRequestMessage(currentDataType, dim));
     }
 
     public static void requestUpdates(int updateFrequency, RegistryKey<World> dim, boolean now) {
@@ -116,7 +116,7 @@ public class DataHolder {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                Network.INSTANCE.sendToServer(new UpdateDataRequestMessage(currentDataType, dim));
+                Network.sendToServer(new UpdateDataRequestMessage(currentDataType, dim));
             }
         }, updateFrequency, updateFrequency);
     }

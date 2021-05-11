@@ -39,10 +39,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -55,7 +55,7 @@ public class CrashUtils {
     public static boolean curiosLoaded = false;
     Timer chunkcleaner;
     public static boolean sparkLoaded = false;
-    public static List<Consumer<ServerWorld>> runnables = new ArrayList<>();
+    public static List<Consumer<ServerWorld>> runnables = new CopyOnWriteArrayList<>();
     public static boolean skipNext = false;
     public static boolean isServer = false;
 
@@ -117,19 +117,19 @@ public class CrashUtils {
                 .then(LoadedChunksCommand.register())
                 .then(ActivityCommand.register())
                 .then(entitiesCommands)
-                .then(Commands.literal("e")
+                .then(Commands.literal("entities")
                         .redirect(entitiesCommands))
                 .then(Commands.literal("entity")
                         .redirect(entitiesCommands))
                 .then(tileEntitiesCommands)
                 .then(Commands.literal("te")
                         .redirect(tileEntitiesCommands))
+                .then(Commands.literal("tileentities")
+                        .redirect(tileEntitiesCommands))
                 .then(Commands.literal("tileentity")
                         .redirect(tileEntitiesCommands))
-                .then(Commands.literal("blockentity")
-                        .redirect(tileEntitiesCommands))
                 .then(inventoryCommands)
-                .then(Commands.literal("i")
+                .then(Commands.literal("inventory")
                         .redirect(inventoryCommands))
 
         );

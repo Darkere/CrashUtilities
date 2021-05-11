@@ -8,7 +8,7 @@ public class InventoryCommands {
 
 
     public static CommandNode<CommandSource> register() {
-        return Commands.literal("inventory")
+        return Commands.literal("i")
             .then(InventoryLookCommand.register())
             .then(RemoveFromInventorySlotCommand.register())
             .build();

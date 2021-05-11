@@ -63,7 +63,7 @@ public class UpdateDataRequestMessage {
                 case TILEENTITYDATA: {
                     TileEntityData tileEntityData = new TileEntityData();
                     tileEntityData.createLists(worlds);
-                    Network.sendToPlayer(ctx.get().getSender(), new TileEntityDataMessage(ctx.get().getSender(), tileEntityData));
+                    Network.sendToPlayer(ctx.get().getSender(), new TileEntityDataMessage(tileEntityData));
                     break;
                 }
                 case PLAYERDATA: {
