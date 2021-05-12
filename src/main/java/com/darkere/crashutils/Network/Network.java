@@ -13,7 +13,7 @@ public class Network {
 
     private static final String NETWORK_VERSION = "2";
     private static final ResourceLocation CHANNEL_ID = new ResourceLocation(CrashUtils.MODID + ":" + "network");
-    private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(CHANNEL_ID, () -> NETWORK_VERSION, s -> s.equals(NETWORK_VERSION), s -> s.equals(NETWORK_VERSION));
+    private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(CHANNEL_ID, () -> NETWORK_VERSION, s -> s.equals(NETWORK_VERSION), s -> true);
     private static final PacketSplitter SPLITTER = new PacketSplitter(10, CHANNEL, CHANNEL_ID);
 
     public static void register() {
