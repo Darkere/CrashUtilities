@@ -73,7 +73,7 @@ public class PacketSplitter {
         packetMaximums.put(index, maxNumberOfMessages);
         messagesToSplit.add(messageType);
 
-        BiConsumer<MSG, PacketBuffer> encode = (msg, buffer) -> {
+        BiConsumer<MSG, PacketBuffer> wrappedEncoder = (msg, buffer) -> {
             int id = buffer.readInt();
             buffer.discardReadBytes();
             ServerPlayerEntity player = messageTargets.get(id);
@@ -85,7 +85,7 @@ public class PacketSplitter {
             createSplittingConsumer(player).accept(msg, buffer);
         };
 
-        CHANNEL.registerMessage(index, messageType, encode, createPacketCombiner().andThen(decoder), messageConsumer);
+        CHANNEL.registerMessage(index, messageType, wrappedEncoder, createPacketCombiner().andThen(decoder), messageConsumer);
     }
 
     private <MSG> BiConsumer<MSG, PacketBuffer> createSplittingConsumer(ServerPlayerEntity playerEntity) {
