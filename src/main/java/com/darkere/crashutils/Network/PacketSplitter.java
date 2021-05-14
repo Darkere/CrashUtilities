@@ -18,8 +18,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class PacketSplitter {
-
-
     private final static int MAX_PACKET_SIZE = 943718;
 
     private final ResourceLocation CHANNEL_ID;
@@ -93,7 +91,6 @@ public class PacketSplitter {
     private <MSG> BiConsumer<MSG, PacketBuffer> createSplittingConsumer(ServerPlayerEntity playerEntity) {
         return (MSG, buf) -> {
 
-            byte[] data = buf.array();
             if (buf.writerIndex() < MAX_PACKET_SIZE) {
                 return;
             }
@@ -122,7 +119,7 @@ public class PacketSplitter {
                 int sliceSize = Math.min(MAX_PACKET_SIZE, buf.writerIndex() - currentIndex);
 
                 //Extract the sub data array.
-                byte[] subPacketData = Arrays.copyOfRange(data, currentIndex, currentIndex + sliceSize);
+                byte[] subPacketData = Arrays.copyOfRange(buf.array(), currentIndex, currentIndex + sliceSize);
 
                 if (packetIndex == 0) { // Assign Data for first Packet to this packet.
                     packetData = subPacketData;
