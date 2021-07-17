@@ -15,14 +15,16 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public class UnstuckCommand implements Command<CommandSource> {
     private static final UnstuckCommand cmd = new UnstuckCommand();
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("unstuck")
-            .then(Commands.argument("name", StringArgumentType.string())
-                .suggests(CommandUtils.PROFILEPROVIDER)
-                .executes(cmd));
+                .then(Commands.argument("name", StringArgumentType.string())
+                        .suggests(CommandUtils.PROFILEPROVIDER)
+                        .executes(cmd));
 
     }
 
@@ -30,18 +32,26 @@ public class UnstuckCommand implements Command<CommandSource> {
     public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
         String name = StringArgumentType.getString(context, "name");
         ServerPlayerEntity player = context.getSource().getServer().getPlayerList().getPlayerByName(name);
+        AtomicReference<Boolean> success = new AtomicReference<>();
         if (player == null) {
-            WorldUtils.applyToPlayer(name, context.getSource().getServer(), (fakePlayer) -> {
+            success.set(WorldUtils.applyToPlayer(name, context.getSource().getServer(), (fakePlayer) -> {
                 ServerWorld overworld = context.getSource().getServer().getLevel(World.OVERWORLD);
                 BlockPos spawn = overworld.getSharedSpawnPos();
                 fakePlayer.setLevel(overworld);
                 fakePlayer.setPos(spawn.getX(), spawn.getY(), spawn.getZ());
-            });
+            }));
+
         } else {
             BlockPos p = context.getSource().getServer().getLevel(World.OVERWORLD).getSharedSpawnPos();
             WorldUtils.teleportPlayer(player, player.getLevel(), player.getServer().getLevel(World.OVERWORLD), p);
         }
-        context.getSource().sendSuccess(new StringTextComponent("Sent Player " + name + " to Spawn"), true);
+
+        if (success.get()) {
+            context.getSource().sendSuccess(new StringTextComponent("Sent Player " + name + " to Spawn"), true);
+        } else {
+            context.getSource().sendSuccess(new StringTextComponent("Unable to load playerdata for " + name), true);
+        }
+
         return 0;
     }
 

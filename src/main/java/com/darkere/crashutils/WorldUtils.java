@@ -74,17 +74,17 @@ public class WorldUtils {
         }
     }
 
-    public static void applyToPlayer(String playerName, MinecraftServer server, Consumer<ServerPlayerEntity> consumer) {
+    public static boolean applyToPlayer(String playerName, MinecraftServer server, Consumer<ServerPlayerEntity> consumer) {
         ServerPlayerEntity player = server.getPlayerList().getPlayerByName(playerName);
         if (player == null) {
             GameProfile profile = server.getProfileCache().get(playerName);
             if (profile == null) {
-                return;
+                return false;
             }
 
             FakePlayer fakePlayer = new FakePlayer(server.getLevel(World.OVERWORLD), profile);
             CompoundNBT nbt = server.playerDataStorage.load(fakePlayer);
-            if (nbt == null) return;
+            if (nbt == null) return false;
             fakePlayer.load(nbt);
             consumer.accept(fakePlayer);
             server.playerDataStorage.save(fakePlayer);
@@ -92,6 +92,8 @@ public class WorldUtils {
         } else {
             consumer.accept(player);
         }
+
+        return true;
     }
 
     public static BlockPos getChunkCenter(ChunkPos pos) {
