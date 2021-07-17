@@ -82,7 +82,7 @@ public class WorldUtils {
                 return false;
             }
 
-            FakePlayer fakePlayer = new FakePlayer(server.getLevel(World.OVERWORLD), profile);
+            FakePlayer fakePlayer = new CustomFakePlayer(server.getLevel(World.OVERWORLD), profile);
             CompoundNBT nbt = server.playerDataStorage.load(fakePlayer);
             if (nbt == null) return false;
             fakePlayer.load(nbt);
@@ -195,7 +195,7 @@ public class WorldUtils {
         Vector3d end = new Vector3d(pos.getMaxBlockX(), 255, pos.getMaxBlockZ());
 
         world.blockEntityList.stream().filter(te -> Objects.equals(te.getType().getRegistryName(), rl) && new AxisAlignedBB(start, end).contains(Vector3d.atCenterOf(te.getBlockPos()))).forEach(te -> {
-            CrashUtils.runNextTick((wld)->{
+            CrashUtils.runNextTick((wld) -> {
                 if (force) {
                     world.removeBlockEntity(te.getBlockPos());
                     world.removeBlock(te.getBlockPos(), false);
@@ -205,5 +205,4 @@ public class WorldUtils {
             });
         });
     }
-
 }
