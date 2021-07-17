@@ -39,10 +39,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -55,8 +55,9 @@ public class CrashUtils {
     public static boolean curiosLoaded = false;
     Timer chunkcleaner;
     public static boolean sparkLoaded = false;
-    public static List<Consumer<ServerWorld>> runnables = new ArrayList<>();
+    public static List<Consumer<ServerWorld>> runnables = new CopyOnWriteArrayList<>();
     public static boolean skipNext = false;
+    public static boolean isServer = false;
 
     public CrashUtils() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::common);
@@ -81,8 +82,11 @@ public class CrashUtils {
     }
 
     public void configReload(ModConfig.Reloading event) {
-        ClearItemTask.restart();
-        MemoryChecker.restart();
+        if(isServer){
+            ClearItemTask.restart();
+            MemoryChecker.restart();
+        }
+
 
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server != null) {
@@ -113,13 +117,19 @@ public class CrashUtils {
                 .then(LoadedChunksCommand.register())
                 .then(ActivityCommand.register())
                 .then(entitiesCommands)
-                .then(Commands.literal("e")
+                .then(Commands.literal("entities")
+                        .redirect(entitiesCommands))
+                .then(Commands.literal("entity")
                         .redirect(entitiesCommands))
                 .then(tileEntitiesCommands)
                 .then(Commands.literal("te")
                         .redirect(tileEntitiesCommands))
+                .then(Commands.literal("tileentities")
+                        .redirect(tileEntitiesCommands))
+                .then(Commands.literal("tileentity")
+                        .redirect(tileEntitiesCommands))
                 .then(inventoryCommands)
-                .then(Commands.literal("i")
+                .then(Commands.literal("inventory")
                         .redirect(inventoryCommands))
 
         );
@@ -132,9 +142,9 @@ public class CrashUtils {
 
     @SubscribeEvent
     public void ServerStarted(FMLServerStartedEvent event) {
-        //ClearItemTask.restart();
-        //MemoryChecker.restart();
-
+        isServer = true;
+        ClearItemTask.start();
+        MemoryChecker.start();
         setupFtbChunksUnloading(event.getServer().getLevel(World.OVERWORLD));
     }
 
@@ -169,7 +179,11 @@ public class CrashUtils {
 
     @SubscribeEvent
     public void onWorldTick(TickEvent.WorldTickEvent event) {
-        if (event.world.isClientSide && event.phase != TickEvent.Phase.END) return;
+        if ( event.phase != TickEvent.Phase.END) return;
+        if(event.world.isClientSide && !runnables.isEmpty()){
+            runnables.clear();
+            return;
+        }
 
         if (!runnables.isEmpty()) {
             if (skipNext) {
@@ -180,5 +194,4 @@ public class CrashUtils {
             runnables.clear();
         }
     }
-
 }

@@ -24,11 +24,11 @@ public class FindLoadedTEsCommand implements Command<CommandSource> {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("find")
-            .then(Commands.argument("res", ResourceLocationArgument.id())
-                .suggests(sugg)
-                .executes(cmd)
-                .then(Commands.argument("dim", DimensionArgument.dimension()))
-                .executes(cmd));
+                .then(Commands.argument("res", ResourceLocationArgument.id())
+                        .suggests(sugg)
+                        .executes(cmd)
+                        .then(Commands.argument("dim", DimensionArgument.dimension()))
+                        .executes(cmd));
 
 
     }

@@ -21,14 +21,15 @@ public class LoadedChunksCommand {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
         return Commands.literal("chunks")
-            .then(Commands.argument("dim", DimensionArgument.dimension()).executes(x -> run(x, 0, null)))
-            .executes(x -> run(x, 0, null))
-            .then(Commands.literal("byLocation")
-                .then(Commands.argument("loc", StringArgumentType.word())
-                    .executes(x -> run(x, 1, StringArgumentType.getString(x, "loc")))))
-            .then(Commands.literal("byTicket")
-                .then(Commands.argument("tic", StringArgumentType.word())
-                    .executes(x -> run(x, 2, StringArgumentType.getString(x, "tic")))));
+                .then(Commands.argument("dim", DimensionArgument.dimension())
+                        .executes(x -> run(x, 0, null)))
+                .executes(x -> run(x, 0, null))
+                .then(Commands.literal("byLocation")
+                        .then(Commands.argument("loc", StringArgumentType.word())
+                                .executes(x -> run(x, 1, StringArgumentType.getString(x, "loc")))))
+                .then(Commands.literal("byTicket")
+                        .then(Commands.argument("tic", StringArgumentType.word())
+                                .executes(x -> run(x, 2, StringArgumentType.getString(x, "tic")))));
     }
 
 

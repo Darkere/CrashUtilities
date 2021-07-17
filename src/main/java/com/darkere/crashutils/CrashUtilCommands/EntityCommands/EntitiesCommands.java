@@ -8,7 +8,7 @@ public class EntitiesCommands {
 
 
     public static CommandNode<CommandSource> register() {
-       return Commands.literal("entities")
+       return Commands.literal("e")
             .then(AllEntitiesCommand.register())
             .then(FindEntitiesCommand.register())
             .then(RemoveEntitiesCommand.register())

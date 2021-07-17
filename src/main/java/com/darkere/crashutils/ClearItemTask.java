@@ -16,11 +16,16 @@ import java.util.stream.Collectors;
 public class ClearItemTask extends TimerTask {
 
     public static ClearItemTask INSTANCE;
-    public boolean enabled;
     int maxItems;
     List<Integer> list = new ArrayList<>();
     Timer timer;
-
+    public int lastCount;
+    public static void start(){
+        if(CrashUtils.SERVER_CONFIG.getEnabled()){
+            INSTANCE = new ClearItemTask();
+            INSTANCE.loadConfigsAndStart();
+        }
+    }
     public static void restart() {
         if(INSTANCE != null){
             INSTANCE.shutdown();
@@ -60,7 +65,8 @@ public class ClearItemTask extends TimerTask {
 
     private void runClear(ServerWorld world) {
         List<Entity> entityList = world.getEntities().filter(x -> x.getType().equals(EntityType.ITEM)).collect(Collectors.toList());
-        if (entityList.size() < maxItems) return;
+        lastCount = entityList.size();
+        if (lastCount < maxItems) return;
         String text = CrashUtils.SERVER_CONFIG.getWarningText();
         int last = list.get(list.size() - 1);
         for (Integer integer : list) {

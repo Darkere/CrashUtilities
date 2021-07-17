@@ -8,7 +8,7 @@ public class TileEntitiesCommands {
 
 
     public static CommandNode<CommandSource> register() {
-        return Commands.literal("tileentities")
+        return Commands.literal("blockentity")
             .then(AllLoadedTEsCommand.register())
             .then(FindLoadedTEsCommand.register())
             .then(DeleteTECommand.register())

@@ -40,7 +40,7 @@ public class CUScreen extends Screen {
     public List<CUDropDown> topDropDowns = new ArrayList<>();
     ExtendedButton button;
     boolean dragging;
-    BlockPos initial = null;
+    BlockPos initial;
     static boolean keep = false;
 
     public CUScreen(RegistryKey<World> worldKey, BlockPos position) {
@@ -151,9 +151,9 @@ public class CUScreen extends Screen {
         for (int i = 0; i < tabs; i++) {
             if (i == 0) {
                 if (i == activeTab) {
-                    CUTab.ATL.drawTab(stack, this, x + (i * 27), y, tabIcons.get(i), iconScale);
+                    CUTab.ATL.drawTab(stack, this, x, y, tabIcons.get(i), iconScale);
                 } else {
-                    CUTab.ITL.drawTab(stack, this, x + (i * 27), y, tabIcons.get(i), iconScale);
+                    CUTab.ITL.drawTab(stack, this, x, y, tabIcons.get(i), iconScale);
                 }
             } else {
                 if (i == activeTab) {
@@ -225,7 +225,7 @@ public class CUScreen extends Screen {
                 if (contentGUI instanceof MapGUI) {
                     MapGUI gui = (MapGUI) contentGUI;
                     BlockPos pos = gui.getChunkFor((int) mx, (int) my).getWorldPosition();
-                    Network.INSTANCE.sendToServer(new TeleportMessage(dim, dim, pos));
+                    Network.sendToServer(new TeleportMessage(dim, dim, pos));
                     return true;
                 }
             }
