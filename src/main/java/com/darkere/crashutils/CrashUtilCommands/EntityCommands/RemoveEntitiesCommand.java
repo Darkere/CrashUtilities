@@ -31,14 +31,17 @@ public class RemoveEntitiesCommand {
             .then(Commands.literal("byType")
                 .then(Commands.argument("type", ResourceLocationArgument.id())
                     .suggests(sugg)
+                    .executes(ctx -> removeEntities(ctx, ResourceLocationArgument.getId(ctx, "type")))
                     .then(Commands.argument("force", StringArgumentType.word())
                         .suggests(boolsugg)
                         .executes(ctx -> removeEntities(ctx, ResourceLocationArgument.getId(ctx, "type"))))))
             .then(Commands.literal("items")
-                .then(Commands.argument("force", StringArgumentType.word())
-                    .suggests(boolsugg))
                 .executes(ctx -> removeItems(ctx, null))
+                .then(Commands.argument("force", StringArgumentType.word())
+                    .suggests(boolsugg)
+                    .executes(ctx -> removeItems(ctx, null)))
                 .then(Commands.argument("name", StringArgumentType.word())
+                    .executes(ctx -> removeItems(ctx, StringArgumentType.getString(ctx, "name")))
                     .then(Commands.argument("force", StringArgumentType.word())
                         .suggests(boolsugg)
                         .executes(ctx -> removeItems(ctx, StringArgumentType.getString(ctx, "name"))))))
@@ -112,7 +115,7 @@ public class RemoveEntitiesCommand {
         try {
             String forced = StringArgumentType.getString(context, "force");
             force = forced.equals("force");
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
 
