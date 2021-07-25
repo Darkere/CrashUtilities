@@ -1,5 +1,6 @@
 package com.darkere.crashutils.Network;
 
+import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.Screens.PlayerInvContainer;
 import com.mojang.authlib.GameProfile;
@@ -40,7 +41,7 @@ public class PlayerInventoryRequestMessage {
         ctx.get().enqueueWork(() -> {
             ServerPlayerEntity player = ctx.get().getSender();
             MinecraftServer server = player.getServer();
-            if(!player.hasPermissions(2)) return;
+            if(!player.hasPermissions(CommandUtils.PERMISSION_LEVEL)) return;
             PlayerEntity otherPlayer = ctx.get().getSender().getServer().getPlayerList().getPlayerByName(data.playerName);
             if (otherPlayer == null) {
                 GameProfile profile = server.getProfileCache().get(data.playerName);

@@ -1,5 +1,6 @@
 package com.darkere.crashutils.Network;
 
+import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.WorldUtils;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
@@ -41,7 +42,7 @@ public class TeleportMessage {
         ctx.get().enqueueWork(() -> {
             ServerPlayerEntity player = ctx.get().getSender();
             if (player == null) return;
-            if(!player.hasPermissions(2)) return;
+            if(!player.hasPermissions(CommandUtils.PERMISSION_LEVEL)) return;
             ServerWorld ori = player.getServer().getLevel(data.origin);
             ServerWorld dest = player.getServer().getLevel(data.dest);
             WorldUtils.teleportPlayer(player, ori, dest, data.pos);

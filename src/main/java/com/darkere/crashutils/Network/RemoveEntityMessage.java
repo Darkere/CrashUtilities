@@ -1,5 +1,6 @@
 package com.darkere.crashutils.Network;
 
+import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.WorldUtils;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
@@ -38,7 +39,7 @@ public class RemoveEntityMessage {
     public static boolean handle(RemoveEntityMessage data, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayerEntity player = ctx.get().getSender();
-            if (player == null || !player.hasPermissions(2)) return;
+            if (player == null || !player.hasPermissions(CommandUtils.PERMISSION_LEVEL)) return;
             if (data.tile) {
                 WorldUtils.removeTileEntity(player.getServer().getLevel(data.worldRegistryKey), data.id, data.force);
             } else {

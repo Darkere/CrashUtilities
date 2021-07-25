@@ -74,7 +74,7 @@ public class ClientEvents {
         if (event.getAction() != GLFW.GLFW_PRESS) return;
         if (OPENSCREEN.consumeClick()) {
             RegistryKey<World> worldKey = Minecraft.getInstance().player.getCommandSenderWorld().dimension();
-            if (Minecraft.getInstance().player.hasPermissions(2)) {
+            if (Minecraft.getInstance().player.hasPermissions(CommandUtils.PERMISSION_LEVEL)) {
                 Minecraft.getInstance().setScreen(CUScreen.openCUScreen(worldKey, new BlockPos(Minecraft.getInstance().player.position())));
             } else {
                 if (!Minecraft.getInstance().hasSingleplayerServer()) {

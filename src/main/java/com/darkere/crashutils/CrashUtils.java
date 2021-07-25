@@ -106,7 +106,7 @@ public class CrashUtils {
         CommandNode<CommandSource> inventoryCommands = InventoryCommands.register();
 
         LiteralCommandNode<CommandSource> cmd = dispatcher.register(LiteralArgumentBuilder.<CommandSource>literal(MODID)
-                .requires(x -> x.hasPermission(2))
+                .requires(x -> x.hasPermission(CommandUtils.PERMISSION_LEVEL))
                 .then(TeleportCommand.register())
                 .then(UnstuckCommand.register())
                 .then(MemoryCommand.register())
@@ -134,7 +134,7 @@ public class CrashUtils {
 
         );
         dispatcher.register(Commands.literal("cu")
-                .requires(x -> x.hasPermission(2))
+                .requires(x -> x.hasPermission(CommandUtils.PERMISSION_LEVEL))
                 .redirect(cmd)
         );
 

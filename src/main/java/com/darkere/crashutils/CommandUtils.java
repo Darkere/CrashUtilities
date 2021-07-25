@@ -21,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class CommandUtils {
+    public static final int PERMISSION_LEVEL = 2;
     private static final Logger LOGGER = LogManager.getLogger();
     public static final SuggestionProvider<CommandSource> PROFILEPROVIDER = (ctx, builder) ->
         ISuggestionProvider.suggest(ctx.getSource().getServer().getProfileCache().getTopMRUProfiles(1000).map(e -> e.getProfile().getName()), builder);

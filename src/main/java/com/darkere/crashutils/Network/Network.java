@@ -26,6 +26,7 @@ public class Network {
         CHANNEL.registerMessage(ID++, TeleportToPlayerMessage.class, TeleportToPlayerMessage::encode, TeleportToPlayerMessage::decode, TeleportToPlayerMessage::handle);
         CHANNEL.registerMessage(ID++, RemoveEntitiesMessage.class, RemoveEntitiesMessage::encode, RemoveEntitiesMessage::decode, RemoveEntitiesMessage::handle);
         CHANNEL.registerMessage(ID++, RemoveEntityMessage.class, RemoveEntityMessage::encode, RemoveEntityMessage::decode, RemoveEntityMessage::handle);
+        CHANNEL.registerMessage(ID++, OpenEnderChestMessage.class, OpenEnderChestMessage::encode, OpenEnderChestMessage::decode, OpenEnderChestMessage::handle);
 
         CHANNEL.registerMessage(ID++, SplitPacketMessage.class, SplitPacketMessage::encode, SplitPacketMessage::decode, SplitPacketMessage::handle);
 

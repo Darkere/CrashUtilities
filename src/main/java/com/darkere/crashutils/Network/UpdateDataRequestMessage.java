@@ -1,5 +1,6 @@
 package com.darkere.crashutils.Network;
 
+import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.DataStructures.EntityData;
 import com.darkere.crashutils.DataStructures.LoadedChunkData;
@@ -42,7 +43,7 @@ public class UpdateDataRequestMessage {
     public static void handle(UpdateDataRequestMessage data, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             if (ctx.get().getSender() == null) return;
-            if (!ctx.get().getSender().hasPermissions(2)) return;
+            if (!ctx.get().getSender().hasPermissions(CommandUtils.PERMISSION_LEVEL)) return;
             MinecraftServer server = ctx.get().getSender().getServer();
             if (server == null) return;
             ServerWorld world = server.getLevel(data.worldKey);

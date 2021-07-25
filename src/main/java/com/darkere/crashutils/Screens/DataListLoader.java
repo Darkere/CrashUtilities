@@ -1,10 +1,7 @@
 package com.darkere.crashutils.Screens;
 
 import com.darkere.crashutils.DataStructures.*;
-import com.darkere.crashutils.Network.DataRequestType;
-import com.darkere.crashutils.Network.Network;
-import com.darkere.crashutils.Network.PlayerInventoryRequestMessage;
-import com.darkere.crashutils.Network.TeleportToPlayerMessage;
+import com.darkere.crashutils.Network.*;
 import com.darkere.crashutils.WorldUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
@@ -228,6 +225,11 @@ public class DataListLoader {
             option.addButton("Teleport", (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Teleport to the player", x, y, parent), x -> {
                 if (option.getString() != null) {
                     Network.sendToServer(new TeleportToPlayerMessage(option.getString()));
+                }
+            });
+            option.addButton("EnderChest", (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Open Enderchest", x, y, parent), x -> {
+                if (option.getString() != null) {
+                   Network.sendToServer(new OpenEnderChestMessage(option.string));
                 }
             });
         });
