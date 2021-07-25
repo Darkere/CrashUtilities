@@ -11,6 +11,8 @@ public class InventoryCommands {
         return Commands.literal("i")
             .then(InventoryLookCommand.register())
             .then(RemoveFromInventorySlotCommand.register())
+            .then(InventoryOpenCommand.register())
+            .then(InventoryOpenEnderChestCommand.register())
             .build();
     }
 

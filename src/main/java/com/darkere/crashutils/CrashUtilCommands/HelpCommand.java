@@ -34,6 +34,8 @@ public class HelpCommand {
             "/cu inventory",
             "   read (name): reads out the Inventory of this player",
             "   remove (name) <slot type>(slot): removes the item from the slot of this player",
+            "   open (name): opens the inventory of a player",
+            "   enderchest (name): opens the enderchest of a player",
             "/cu activity: list playeractivity over the last days,week,month",
             "/cu tp (name)",
             "   (pos) (dim): teleport to position in dimension",

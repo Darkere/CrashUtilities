@@ -156,7 +156,7 @@ public class CrashUtils {
                 public void run() {
                     PlayerActivityHistory history = new PlayerActivityHistory(world);
                     LOGGER.info("Unloading chunks for players that have not been online in: " + SERVER_CONFIG.getExpireTimeInDays() + " Days");
-                    LOGGER.info(history.getPlayersInChunkClearTime() + " Player(s) affected ");
+                    LOGGER.info(history.getPlayersInChunkClearTime().size() + " Player(s) affected ");
                     for (String player : history.getPlayersInChunkClearTime()) {
                         LOGGER.info("Unloading " + player + "'s Chunks");
                         world.getServer().getCommands().performCommand(world.getServer().createCommandSourceStack(),

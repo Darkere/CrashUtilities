@@ -1,6 +1,5 @@
 package com.darkere.crashutils.Screens;
 
-import com.darkere.crashutils.CrashUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.Inventory;
@@ -16,7 +15,6 @@ import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class PlayerInvContainer extends Container {
@@ -56,26 +54,25 @@ public class PlayerInvContainer extends Container {
         } else {
             this.otherPlayer = otherPlayer;
             otherPlayerInventory = new InvWrapper(otherPlayer.inventory);
-            otherPlayerName = otherPlayer.getName().getString();
         }
 
         layoutPlayerInventorySlots(playerInventory, 25, 105);
         layoutPlayerInventorySlots(otherPlayerInventory, 25, -13);
         layoutArmorAndOffhandSlots(playerInventory, -10, 97);
         layoutArmorAndOffhandSlots(otherPlayerInventory, -10, -21);
-        if (CrashUtils.curiosLoaded) {
-            IItemHandler curiosInv = null;
-            if (slotAmounts != null) {
-                curiosInv = new InvWrapper(new Inventory(curioSlotcount));
-                this.slotAmounts = slotAmounts;
-            } else {
-                slotAmounts = new LinkedHashMap<>();
-                Map<String, Integer> finalSlotAmounts = slotAmounts;
-                CuriosApi.getCuriosHelper().getCuriosHandler(player).ifPresent(x -> x.getCurios().forEach((s, h) -> finalSlotAmounts.put(s, h.getSlots())));
-            }
-            layoutCurioSlots(otherPlayer, 204, -35, slotAmounts.values(), curiosInv);
-            layoutCurioSlots(player, 204, 85, slotAmounts.values(), null);
-        }
+//        if (CrashUtils.curiosLoaded) {
+//            IItemHandler curiosInv = null;
+//            if (slotAmounts != null) {
+//                curiosInv = new InvWrapper(new Inventory(curioSlotcount));
+//                this.slotAmounts = slotAmounts;
+//            } else {
+//                slotAmounts = new LinkedHashMap<>();
+//                Map<String, Integer> finalSlotAmounts = slotAmounts;
+//                CuriosApi.getCuriosHelper().getCuriosHandler(player).ifPresent(x -> x.getCurios().forEach((s, h) -> finalSlotAmounts.put(s, h.getSlots())));
+//            }
+//            layoutCurioSlots(otherPlayer, 204, -35, slotAmounts.values(), curiosInv);
+//            layoutCurioSlots(player, 204, 85, slotAmounts.values(), null);
+//        }
 
     }
 

@@ -91,7 +91,7 @@ public class ClientEvents {
     public static void openContainerAndScreen(int id, String playerName, Map<String, Integer> curios) {
         PlayerEntity player = Minecraft.getInstance().player;
         if (player == null) return;
-        PlayerInvContainer c = new PlayerInvContainer(player, null, id, playerName, curios, curios.values().stream().mapToInt(x -> x).sum());
+        PlayerInvContainer c = new PlayerInvContainer(player, /*clientside null */null, id, playerName, curios, curios.values().stream().mapToInt(x -> x).sum());
         player.containerMenu = c;
         Minecraft.getInstance().setScreen(new PlayerInvScreen(c, player.inventory, new StringTextComponent("cuinventoryscreen")));
     }

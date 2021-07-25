@@ -1,10 +1,6 @@
 package com.darkere.crashutils.CrashUtilCommands.InventoryCommands;
 
 import com.darkere.crashutils.CommandUtils;
-import com.darkere.crashutils.CrashUtils;
-import com.darkere.crashutils.Network.Network;
-import com.darkere.crashutils.Network.OpenPlayerInvMessage;
-import com.darkere.crashutils.Screens.PlayerInvContainer;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -24,20 +20,15 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.fml.network.FMLConnectionData;
 import net.minecraftforge.fml.network.NetworkHooks;
-import top.theillusivec4.curios.api.CuriosApi;
 
 import javax.annotation.Nullable;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.UUID;
 
-public class InventoryOpenCommand {
-
+public class InventoryOpenEnderChestCommand {
 
     public static ArgumentBuilder<CommandSource, ?> register() {
-        return Commands.literal("open")
+        return Commands.literal("enderchest")
             .then(Commands.argument("player", StringArgumentType.string())
                 .suggests(CommandUtils.PROFILEPROVIDER)
                 .executes(ctx -> openInventory(StringArgumentType.getString(ctx, "player"), ctx)));
@@ -65,27 +56,8 @@ public class InventoryOpenCommand {
             otherPlayer.load(nbt);
         }
 
-        FMLConnectionData data = NetworkHooks.getConnectionData(sourcePlayer.connection.getConnection());
-        if (data != null && data.getModList().contains(CrashUtils.MODID)) {
-            sourcePlayer.doCloseContainer();
-            sourcePlayer.nextContainerCounter();
-            int id = sourcePlayer.containerCounter;
-
-            Map<String, Integer> curios = new LinkedHashMap<>();
-            if (CrashUtils.curiosLoaded) {
-                CuriosApi.getCuriosHelper().getCuriosHandler(otherPlayer).orElse(null).getCurios().forEach((s, handler) -> {
-                    curios.put(s, handler.getSlots());
-                });
-            }
-
-            Network.sendToPlayer(sourcePlayer, new OpenPlayerInvMessage(id, otherPlayer.getName().getString(), curios));
-            sourcePlayer.containerMenu = new PlayerInvContainer(sourcePlayer, otherPlayer, id, null, null, 0);
-            sourcePlayer.containerMenu.addSlotListener(sourcePlayer);
-
-            return Command.SINGLE_SUCCESS;
-        }
-
         PlayerEntity finalOtherPlayer = otherPlayer;
+
         NetworkHooks.openGui(sourcePlayer, new INamedContainerProvider() {
             @Override
             public ITextComponent getDisplayName() {
@@ -95,7 +67,7 @@ public class InventoryOpenCommand {
             @Nullable
             @Override
             public Container createMenu(int id, PlayerInventory p_createMenu_2_, PlayerEntity p_createMenu_3_) {
-                return new ChestContainer(ContainerType.GENERIC_9x4, id, sourcePlayer.inventory, finalOtherPlayer.inventory, 4) {
+                return new ChestContainer(ContainerType.GENERIC_9x3, id, sourcePlayer.inventory, finalOtherPlayer.getEnderChestInventory(), 3){
                     @Override
                     public void removed(PlayerEntity p_75134_1_) {
                         super.removed(p_75134_1_);
@@ -110,7 +82,6 @@ public class InventoryOpenCommand {
                 };
             }
         });
-
         return Command.SINGLE_SUCCESS;
     }
 }
