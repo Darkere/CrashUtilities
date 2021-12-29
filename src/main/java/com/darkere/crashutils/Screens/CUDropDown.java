@@ -1,19 +1,19 @@
 package com.darkere.crashutils.Screens;
 
 import com.darkere.crashutils.Screens.Types.DropDownType;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Transformation;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.util.math.vector.TransformationMatrix;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.network.chat.TextComponent;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class CUDropDown extends AbstractGui {
+public class CUDropDown extends GuiComponent {
     private List<String> allOptions;
     private List<String> options = new ArrayList<>();
     private String selected = "";
@@ -24,7 +24,7 @@ public class CUDropDown extends AbstractGui {
     private boolean alwaysExpanded;
     private List<FillMany.Text> strings;
     private final int height = 11;
-    final TextFieldWidget widget;
+    final EditBox widget;
     private boolean isEnabled = false;
     String oldFilter = "";
     CUScreen parent;
@@ -58,7 +58,7 @@ public class CUDropDown extends AbstractGui {
         } else {
             this.width = width;
         }
-        widget = new TextFieldWidget(Minecraft.getInstance().font, this.posX, this.posY, this.width, height, new StringTextComponent(selected));
+        widget = new EditBox(Minecraft.getInstance().font, this.posX, this.posY, this.width, height, new TextComponent(selected));
         widget.setValue(selected);
         widget.moveCursorToStart();
         maxOffset = options.size() - fitOnScreen;
@@ -70,7 +70,7 @@ public class CUDropDown extends AbstractGui {
         this.fitOnScreen = fitOnScreen;
     }
 
-    public void render(MatrixStack stack, int centerX, int centerY) {
+    public void render(PoseStack stack, int centerX, int centerY) {
         posX = centerX + defaultXRenderOffset + 1;
         posY = centerY + defaultYRenderOffset + 1;
         if (!isEnabled) return;
@@ -94,7 +94,7 @@ public class CUDropDown extends AbstractGui {
                 colored = !colored;
             }
         }
-        FillMany.fillMany(TransformationMatrix.identity().getMatrix(), list);
+        FillMany.fillMany(Transformation.identity().getMatrix(), list);
         FillMany.drawStrings(stack, Minecraft.getInstance().font, strings);
 
     }

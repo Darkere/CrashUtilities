@@ -2,35 +2,35 @@ package com.darkere.crashutils.Network;
 
 import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.WorldUtils;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 public class TeleportMessage {
-    RegistryKey<World> origin;
-    RegistryKey<World> dest;
+    ResourceKey<Level> origin;
+    ResourceKey<Level> dest;
     BlockPos pos;
 
-    public TeleportMessage(RegistryKey<World> origin, RegistryKey<World> dest, BlockPos pos) {
+    public TeleportMessage(ResourceKey<Level> origin, ResourceKey<Level> dest, BlockPos pos) {
         this.origin = origin;
         this.dest = dest;
         this.pos = pos;
     }
 
-    public static void encode(TeleportMessage data, PacketBuffer buf) {
+    public static void encode(TeleportMessage data, FriendlyByteBuf buf) {
         NetworkTools.writeWorldKey(data.origin, buf);
         NetworkTools.writeWorldKey(data.dest, buf);
         buf.writeBlockPos(data.pos);
     }
 
 
-    public static TeleportMessage decode(PacketBuffer buf) {
+    public static TeleportMessage decode(FriendlyByteBuf buf) {
         return new TeleportMessage(
             NetworkTools.readWorldKey(buf),
             NetworkTools.readWorldKey(buf),
@@ -40,11 +40,11 @@ public class TeleportMessage {
 
     public static void handle(TeleportMessage data, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            ServerPlayerEntity player = ctx.get().getSender();
+            ServerPlayer player = ctx.get().getSender();
             if (player == null) return;
             if(!player.hasPermissions(CommandUtils.PERMISSION_LEVEL)) return;
-            ServerWorld ori = player.getServer().getLevel(data.origin);
-            ServerWorld dest = player.getServer().getLevel(data.dest);
+            ServerLevel ori = player.getServer().getLevel(data.origin);
+            ServerLevel dest = player.getServer().getLevel(data.dest);
             WorldUtils.teleportPlayer(player, ori, dest, data.pos);
         });
         ctx.get().setPacketHandled(true);

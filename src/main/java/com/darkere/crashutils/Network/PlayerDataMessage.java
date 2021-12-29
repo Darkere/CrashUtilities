@@ -2,8 +2,8 @@ package com.darkere.crashutils.Network;
 
 import com.darkere.crashutils.DataStructures.DataHolder;
 import com.darkere.crashutils.DataStructures.PlayerData;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,14 +16,14 @@ public class PlayerDataMessage {
         data = playerData;
     }
 
-    public static void encode(PlayerDataMessage data, PacketBuffer buf) {
+    public static void encode(PlayerDataMessage data, FriendlyByteBuf buf) {
         List<String> names = data.data.getPlayerNames(null);
         buf.writeInt(names.size());
         names.forEach(buf::writeUtf);
     }
 
 
-    public static PlayerDataMessage decode(PacketBuffer buf) {
+    public static PlayerDataMessage decode(FriendlyByteBuf buf) {
         List<String> names = new ArrayList<>();
         int size = buf.readInt();
         for (int i = 0; i < size; i++) {

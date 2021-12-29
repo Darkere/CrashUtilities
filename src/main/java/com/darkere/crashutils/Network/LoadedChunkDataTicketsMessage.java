@@ -1,9 +1,9 @@
 package com.darkere.crashutils.Network;
 
 import com.darkere.crashutils.DataStructures.DataHolder;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.Map;
 import java.util.Set;
@@ -16,11 +16,11 @@ public class LoadedChunkDataTicketsMessage {
         this.data = data;
     }
 
-    public static void encode(LoadedChunkDataTicketsMessage data, PacketBuffer buf) {
+    public static void encode(LoadedChunkDataTicketsMessage data, FriendlyByteBuf buf) {
         NetworkTools.writeSChPMap(buf, data.data);
     }
 
-    public static LoadedChunkDataTicketsMessage decode(PacketBuffer buf) {
+    public static LoadedChunkDataTicketsMessage decode(FriendlyByteBuf buf) {
         return new LoadedChunkDataTicketsMessage(NetworkTools.readSChPMap(buf));
     }
 

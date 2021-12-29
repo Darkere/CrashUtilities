@@ -4,12 +4,12 @@ import com.darkere.crashutils.DataStructures.DataHolder;
 import com.darkere.crashutils.Network.DataRequestType;
 import com.darkere.crashutils.Screens.Types.DropDownType;
 import com.darkere.crashutils.Screens.Types.GridRenderType;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 
 import java.awt.*;
 import java.util.List;
@@ -33,7 +33,7 @@ public class MapGUI extends CUContentPane {
     private String entityFilter;
     BlockPos initial;
 
-    MapGUI(CUScreen screen, RegistryKey<World> dim, BlockPos initial) {
+    MapGUI(CUScreen screen, ResourceKey<Level> dim, BlockPos initial) {
         super(dim, screen);
         this.initial = initial;
         goTo(initial);
@@ -65,7 +65,7 @@ public class MapGUI extends CUContentPane {
         });
     }
 
-    public void render(MatrixStack stack, int centerX, int centerY, int mx, int my, float partialTicks) {
+    public void render(PoseStack stack, int centerX, int centerY, int mx, int my, float partialTicks) {
         super.render(stack, centerX, centerY, mx, my, partialTicks);
         List<FillMany.ColoredRectangle> list = new ArrayList<>();
         for (int i = 0; i < XAcross; i++) {

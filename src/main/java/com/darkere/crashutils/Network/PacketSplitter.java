@@ -2,12 +2,12 @@ package com.darkere.crashutils.Network;
 
 import com.google.common.primitives.Bytes;
 import io.netty.buffer.Unpooled;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.PacketDistributor;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.network.simple.SimpleChannel;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 
@@ -24,7 +24,7 @@ public class PacketSplitter {
     private final SimpleChannel CHANNEL;
 
     private static final Map<Integer, Map<Integer, byte[]>> packageCache = new HashMap<>();
-    private final Map<Integer, ServerPlayerEntity> messageTargets = new HashMap<>();
+    private final Map<Integer, ServerPlayer> messageTargets = new HashMap<>();
     private final Map<Integer, Integer> packetMaximums = new HashMap<>();
     private final Set<Class<?>> messagesToSplit = new HashSet<>();
 
@@ -42,7 +42,7 @@ public class PacketSplitter {
         return messagesToSplit.contains(clazz);
     }
 
-    public void sendToPlayer(ServerPlayerEntity player, Object message) {
+    public void sendToPlayer(ServerPlayer player, Object message) {
         if(ID == 0 ) ID++; // in case we wrapped around, 0 is reserved for server
         int id = ID++;
         messageTargets.put(id, player);
@@ -56,7 +56,7 @@ public class PacketSplitter {
 
     //mostly copied from SimpleChannel
     private void sendPacket(Object Message, int id, PacketDistributor.PacketTarget target) {
-        final PacketBuffer bufIn = new PacketBuffer(Unpooled.buffer());
+        final FriendlyByteBuf bufIn = new FriendlyByteBuf(Unpooled.buffer());
 
         //write the message id to be able to figure out where the packet is supposed to go in the wrapper
         bufIn.writeInt(id);
@@ -65,18 +65,18 @@ public class PacketSplitter {
         target.send(target.getDirection().buildPacket(Pair.of(bufIn, index), CHANNEL_ID).getThis());
     }
 
-    public <MSG> void registerMessage(int index, Class<MSG> messageType, BiConsumer<MSG, PacketBuffer> encoder, Function<PacketBuffer, MSG> decoder, BiConsumer<MSG, Supplier<NetworkEvent.Context>> messageConsumer) {
+    public <MSG> void registerMessage(int index, Class<MSG> messageType, BiConsumer<MSG, FriendlyByteBuf> encoder, Function<FriendlyByteBuf, MSG> decoder, BiConsumer<MSG, Supplier<NetworkEvent.Context>> messageConsumer) {
         registerMessage(index, maxNumberOfMessages, messageType, encoder, decoder, messageConsumer);
     }
 
-    public <MSG> void registerMessage(int index, int maxNumberOfMessages, Class<MSG> messageType, BiConsumer<MSG, PacketBuffer> encoder, Function<PacketBuffer, MSG> decoder, BiConsumer<MSG, Supplier<NetworkEvent.Context>> messageConsumer) {
+    public <MSG> void registerMessage(int index, int maxNumberOfMessages, Class<MSG> messageType, BiConsumer<MSG, FriendlyByteBuf> encoder, Function<FriendlyByteBuf, MSG> decoder, BiConsumer<MSG, Supplier<NetworkEvent.Context>> messageConsumer) {
         packetMaximums.put(index, maxNumberOfMessages);
         messagesToSplit.add(messageType);
 
-        BiConsumer<MSG, PacketBuffer> wrappedEncoder = (msg, buffer) -> {
+        BiConsumer<MSG, FriendlyByteBuf> wrappedEncoder = (msg, buffer) -> {
             int id = buffer.readInt();
             buffer.discardReadBytes();
-            ServerPlayerEntity player = messageTargets.get(id);
+            ServerPlayer player = messageTargets.get(id);
             messageTargets.remove(id);
 
             //write a zero for the number of packets in case the packet does not need to be split
@@ -88,7 +88,7 @@ public class PacketSplitter {
         CHANNEL.registerMessage(index, messageType, wrappedEncoder, createPacketCombiner().andThen(decoder), messageConsumer);
     }
 
-    private <MSG> BiConsumer<MSG, PacketBuffer> createSplittingConsumer(ServerPlayerEntity playerEntity) {
+    private <MSG> BiConsumer<MSG, FriendlyByteBuf> createSplittingConsumer(ServerPlayer playerEntity) {
         return (MSG, buf) -> {
 
             if (buf.writerIndex() < MAX_PACKET_SIZE) {
@@ -164,7 +164,7 @@ public class PacketSplitter {
         };
     }
 
-    private Function<PacketBuffer, PacketBuffer> createPacketCombiner() {
+    private Function<FriendlyByteBuf, FriendlyByteBuf> createPacketCombiner() {
         return (buf) -> {
             int size = buf.readShort();
 
@@ -191,7 +191,7 @@ public class PacketSplitter {
                     .map(Map.Entry::getValue)
                     .reduce(new byte[0], Bytes::concat);
 
-            PacketBuffer buffer = new PacketBuffer(Unpooled.wrappedBuffer(packetData));
+            FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.wrappedBuffer(packetData));
 
             //remove data from cache
             packageCache.remove(comId);

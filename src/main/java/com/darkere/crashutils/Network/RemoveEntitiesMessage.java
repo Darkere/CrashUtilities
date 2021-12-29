@@ -2,24 +2,24 @@ package com.darkere.crashutils.Network;
 
 import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.WorldUtils;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 public class RemoveEntitiesMessage {
-    RegistryKey<World> worldRegistryKey;
+    ResourceKey<Level> worldRegistryKey;
     ResourceLocation rl;
     ChunkPos pos;
     boolean tile;
     boolean force;
 
-    public RemoveEntitiesMessage(RegistryKey<World> worldRegistryKey, ResourceLocation rl, ChunkPos pos, boolean tile, boolean force) {
+    public RemoveEntitiesMessage(ResourceKey<Level> worldRegistryKey, ResourceLocation rl, ChunkPos pos, boolean tile, boolean force) {
         this.worldRegistryKey = worldRegistryKey;
         this.rl = rl;
         this.pos = pos;
@@ -28,7 +28,7 @@ public class RemoveEntitiesMessage {
     }
 
 
-    public static void encode(RemoveEntitiesMessage data, PacketBuffer buf) {
+    public static void encode(RemoveEntitiesMessage data, FriendlyByteBuf buf) {
         NetworkTools.writeWorldKey(data.worldRegistryKey, buf);
         buf.writeResourceLocation(data.rl);
         buf.writeBoolean(data.tile);
@@ -42,8 +42,8 @@ public class RemoveEntitiesMessage {
     }
 
 
-    public static RemoveEntitiesMessage decode(PacketBuffer buf) {
-        RegistryKey<World> world = NetworkTools.readWorldKey(buf);
+    public static RemoveEntitiesMessage decode(FriendlyByteBuf buf) {
+        ResourceKey<Level> world = NetworkTools.readWorldKey(buf);
         ResourceLocation rl = buf.readResourceLocation();
         boolean tile = buf.readBoolean();
         boolean force = buf.readBoolean();
@@ -56,9 +56,9 @@ public class RemoveEntitiesMessage {
 
     public static boolean handle(RemoveEntitiesMessage data, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            ServerPlayerEntity player = ctx.get().getSender();
+            ServerPlayer player = ctx.get().getSender();
             if (player == null || !player.hasPermissions(CommandUtils.PERMISSION_LEVEL)) return;
-            World world = player.getServer().getLevel(data.worldRegistryKey);
+            Level world = player.getServer().getLevel(data.worldRegistryKey);
             if (data.pos == null) {
                 if (data.tile) {
                     WorldUtils.removeTileEntityType(world, data.rl, data.force);

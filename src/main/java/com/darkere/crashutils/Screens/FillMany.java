@@ -1,14 +1,10 @@
 package com.darkere.crashutils.Screens;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldVertexBufferUploader;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.math.vector.Matrix4f;
-import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix4f;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.GameRenderer;
 
 import java.util.List;
 
@@ -43,7 +39,7 @@ public class FillMany {
         }
     }
 
-    public static void drawStrings(MatrixStack stack, FontRenderer renderer, List<Text> texts) {
+    public static void drawStrings(PoseStack stack, Font renderer, List<Text> texts) {
         for (Text text : texts) {
             renderer.draw(stack, text.text, text.x, text.y, text.color);
         }
@@ -53,16 +49,17 @@ public class FillMany {
         RenderSystem.enableBlend();
         RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
-        BufferBuilder bufferbuilder = Tessellator.getInstance().getBuilder();
-        bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
         for (ColoredRectangle rect : rects) {
             addRectangle(bufferbuilder, matrix, rect.x0, rect.y0, rect.x1, rect.y1, rect.color);
         }
 
         bufferbuilder.end();
-        WorldVertexBufferUploader.end(bufferbuilder);
+        BufferUploader.end(bufferbuilder);
 
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();

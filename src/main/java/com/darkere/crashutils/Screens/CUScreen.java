@@ -6,18 +6,18 @@ import com.darkere.crashutils.Network.DataRequestType;
 import com.darkere.crashutils.Network.Network;
 import com.darkere.crashutils.Network.TeleportMessage;
 import com.darkere.crashutils.Screens.Types.DropDownType;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.client.gui.GuiUtils;
-import net.minecraftforge.fml.client.gui.widget.ExtendedButton;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.client.gui.widget.ExtendedButton;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class CUScreen extends Screen {
     long doubleClickTimer;
     double oldClickX;
     double OldClickY;
-    RegistryKey<World> dim;
+    ResourceKey<Level> dim;
     int centerX;
     int centerY;
     int activeTab = 0;
@@ -44,8 +44,8 @@ public class CUScreen extends Screen {
     BlockPos initial;
     static boolean keep = false;
 
-    public CUScreen(RegistryKey<World> worldKey, BlockPos position) {
-        super(new StringTextComponent("CUScreen"));
+    public CUScreen(ResourceKey<Level> worldKey, BlockPos position) {
+        super(new TextComponent("CUScreen"));
         dim = worldKey;
         initial = position;
 
@@ -60,13 +60,13 @@ public class CUScreen extends Screen {
             contentGUI = new MapGUI(this, dim, initial);
             DataHolder.setRequestType(DataRequestType.LOADEDCHUNKDATA);
         }
-            button = new ExtendedButton(centerX + 174, centerY - 103, 20, 10, new StringTextComponent(String.valueOf(contentGUI.updateSpeed)),
+            button = new ExtendedButton(centerX + 174, centerY - 103, 20, 10, new TextComponent(String.valueOf(contentGUI.updateSpeed)),
                 (x) -> {
                     contentGUI.shouldUpdate = !contentGUI.shouldUpdate;
                     contentGUI.setUpdateSpeed();
                 });
-            this.addButton(button);
-            backButton = new ExtendedButton(centerX + 145, centerY - 103, 20,10 ,new StringTextComponent("<-"),
+            this.addWidget(button);
+            backButton = new ExtendedButton(centerX + 145, centerY - 103, 20,10 ,new TextComponent("<-"),
             button->{
                 if(contentGUI instanceof DataListGUI)
                     ((DataListGUI) contentGUI).loader.goBack();
@@ -75,13 +75,14 @@ public class CUScreen extends Screen {
 
 
             });
-            addButton(backButton);
+            addWidget(backButton);
     }
 
     @Override
-    public void renderBackground(MatrixStack stack) {
+    public void renderBackground(PoseStack stack) {
         assert this.minecraft != null;
-        this.minecraft.getTextureManager().bind(WINDOW);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, WINDOW);
         int i = centerX - (400 / 2);
         int j = centerY - (216 / 2);
         blit(stack, i, j, 0, 0, 400, 216, 512, 512);
@@ -90,7 +91,7 @@ public class CUScreen extends Screen {
     }
 
     @Override
-    public void render(MatrixStack stack, int mx, int my, float partialTicks) {
+    public void render(PoseStack stack, int mx, int my, float partialTicks) {
         renderBackground(stack);
         contentGUI.render(stack, centerX, centerY, mx, my, partialTicks);
         centerX = width / 2;
@@ -108,16 +109,16 @@ public class CUScreen extends Screen {
         super.render(stack, mx, my, partialTicks);
     }
 
-    private void renderToolTips(MatrixStack stack, int mx, int my) {
-        List<IFormattableTextComponent> tooltips = new ArrayList<>();
+    private void renderToolTips(PoseStack stack, int mx, int my) {
+        List<MutableComponent> tooltips = new ArrayList<>();
         //tooltips.add(mx+ " " + my);
         if (contentGUI.isMouseOver(mx, my, centerX, centerY)) {
             if (contentGUI instanceof MapGUI) {
                 MapGUI gui = (MapGUI) contentGUI;
                 ChunkPos chunkPos = gui.getChunkFor(mx, my);
-                tooltips.add(new StringTextComponent("Chunk: X: " + chunkPos.x + " Z: " + chunkPos.z));
+                tooltips.add(new TextComponent("Chunk: X: " + chunkPos.x + " Z: " + chunkPos.z));
                 String loc = gui.getLocFor(mx, my);
-                tooltips.add(new StringTextComponent("State: " + gui.getNameForLocationType(loc)));
+                tooltips.add(new TextComponent("State: " + gui.getNameForLocationType(loc)));
                 StringBuilder builder = new StringBuilder();
                 switch (gui.type) {
                     case TICKET:
@@ -138,29 +139,30 @@ public class CUScreen extends Screen {
                         break;
                 }
 
-                tooltips.add(new StringTextComponent(builder.toString()));
-                tooltips.add(new StringTextComponent("(Double click to teleport)"));
+                tooltips.add(new TextComponent(builder.toString()));
+                tooltips.add(new TextComponent("(Double click to teleport)"));
             }
         }
         if (button.isMouseOver(mx, my)) {
-            tooltips.add(new StringTextComponent("Requesting data every " + contentGUI.updateSpeed + " seconds"));
-            tooltips.add(new StringTextComponent("Currently " + (contentGUI.shouldUpdate ? "enabled" : "disabled")));
-            tooltips.add(new StringTextComponent("Scroll to change update Speed"));
-            tooltips.add(new StringTextComponent("(It may be possible to lag a server using this)"));
+            tooltips.add(new TextComponent("Requesting data every " + contentGUI.updateSpeed + " seconds"));
+            tooltips.add(new TextComponent("Currently " + (contentGUI.shouldUpdate ? "enabled" : "disabled")));
+            tooltips.add(new TextComponent("Scroll to change update Speed"));
+            tooltips.add(new TextComponent("(It may be possible to lag a server using this)"));
         }
         if(backButton.isMouseOver(mx,my)){
-            tooltips.add(new StringTextComponent(contentGUI instanceof  MapGUI ? "Return to player" : "Go Back"));
+            tooltips.add(new TextComponent(contentGUI instanceof  MapGUI ? "Return to player" : "Go Back"));
         }
         if (!tooltips.isEmpty()) {
-            GuiUtils.drawHoveringText(stack, tooltips, mx, my, width, height, 150, Minecraft.getInstance().font);
+         //TODO:Fix Tooltips   renderTooltip(stack, (List<? extends FormattedCharSequence>) tooltips, mx, my, Minecraft.getInstance().font);
         }
     }
 
-    private void renderTabs(MatrixStack stack) {
+    private void renderTabs(PoseStack stack) {
         int x = centerX - (400 / 2);
         int y = centerY - (216 / 2) - 22;
         assert this.minecraft != null;
-        this.minecraft.getTextureManager().bind(TABS);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, TABS);
         float iconScale = 3.75f;
         List<CUTab> tabIcons = new ArrayList<>();
         tabIcons.add(CUTab.MAPTABICON);
@@ -295,7 +297,7 @@ public class CUScreen extends Screen {
             } else if (delta < 0 && contentGUI.updateSpeed <= 5 && contentGUI.updateSpeed > 1) {
                 contentGUI.updateSpeed -= 1;
             }
-            button.setMessage(new StringTextComponent(String.valueOf(contentGUI.updateSpeed)));
+            button.setMessage(new TextComponent(String.valueOf(contentGUI.updateSpeed)));
             contentGUI.setUpdateSpeed();
             return true;
         }
@@ -332,7 +334,7 @@ public class CUScreen extends Screen {
         contentGUI.updateSelection(ddtype, s);
     }
 
-    public static CUScreen openCUScreen(RegistryKey<World> world, BlockPos pos) {
+    public static CUScreen openCUScreen(ResourceKey<Level> world, BlockPos pos) {
         if (stored == null || !keep || !world.equals(stored.dim)) {
             keep = false;
             stored = new CUScreen(world, pos);

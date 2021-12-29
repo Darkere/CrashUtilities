@@ -2,7 +2,7 @@ package com.darkere.crashutils.DataStructures;
 
 import com.darkere.crashutils.CrashUtils;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
@@ -11,6 +11,7 @@ import java.nio.file.LinkOption;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class PlayerActivityHistory {
@@ -24,7 +25,7 @@ public class PlayerActivityHistory {
     private static final long chunkcleanertimer = dayTime * CrashUtils.SERVER_CONFIG.getExpireTimeInDays();
 
 
-    public PlayerActivityHistory(ServerWorld world) {
+    public PlayerActivityHistory(ServerLevel world) {
         long current = Instant.now().getEpochSecond();
         try {
             Files.list(world.getServer().playerDataStorage.getPlayerDataFolder().toPath()).forEach(x -> {
@@ -50,9 +51,9 @@ public class PlayerActivityHistory {
                         return;
                     }
 
-                    GameProfile profile = world.getServer().getProfileCache().get(uuid);
-                    if (profile == null) return;
-                    String playerName = profile.getName();
+                    Optional<GameProfile> profile = world.getServer().getProfileCache().get(uuid);
+                    if (profile.isEmpty()) return;
+                    String playerName = profile.get().getName();
                     month.add(playerName);
                     if (diff < weekTime) {
                         week.add(playerName);

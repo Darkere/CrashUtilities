@@ -5,17 +5,17 @@ import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.Screens.CUOption;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.*;
 import net.minecraft.util.SortedArraySet;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.chunk.IChunk;
-import net.minecraft.world.server.*;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.ProtoChunk;
 
 import java.util.*;
 
@@ -41,19 +41,19 @@ public class LoadedChunkData {
         this.chunksByLocationType = chunksByLocationType;
     }
 
-    public LoadedChunkData(List<ServerWorld> worlds) {
+    public LoadedChunkData(List<ServerLevel> worlds) {
         CrashUtils.runNextTick((world) -> init(worlds));
 
     }
 
-    public void init(List<ServerWorld> worlds) {
-        for (World world : worlds) {
-            ChunkManager chunkManager = ((ServerChunkProvider) world.getChunkSource()).chunkMap;
-            TicketManager ticketManager = chunkManager.getDistanceManager();
+    public void init(List<ServerLevel> worlds) {
+        for (Level world : worlds) {
+            ChunkMap chunkManager = ((ServerChunkCache) world.getChunkSource()).chunkMap;
+            DistanceManager ticketManager = chunkManager.getDistanceManager();
             total += chunkManager.size();
             Iterable<ChunkHolder> chunkHolders = chunkManager.getChunks();
             chunkHolders.forEach(chunkHolder -> {
-                IChunk chunk = chunkHolder.getLastAvailable();
+                ChunkAccess chunk = chunkHolder.getLastAvailable();
                 LocationTickets ticketCounter = null;
                 if (chunk == null) {
                     chunksByLocationType.merge("PRIMED", new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (list, newer) -> {
@@ -66,8 +66,8 @@ public class LoadedChunkData {
                     });
                     ticketCounter = ticketsByLocation.get("PRIMED");
                 } else {
-                    if (chunk instanceof Chunk) {
-                        Chunk actualChunk = (Chunk) chunk;
+                    if (chunk instanceof LevelChunk) {
+                        LevelChunk actualChunk = (LevelChunk) chunk;
                         chunksByLocationType.merge(actualChunk.getFullStatus().toString(), new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (list, newer) -> {
                             list.add(chunkHolder.getPos());
                             return list;
@@ -78,7 +78,7 @@ public class LoadedChunkData {
                         });
                         ticketCounter = ticketsByLocation.get(actualChunk.getFullStatus().toString());
                     } else {
-                        if (chunk instanceof ChunkPrimer) {
+                        if (chunk instanceof ProtoChunk) {
                             chunksByLocationType.merge(chunk.getStatus().getName().equals("full") ? "FULL" : "PARTIALLYGENERATED", new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (list, newer) -> {
                                 list.add(chunkHolder.getPos());
                                 return list;
@@ -113,18 +113,18 @@ public class LoadedChunkData {
         }
     }
 
-    public void reply(CommandSource source) {
+    public void reply(CommandSourceStack source) {
         ticketsByLocation.forEach((name,locationticket)->{
-            source.sendSuccess(new StringTextComponent(name + ": " + locationticket.count),true);
+            source.sendSuccess(new TextComponent(name + ": " + locationticket.count),true);
             locationticket.tickets.forEach((ticket,count)->{
-                source.sendSuccess(new StringTextComponent("    " + ticket + ": " + count), true);
+                source.sendSuccess(new TextComponent("    " + ticket + ": " + count), true);
             });
         });
-        source.sendSuccess(new StringTextComponent("Non-Ticking chunks have little to no performance impact. See the GUI and minecraft wiki for what each type represents."), false);
+        source.sendSuccess(new TextComponent("Non-Ticking chunks have little to no performance impact. See the GUI and minecraft wiki for what each type represents."), false);
     }
 
-    public void replyWithLocation(CommandSource source, String word) throws CommandSyntaxException {
-        source.sendSuccess(new StringTextComponent("Chunks with LocationType " + word), true);
+    public void replyWithLocation(CommandSourceStack source, String word) throws CommandSyntaxException {
+        source.sendSuccess(new TextComponent("Chunks with LocationType " + word), true);
         Set<ChunkPos> chunkPos = chunksByLocationType.get(word);
         if (chunkPos != null) {
             sendChunkPositions(source, chunkPos);
@@ -132,17 +132,17 @@ public class LoadedChunkData {
 
     }
 
-    private void sendChunkPositions(CommandSource source, Set<ChunkPos> chunks) throws CommandSyntaxException {
+    private void sendChunkPositions(CommandSourceStack source, Set<ChunkPos> chunks) throws CommandSyntaxException {
         for (ChunkPos chunkPos : chunks) {
             BlockPos pos = chunkPos.getWorldPosition();
-            CommandUtils.sendCommandMessage(source, new StringTextComponent(chunkPos.toString()), "/cu tp " + (source.getEntity() instanceof PlayerEntity ? source.getPlayerOrException().getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ(), true);
+            CommandUtils.sendCommandMessage(source, new TextComponent(chunkPos.toString()), "/cu tp " + (source.getEntity() instanceof Player ? source.getPlayerOrException().getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ(), true);
         }
     }
 
-    public void replyWithTicket(CommandSource source, String word) throws CommandSyntaxException {
+    public void replyWithTicket(CommandSourceStack source, String word) throws CommandSyntaxException {
         Set<ChunkPos> chunks = chunksByTicketName.get(word);
         if (chunks == null) return;
-        source.sendSuccess(new StringTextComponent("Chunks with " + word + " Ticket"), true);
+        source.sendSuccess(new TextComponent("Chunks with " + word + " Ticket"), true);
         sendChunkPositions(source, chunks);
     }
 

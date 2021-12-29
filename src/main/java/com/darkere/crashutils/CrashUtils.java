@@ -1,8 +1,11 @@
 package com.darkere.crashutils;
 
 import com.darkere.crashutils.CrashUtilCommands.EntityCommands.EntitiesCommands;
-import com.darkere.crashutils.CrashUtilCommands.*;
+import com.darkere.crashutils.CrashUtilCommands.HelpCommand;
 import com.darkere.crashutils.CrashUtilCommands.InventoryCommands.InventoryCommands;
+import com.darkere.crashutils.CrashUtilCommands.ItemClearCommand;
+import com.darkere.crashutils.CrashUtilCommands.LoadedChunksCommand;
+import com.darkere.crashutils.CrashUtilCommands.MemoryCommand;
 import com.darkere.crashutils.CrashUtilCommands.PlayerCommands.ActivityCommand;
 import com.darkere.crashutils.CrashUtilCommands.PlayerCommands.TeleportCommand;
 import com.darkere.crashutils.CrashUtilCommands.PlayerCommands.UnstuckCommand;
@@ -13,29 +16,28 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.ExtensionPoint;
+import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.network.FMLNetworkConstants;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
-import org.apache.commons.lang3.tuple.Pair;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -55,7 +57,7 @@ public class CrashUtils {
     public static boolean curiosLoaded = false;
     Timer chunkcleaner;
     public static boolean sparkLoaded = false;
-    public static List<Consumer<ServerWorld>> runnables = new CopyOnWriteArrayList<>();
+    public static List<Consumer<ServerLevel>> runnables = new CopyOnWriteArrayList<>();
     public static boolean skipNext = false;
     public static boolean isServer = false;
 
@@ -66,7 +68,7 @@ public class CrashUtils {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> MinecraftForge.EVENT_BUS.register(new ClientEvents()));
         //MinecraftForge.EVENT_BUS.register(new DeleteBlocks());
         MinecraftForge.EVENT_BUS.register(this);
-        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
+        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, ()->new IExtensionPoint.DisplayTest(()->"ANY", (remote, isServer)-> true));
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SERVER_CONFIG.getSpec());
         curiosLoaded = ModList.get().isLoaded("curios");
         sparkLoaded = ModList.get().isLoaded("spark");
@@ -81,7 +83,7 @@ public class CrashUtils {
         Network.register();
     }
 
-    public void configReload(ModConfig.Reloading event) {
+    public void configReload(ModConfigEvent.Reloading event) {
         if(isServer){
             ClearItemTask.restart();
             MemoryChecker.restart();
@@ -90,7 +92,7 @@ public class CrashUtils {
 
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server != null) {
-            ServerWorld world = server.getLevel(World.OVERWORLD);
+            ServerLevel world = server.getLevel(Level.OVERWORLD);
             if (world != null) {
                 setupFtbChunksUnloading(world);
             }
@@ -100,18 +102,18 @@ public class CrashUtils {
 
     @SubscribeEvent
     public void onRegisterCommands(RegisterCommandsEvent event) {
-        CommandDispatcher<CommandSource> dispatcher = event.getDispatcher();
-        CommandNode<CommandSource> entitiesCommands = EntitiesCommands.register();
-        CommandNode<CommandSource> tileEntitiesCommands = TileEntitiesCommands.register();
-        CommandNode<CommandSource> inventoryCommands = InventoryCommands.register();
+        CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
+        CommandNode<CommandSourceStack> entitiesCommands = EntitiesCommands.register();
+        CommandNode<CommandSourceStack> tileEntitiesCommands = TileEntitiesCommands.register();
+        CommandNode<CommandSourceStack> inventoryCommands = InventoryCommands.register();
 
-        LiteralCommandNode<CommandSource> cmd = dispatcher.register(LiteralArgumentBuilder.<CommandSource>literal(MODID)
+        LiteralCommandNode<CommandSourceStack> cmd = dispatcher.register(LiteralArgumentBuilder.<CommandSourceStack>literal(MODID)
                 .requires(x -> x.hasPermission(CommandUtils.PERMISSION_LEVEL))
                 .then(TeleportCommand.register())
                 .then(UnstuckCommand.register())
                 .then(MemoryCommand.register())
                 .then(ItemClearCommand.register())
-                .then(GetLogCommand.register())
+                //.then(GetLogCommand.register())
                 .then(HelpCommand.register())
                 //.then(ProfilingCommands.register())
                 .then(LoadedChunksCommand.register())
@@ -141,14 +143,14 @@ public class CrashUtils {
     }
 
     @SubscribeEvent
-    public void ServerStarted(FMLServerStartedEvent event) {
+    public void ServerStarted(ServerStartedEvent event) {
         isServer = true;
         ClearItemTask.start();
         MemoryChecker.start();
-        setupFtbChunksUnloading(event.getServer().getLevel(World.OVERWORLD));
+        setupFtbChunksUnloading(event.getServer().getLevel(Level.OVERWORLD));
     }
 
-    private void setupFtbChunksUnloading(ServerWorld world) {
+    private void setupFtbChunksUnloading(ServerLevel world) {
         if (SERVER_CONFIG.shouldChunksExpire()) {
             chunkcleaner = new Timer(true);
             chunkcleaner.scheduleAtFixedRate(new TimerTask() {
@@ -168,11 +170,11 @@ public class CrashUtils {
 
     }
 
-    public static void runNextTick(Consumer<ServerWorld> run) {
+    public static void runNextTick(Consumer<ServerLevel> run) {
         runnables.add(run);
     }
 
-    public static void runInTwoTicks(Consumer<ServerWorld> run) {
+    public static void runInTwoTicks(Consumer<ServerLevel> run) {
         runnables.add(run);
         skipNext = true;
     }
@@ -190,7 +192,7 @@ public class CrashUtils {
                 skipNext = false;
                 return;
             }
-            runnables.forEach(c -> c.accept((ServerWorld) event.world));
+            runnables.forEach(c -> c.accept((ServerLevel) event.world));
             runnables.clear();
         }
     }

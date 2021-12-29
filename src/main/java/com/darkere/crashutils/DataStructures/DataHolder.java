@@ -3,9 +3,9 @@ package com.darkere.crashutils.DataStructures;
 import com.darkere.crashutils.Network.DataRequestType;
 import com.darkere.crashutils.Network.Network;
 import com.darkere.crashutils.Network.UpdateDataRequestMessage;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 
 import java.util.*;
 
@@ -104,11 +104,11 @@ public class DataHolder {
         return null;
     }
 
-    public static void requestImmediateUpdate(RegistryKey<World> dim) {
+    public static void requestImmediateUpdate(ResourceKey<Level> dim) {
         Network.sendToServer(new UpdateDataRequestMessage(currentDataType, dim));
     }
 
-    public static void requestUpdates(int updateFrequency, RegistryKey<World> dim, boolean now) {
+    public static void requestUpdates(int updateFrequency, ResourceKey<Level> dim, boolean now) {
         timer.cancel();
         if (now) requestImmediateUpdate(dim);
         if (updateFrequency == 0) return;

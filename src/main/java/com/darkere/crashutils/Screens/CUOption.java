@@ -3,11 +3,11 @@ package com.darkere.crashutils.Screens;
 import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.DataStructures.DataHolder;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.ChunkPos;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,8 +84,8 @@ public class CUOption {
 
     List<Button> buttons = new ArrayList<>();
 
-    public CUOption addButton(String text, Button.ITooltip tooltip, Button.IPressable action) {
-        buttons.add(new Button(0, 0, Minecraft.getInstance().font.width(text) + 4, Minecraft.getInstance().font.lineHeight + 3, new StringTextComponent(text), action, tooltip));
+    public CUOption addButton(String text, Button.OnTooltip tooltip, Button.OnPress action) {
+        buttons.add(new Button(0, 0, Minecraft.getInstance().font.width(text) + 4, Minecraft.getInstance().font.lineHeight + 3, new TextComponent(text), action, tooltip));
         return this;
     }
 

@@ -3,12 +3,12 @@ package com.darkere.crashutils.Screens;
 import com.darkere.crashutils.DataStructures.DataHolder;
 import com.darkere.crashutils.Network.DataRequestType;
 import com.darkere.crashutils.Screens.Types.DropDownType;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.World;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 
-public abstract class CUContentPane extends AbstractGui {
+public abstract class CUContentPane extends GuiComponent {
     int defaultRenderOffsetX = -191;
     int defaultRenderOffsetY = -90;
     int centerX;
@@ -20,14 +20,14 @@ public abstract class CUContentPane extends AbstractGui {
     boolean firstPlayer = false;
     int updateSpeed = 60;
     boolean shouldUpdate = false;
-    RegistryKey<World> dim;
+    ResourceKey<Level> dim;
     CUScreen screen;
     int XTopLeft;
     int YTopLeft;
     int XAcross = 383;
     int YAcross = 190;
 
-    public CUContentPane(RegistryKey<World> dim, CUScreen screen) {
+    public CUContentPane(ResourceKey<Level> dim, CUScreen screen) {
         this.dim = dim;
         this.screen = screen;
     }
@@ -51,7 +51,7 @@ public abstract class CUContentPane extends AbstractGui {
         return (mx >= XTopLeft && mx <= XTopLeft + XAcross && my >= YTopLeft && my <= YTopLeft + YAcross);
     }
 
-    public void render(MatrixStack stack, int centerX, int centerY, int mx, int my, float partialTicks) {
+    public void render(PoseStack stack, int centerX, int centerY, int mx, int my, float partialTicks) {
         updateRenderValues(centerX, centerY);
         fill(stack, XTopLeft, YTopLeft, XAcross + XTopLeft, YAcross + YTopLeft, 0xFF000000);
     }

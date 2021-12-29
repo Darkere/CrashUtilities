@@ -5,27 +5,27 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.command.arguments.ResourceLocationArgument;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collections;
 import java.util.List;
 
 public class RemoveEntitiesCommand {
-    private static final SuggestionProvider<CommandSource> sugg = (ctx, builder) -> ISuggestionProvider.suggestResource(ForgeRegistries.ENTITIES.getKeys().stream(), builder);
-    private static final SuggestionProvider<CommandSource> boolsugg = (ctx, builder) -> ISuggestionProvider.suggest(Collections.singletonList("force"), builder);
+    private static final SuggestionProvider<CommandSourceStack> sugg = (ctx, builder) -> SharedSuggestionProvider.suggestResource(ForgeRegistries.ENTITIES.getKeys().stream(), builder);
+    private static final SuggestionProvider<CommandSourceStack> boolsugg = (ctx, builder) -> SharedSuggestionProvider.suggest(Collections.singletonList("force"), builder);
     private static int counter = 0;
 
-    public static ArgumentBuilder<CommandSource, ?> register() {
+    public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("remove")
             .executes(ctx -> removeEntities(ctx, null))
             .then(Commands.literal("byType")
@@ -60,57 +60,69 @@ public class RemoveEntitiesCommand {
 
     }
 
-    private static int removeEntities(CommandContext<CommandSource> context, ResourceLocation type) {
+    private static int removeEntities(CommandContext<CommandSourceStack> context, ResourceLocation type) {
         counter = 0;
-        List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
-        worlds.forEach(world -> world.getEntities().filter(entity -> {
+        List<ServerLevel> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
+        worlds.forEach(world -> world.getEntities().getAll().forEach(entity -> {
             if (type == null) {
-                return !entity.hasCustomName();
+                if(!entity.hasCustomName())
+                    removeEntity(context, world, entity);
             } else {
-                if (entity.getType().getRegistryName() != null) {
-                    return entity.getType().getRegistryName().equals(type);
+                if (entity.getType().getRegistryName() != null && entity.getType().getRegistryName().equals(type)) {
+                    removeEntity(context, world, entity);
                 }
             }
-            return false;
-        }).forEach(x -> removeEntity(context, world, x)));
+        }));
         respond(context);
         return 1;
     }
 
-    private static int removeEntitiesByRegEx(CommandContext<CommandSource> context, String regex) {
+    private static int removeEntitiesByRegEx(CommandContext<CommandSourceStack> context, String regex) {
         counter = 0;
-        List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
-        worlds.forEach(world -> world.getEntities().filter(entity -> {
+        List<ServerLevel> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
+        worlds.forEach(world -> world.getEntities().getAll().forEach(entity -> {
+            boolean remove = false;
             if (regex == null) {
-                return !entity.hasCustomName();
+                remove = !entity.hasCustomName();
             } else {
                 if (entity != null && entity.getType().getRegistryName() != null) {
-                    return (entity.getType().getRegistryName().toString().matches(regex));
+                    remove = (entity.getType().getRegistryName().toString().matches(regex));
                 }
             }
-            return false;
-        }).forEach(x -> removeEntity(context, world, x)));
+            if (remove)
+                removeEntity(context, world, entity);
+        }));
         respond(context);
         return 1;
     }
 
-    private static int removeItems(CommandContext<CommandSource> context, String type) {
+    private static int removeItems(CommandContext<CommandSourceStack> context, String type) {
         counter = 0;
-        List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
-        worlds.forEach(world -> world.getEntities().filter(x -> x instanceof ItemEntity).map(x -> (ItemEntity) x).filter(x -> type == null ? !x.hasCustomName() : x.getName().getString().contains(type)).forEach(x -> removeEntity(context, world, x)));
+        List<ServerLevel> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
+        worlds.forEach(world -> world.getEntities().getAll().forEach(entity -> {
+            if (entity instanceof ItemEntity) {
+                if (type == null)
+                    removeEntity(context, world, entity);
+                else if (entity.getName().getString().contains(type))
+                    removeEntity(context, world, entity);
+            }
+        }));
         respond(context);
         return 1;
     }
 
-    private static int removeMonsters(CommandContext<CommandSource> context) {
+    private static int removeMonsters(CommandContext<CommandSourceStack> context) {
         counter = 0;
-        List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
-        worlds.forEach(world -> world.getEntities().filter(x -> x.getType().getCategory() == EntityClassification.MONSTER).forEach(x -> removeEntity(context, world, x)));
+        List<ServerLevel> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
+        worlds.forEach(world -> world.getEntities().getAll().forEach(entity -> {
+            if (entity.getType().getCategory() == MobCategory.MONSTER && !entity.hasCustomName())
+                removeEntity(context, world, entity);
+        }));
         respond(context);
         return 1;
     }
 
-    private static void removeEntity(CommandContext<CommandSource> context, ServerWorld world, Entity x) {
+    private static void removeEntity(CommandContext<CommandSourceStack> context, ServerLevel world, Entity x) {
         boolean force = false;
         try {
             String forced = StringArgumentType.getString(context, "force");
@@ -122,12 +134,12 @@ public class RemoveEntitiesCommand {
         if (force) {
             world.removeEntityComplete(x, false);
         } else {
-            x.remove();
+            x.remove(Entity.RemovalReason.DISCARDED);
         }
         counter++;
     }
 
-    private static void respond(CommandContext<CommandSource> context) {
-        context.getSource().sendSuccess(new StringTextComponent("Removed " + counter + " Entities"), true);
+    private static void respond(CommandContext<CommandSourceStack> context) {
+        context.getSource().sendSuccess(new TextComponent("Removed " + counter + " Entities"), true);
     }
 }

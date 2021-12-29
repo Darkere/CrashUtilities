@@ -1,17 +1,16 @@
 package com.darkere.crashutils;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.ChatType;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ClearItemTask extends TimerTask {
 
@@ -63,8 +62,13 @@ public class ClearItemTask extends TimerTask {
         CrashUtils.runNextTick(this::runClear);
     }
 
-    private void runClear(ServerWorld world) {
-        List<Entity> entityList = world.getEntities().filter(x -> x.getType().equals(EntityType.ITEM)).collect(Collectors.toList());
+    private void runClear(ServerLevel world) {
+        List<Entity> entityList = new ArrayList<>();
+        world.getEntities().getAll().forEach(x->{
+            if(x.getType().equals(EntityType.ITEM))
+                entityList.add(x);
+
+        });
         lastCount = entityList.size();
         if (lastCount < maxItems) return;
         String text = CrashUtils.SERVER_CONFIG.getWarningText();
@@ -74,13 +78,18 @@ public class ClearItemTask extends TimerTask {
                 new java.util.Timer().schedule(new TimerTask() {
                     @Override
                     public void run() {
-                        List<Entity> list = world.getEntities().filter(x -> x.getType().equals(EntityType.ITEM)).collect(Collectors.toList());
+                        List<Entity> entityList = new ArrayList<>();
+                        world.getEntities().getAll().forEach(x->{
+                            if(x.getType().equals(EntityType.ITEM))
+                                entityList.add(x);
+
+                        });
                         int size = list.size();
                         if (size > maxItems) {
-                            list.forEach(Entity::remove);
-                            world.getServer().getPlayerList().broadcastMessage(new StringTextComponent(size + " Items cleared"), ChatType.SYSTEM, Util.NIL_UUID);
+                            entityList.forEach(entity -> entity.remove(Entity.RemovalReason.DISCARDED));
+                            world.getServer().getPlayerList().broadcastMessage(new TextComponent(size + " Items cleared"), ChatType.SYSTEM, Util.NIL_UUID);
                         } else {
-                            world.getServer().getPlayerList().broadcastMessage(new StringTextComponent("Item Clear prevented. Only " + size + " items on the ground"),ChatType.SYSTEM, Util.NIL_UUID);
+                            world.getServer().getPlayerList().broadcastMessage(new TextComponent("Item Clear prevented. Only " + size + " items on the ground"),ChatType.SYSTEM, Util.NIL_UUID);
                         }
 
                     }
@@ -88,7 +97,7 @@ public class ClearItemTask extends TimerTask {
 
             }
             String intText = text.replaceFirst("%", integer.toString());
-            ITextComponent message = new StringTextComponent("[=== ").append(new StringTextComponent(intText).withStyle(TextFormatting.RED)).append(new StringTextComponent(" ===]"));
+            Component message = new TextComponent("[=== ").append(new TextComponent(intText).withStyle(ChatFormatting.RED)).append(new TextComponent(" ===]"));
             new java.util.Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {

@@ -2,29 +2,29 @@ package com.darkere.crashutils.Network;
 
 import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.WorldUtils;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.UUID;
 import java.util.function.Supplier;
 
 public class RemoveEntityMessage {
-    RegistryKey<World> worldRegistryKey;
+    ResourceKey<Level> worldRegistryKey;
     UUID id;
     boolean tile;
     boolean force;
 
-    public RemoveEntityMessage(RegistryKey<World> worldRegistryKey, UUID id, boolean tile, boolean force) {
+    public RemoveEntityMessage(ResourceKey<Level> worldRegistryKey, UUID id, boolean tile, boolean force) {
         this.worldRegistryKey = worldRegistryKey;
         this.id = id;
         this.tile = tile;
         this.force = force;
     }
 
-    public static void encode(RemoveEntityMessage data, PacketBuffer buf) {
+    public static void encode(RemoveEntityMessage data, FriendlyByteBuf buf) {
         NetworkTools.writeWorldKey(data.worldRegistryKey, buf);
         buf.writeUUID(data.id);
         buf.writeBoolean(data.tile);
@@ -32,13 +32,13 @@ public class RemoveEntityMessage {
     }
 
 
-    public static RemoveEntityMessage decode(PacketBuffer buf) {
+    public static RemoveEntityMessage decode(FriendlyByteBuf buf) {
         return new RemoveEntityMessage(NetworkTools.readWorldKey(buf), buf.readUUID(), buf.readBoolean(), buf.readBoolean());
     }
 
     public static boolean handle(RemoveEntityMessage data, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            ServerPlayerEntity player = ctx.get().getSender();
+            ServerPlayer player = ctx.get().getSender();
             if (player == null || !player.hasPermissions(CommandUtils.PERMISSION_LEVEL)) return;
             if (data.tile) {
                 WorldUtils.removeTileEntity(player.getServer().getLevel(data.worldRegistryKey), data.id, data.force);

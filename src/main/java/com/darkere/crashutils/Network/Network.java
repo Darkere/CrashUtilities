@@ -1,12 +1,12 @@
 package com.darkere.crashutils.Network;
 
 import com.darkere.crashutils.CrashUtils;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.PacketDistributor;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.network.simple.SimpleChannel;
 
 public class Network {
     private static int ID = 1;
@@ -36,7 +36,7 @@ public class Network {
         SPLITTER.registerMessage(ID++, LoadedChunkDataTicketsMessage.class, LoadedChunkDataTicketsMessage::encode, LoadedChunkDataTicketsMessage::decode, LoadedChunkDataTicketsMessage::handle);
     }
 
-    public static void sendToPlayer(ServerPlayerEntity player, Object message) {
+    public static void sendToPlayer(ServerPlayer player, Object message) {
         if (!(player instanceof FakePlayer)) {
             if (SPLITTER.shouldMessageBeSplit(message.getClass())) {
                 SPLITTER.sendToPlayer(player, message);

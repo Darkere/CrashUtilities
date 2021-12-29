@@ -1,17 +1,17 @@
 package com.darkere.crashutils.Network;
 
 import com.darkere.crashutils.DataStructures.WorldPos;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
+import net.minecraft.core.Registry;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 
 import java.util.*;
 
 public class NetworkTools {
-    public static void writeSChPMap(PacketBuffer buf, Map<String, Set<ChunkPos>> map) {
+    public static void writeSChPMap(FriendlyByteBuf buf, Map<String, Set<ChunkPos>> map) {
         buf.writeInt(map.size());
         map.forEach((key, value) -> {
             buf.writeUtf(key);
@@ -22,7 +22,7 @@ public class NetworkTools {
         });
     }
 
-    public static Map<String, Set<ChunkPos>> readSChPMap(PacketBuffer buf) {
+    public static Map<String, Set<ChunkPos>> readSChPMap(FriendlyByteBuf buf) {
         HashMap<String, Set<ChunkPos>> map = new HashMap<>();
         int mapsize = buf.readInt();
         for (int i = 0; i < mapsize; i++) {
@@ -37,26 +37,26 @@ public class NetworkTools {
         return map;
     }
 
-    public static void writeWorldKey(RegistryKey<World> worldKey, PacketBuffer buf) {
+    public static void writeWorldKey(ResourceKey<Level> worldKey, FriendlyByteBuf buf) {
         ResourceLocation loc = worldKey.location();
         buf.writeResourceLocation(loc);
     }
 
-    public static RegistryKey<World> readWorldKey(PacketBuffer buf) {
-        return RegistryKey.create(Registry.DIMENSION_REGISTRY, buf.readResourceLocation());
+    public static ResourceKey<Level> readWorldKey(FriendlyByteBuf buf) {
+        return ResourceKey.create(Registry.DIMENSION_REGISTRY, buf.readResourceLocation());
     }
 
-    public static void writeWorldPos(WorldPos pos, PacketBuffer buf) {
+    public static void writeWorldPos(WorldPos pos, FriendlyByteBuf buf) {
         buf.writeBlockPos(pos.pos);
         writeWorldKey(pos.type, buf);
         buf.writeUUID(pos.id);
     }
 
-    public static WorldPos readWorldPos(PacketBuffer buf) {
+    public static WorldPos readWorldPos(FriendlyByteBuf buf) {
         return new WorldPos(buf.readBlockPos(), readWorldKey(buf), buf.readUUID());
     }
 
-    public static void writeRLWPMap(Map<ResourceLocation, List<WorldPos>> map, PacketBuffer buf) {
+    public static void writeRLWPMap(Map<ResourceLocation, List<WorldPos>> map, FriendlyByteBuf buf) {
         buf.writeInt(map.size());
         map.forEach((x, y) -> {
             buf.writeResourceLocation(x);
@@ -67,7 +67,7 @@ public class NetworkTools {
         });
     }
 
-    public static Map<ResourceLocation, List<WorldPos>> readRLWPMap(PacketBuffer buf) {
+    public static Map<ResourceLocation, List<WorldPos>> readRLWPMap(FriendlyByteBuf buf) {
         Map<ResourceLocation, List<WorldPos>> map = new HashMap<>();
         int mapsize = buf.readInt();
         for (int i = 0; i < mapsize; i++) {

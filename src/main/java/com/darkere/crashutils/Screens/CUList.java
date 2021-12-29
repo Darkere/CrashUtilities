@@ -1,15 +1,15 @@
 package com.darkere.crashutils.Screens;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.Button;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class CUList extends AbstractGui {
+public class CUList extends GuiComponent {
     List<CUOption> allOptions;
     List<CUOption> currentOptions = new ArrayList<>();
     private final int posX;
@@ -38,7 +38,7 @@ public class CUList extends AbstractGui {
         this.action = action;
     }
 
-    public void render(MatrixStack stack, int mx, int my, float partialTicks) {
+    public void render(PoseStack stack, int mx, int my, float partialTicks) {
         if (!isEnabled) return;
         int x = posX;
         int y = posY + 1;

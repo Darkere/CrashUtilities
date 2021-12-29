@@ -1,7 +1,7 @@
 package com.darkere.crashutils.Network;
 
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -30,13 +30,13 @@ public class SplitPacketMessage {
         this.payload = payload;
     }
 
-    public static void encode(SplitPacketMessage message, PacketBuffer buf) {
+    public static void encode(SplitPacketMessage message, FriendlyByteBuf buf) {
         buf.writeVarInt(message.communicationId);
         buf.writeVarInt(message.packetIndex);
         buf.writeByteArray(message.payload);
     }
 
-    public static SplitPacketMessage decode(final PacketBuffer buf) {
+    public static SplitPacketMessage decode(final FriendlyByteBuf buf) {
         return new SplitPacketMessage(buf.readVarInt(), buf.readVarInt(), buf.readByteArray());
     }
 

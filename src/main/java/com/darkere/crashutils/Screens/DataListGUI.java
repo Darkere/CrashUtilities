@@ -3,21 +3,21 @@ package com.darkere.crashutils.Screens;
 import com.darkere.crashutils.DataStructures.DataHolder;
 import com.darkere.crashutils.Network.DataRequestType;
 import com.darkere.crashutils.Screens.Types.DropDownType;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 
 import java.util.Arrays;
 
 public class DataListGUI extends CUContentPane {
     CUDropDown SELECTOR;
     DataListLoader loader;
-    TextFieldWidget filterWidget;
+    EditBox filterWidget;
 
-    DataListGUI(CUScreen screen, RegistryKey<World> dim) {
+    DataListGUI(CUScreen screen, ResourceKey<Level> dim) {
         super(dim, screen);
         updateRenderValues(screen.centerX, screen.centerY);
         loader = new DataListLoader(XTopLeft, YTopLeft, XAcross, YAcross, screen, dim);
@@ -27,12 +27,12 @@ public class DataListGUI extends CUContentPane {
         screen.topDropDowns.add(SELECTOR);
         SELECTOR.setEnabled(true);
         loader.loadOrderedEntityList(false);
-        filterWidget = new TextFieldWidget(Minecraft.getInstance().font, centerX - 107, centerY - 104, 150, Minecraft.getInstance().font.lineHeight + 2, new StringTextComponent("Filter"));
+        filterWidget = new EditBox(Minecraft.getInstance().font, centerX - 107, centerY - 104, 150, Minecraft.getInstance().font.lineHeight + 2, new TextComponent("Filter"));
         filterWidget.setResponder(r -> loader.currentList.updateFilter(r));
     }
 
     @Override
-    public void render(MatrixStack stack, int centerX, int centerY, int mx, int my, float partialTicks) {
+    public void render(PoseStack stack, int centerX, int centerY, int mx, int my, float partialTicks) {
         super.render(stack, centerX, centerY, mx, my, partialTicks);
         loader.currentList.render(stack, mx, my, partialTicks);
         filterWidget.render(stack, mx, my, partialTicks);

@@ -2,8 +2,8 @@ package com.darkere.crashutils.Network;
 
 import com.darkere.crashutils.DataStructures.DataHolder;
 import com.darkere.crashutils.DataStructures.EntityData;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -15,11 +15,11 @@ public class EntityDataMessage {
     }
 
 
-    public static void encode(EntityDataMessage data, PacketBuffer buf) {
+    public static void encode(EntityDataMessage data, FriendlyByteBuf buf) {
         NetworkTools.writeRLWPMap(data.list.getMap(), buf);
     }
 
-    public static EntityDataMessage decode(PacketBuffer buf) {
+    public static EntityDataMessage decode(FriendlyByteBuf buf) {
         return new EntityDataMessage(new EntityData(NetworkTools.readRLWPMap(buf)));
     }
 

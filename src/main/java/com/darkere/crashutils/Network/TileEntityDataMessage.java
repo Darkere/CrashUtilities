@@ -2,8 +2,8 @@ package com.darkere.crashutils.Network;
 
 import com.darkere.crashutils.DataStructures.DataHolder;
 import com.darkere.crashutils.DataStructures.TileEntityData;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -15,12 +15,12 @@ public class TileEntityDataMessage {
     }
 
 
-    public static void encode(TileEntityDataMessage data, PacketBuffer buf) {
+    public static void encode(TileEntityDataMessage data, FriendlyByteBuf buf) {
         NetworkTools.writeRLWPMap(data.list.getMap(), buf);
     }
 
 
-    public static TileEntityDataMessage decode(PacketBuffer buf) {
+    public static TileEntityDataMessage decode(FriendlyByteBuf buf) {
         return new TileEntityDataMessage(new TileEntityData(NetworkTools.readRLWPMap(buf)));
     }
 

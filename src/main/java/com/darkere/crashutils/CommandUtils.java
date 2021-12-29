@@ -3,31 +3,27 @@ package com.darkere.crashutils;
 import com.darkere.crashutils.DataStructures.WorldPos;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.ClickEvent;
-import net.minecraft.util.text.event.HoverEvent;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.*;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class CommandUtils {
     public static final int PERMISSION_LEVEL = 2;
     private static final Logger LOGGER = LogManager.getLogger();
-    public static final SuggestionProvider<CommandSource> PROFILEPROVIDER = (ctx, builder) ->
-        ISuggestionProvider.suggest(ctx.getSource().getServer().getProfileCache().getTopMRUProfiles(1000).map(e -> e.getProfile().getName()), builder);
+    public static final SuggestionProvider<CommandSourceStack> PROFILEPROVIDER = (ctx, builder) ->
+        SharedSuggestionProvider.suggest(ctx.getSource().getServer().getProfileCache().getTopMRUProfiles(1000).map(e -> e.getProfile().getName()), builder);
 
-    public static void sendNormalMessage(CommandSource source, String msg, TextFormatting color) {
-        IFormattableTextComponent text = new StringTextComponent(msg);
+    public static void sendNormalMessage(CommandSourceStack source, String msg, ChatFormatting color) {
+        MutableComponent text = new TextComponent(msg);
         Style style = Style.EMPTY;
         text = text.setStyle(style);
         text.withStyle(color);
@@ -35,24 +31,24 @@ public class CommandUtils {
     }
 
 
-    public static void sendCommandMessage(CommandSource source, IFormattableTextComponent text, String command, boolean runDirectly) {
+    public static void sendCommandMessage(CommandSourceStack source, MutableComponent text, String command, boolean runDirectly) {
 
         Style style = text.getStyle();
         ClickEvent click = new ClickEvent(runDirectly ? ClickEvent.Action.RUN_COMMAND : ClickEvent.Action.SUGGEST_COMMAND, command);
         style = style.applyTo(style.withClickEvent(click));
 
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Click to execute \u00A76" + command + "\u00A7r"));
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to execute \u00A76" + command + "\u00A7r"));
         style = style.applyTo(style.withHoverEvent(hoverEvent));
-        IFormattableTextComponent tex = text.setStyle(style);
+        MutableComponent tex = text.setStyle(style);
         source.sendSuccess(tex, false);
         LOGGER.info(text.getString() + " " + command);
     }
 
-    public static void sendTEMessage(CommandSource source, WorldPos worldPos, boolean runDirectly) {
+    public static void sendTEMessage(CommandSourceStack source, WorldPos worldPos, boolean runDirectly) {
         BlockPos pos = worldPos.pos;
         String position = " - " + "[" + pos.getX() + "," + pos.getY() + "," + pos.getZ() + "]";
-        IFormattableTextComponent text = new StringTextComponent(position).withStyle(TextFormatting.GREEN);
-        ServerPlayerEntity player = null;
+        MutableComponent text = new TextComponent(position).withStyle(ChatFormatting.GREEN);
+        ServerPlayer player = null;
         try {
             player = source.getPlayerOrException();
         } catch (CommandSyntaxException e) {
@@ -61,21 +57,21 @@ public class CommandUtils {
         sendCommandMessage(source, text, "/cu tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + worldPos.type.location(), runDirectly);
     }
 
-    public static void sendFindTEMessage(CommandSource source, ResourceLocation res, int count, boolean ticking) {
-        IFormattableTextComponent text = new StringTextComponent(res.toString()).withStyle(TextFormatting.AQUA);
-        text.append(new StringTextComponent(" Count ").withStyle(TextFormatting.DARK_RED));
-        text.append(new StringTextComponent(Integer.toString(count)).withStyle(TextFormatting.GREEN));
+    public static void sendFindTEMessage(CommandSourceStack source, ResourceLocation res, int count, boolean ticking) {
+        MutableComponent text = new TextComponent(res.toString()).withStyle(ChatFormatting.AQUA);
+        text.append(new TextComponent(" Count ").withStyle(ChatFormatting.DARK_RED));
+        text.append(new TextComponent(Integer.toString(count)).withStyle(ChatFormatting.GREEN));
         if (ticking)
-            text.append(new StringTextComponent(" ticking").withStyle(TextFormatting.RED));
+            text.append(new TextComponent(" ticking").withStyle(ChatFormatting.RED));
         sendCommandMessage(source, text, "/cu tileentities find " + res.toString(), true);
 
     }
 
-    public static void sendChunkEntityMessage(CommandSource source, int count, BlockPos pos, RegistryKey<World> type, boolean runDirectly) {
-        IFormattableTextComponent text = new StringTextComponent("- " + pos.toString()).withStyle(TextFormatting.GREEN);
-        text.append(coloredComponent(" Count ", TextFormatting.RED));
-        text.append(coloredComponent(Integer.toString(count), TextFormatting.GREEN));
-        ServerPlayerEntity player = null;
+    public static void sendChunkEntityMessage(CommandSourceStack source, int count, BlockPos pos, ResourceKey<Level> type, boolean runDirectly) {
+        MutableComponent text = new TextComponent("- " + pos.toString()).withStyle(ChatFormatting.GREEN);
+        text.append(coloredComponent(" Count ", ChatFormatting.RED));
+        text.append(coloredComponent(Integer.toString(count), ChatFormatting.GREEN));
+        ServerPlayer player = null;
         try {
             player = source.getPlayerOrException();
         } catch (CommandSyntaxException e) {
@@ -84,29 +80,29 @@ public class CommandUtils {
         sendCommandMessage(source, text, "/cu tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + type.location(), runDirectly);
     }
 
-    public static void sendFindEMessage(CommandSource source, ResourceLocation res, int count) {
-        IFormattableTextComponent text = new StringTextComponent(String.valueOf(count)).withStyle(TextFormatting.BLUE);
-        text.append(new StringTextComponent("x ").withStyle(TextFormatting.YELLOW));
-        text.append(new StringTextComponent(res.toString()).withStyle(TextFormatting.AQUA));
+    public static void sendFindEMessage(CommandSourceStack source, ResourceLocation res, int count) {
+        MutableComponent text = new TextComponent(String.valueOf(count)).withStyle(ChatFormatting.BLUE);
+        text.append(new TextComponent("x ").withStyle(ChatFormatting.YELLOW));
+        text.append(new TextComponent(res.toString()).withStyle(ChatFormatting.AQUA));
         sendCommandMessage(source, text, "/cu entities find " + res.toString(), true);
 
     }
 
-    public static IFormattableTextComponent coloredComponent(String text, TextFormatting color) {
-        return new StringTextComponent(text).withStyle(color);
+    public static MutableComponent coloredComponent(String text, ChatFormatting color) {
+        return new TextComponent(text).withStyle(color);
     }
 
-    public static void sendItemInventoryRemovalMessage(CommandSource source, String name, ItemStack itemStack, String inventoryType, int i) {
-        IFormattableTextComponent text = new StringTextComponent("[" + i + "] ").withStyle(TextFormatting.DARK_BLUE);
+    public static void sendItemInventoryRemovalMessage(CommandSourceStack source, String name, ItemStack itemStack, String inventoryType, int i) {
+        MutableComponent text = new TextComponent("[" + i + "] ").withStyle(ChatFormatting.DARK_BLUE);
         text.append(itemStack.getDisplayName());
         String Command = "/cu inventory remove " + name + " " + inventoryType + " " + i;
         sendCommandMessage(source, text, Command, false);
     }
 
-    public static IFormattableTextComponent createURLComponent(String display, String url) {
-        IFormattableTextComponent text = new StringTextComponent(display);
+    public static MutableComponent createURLComponent(String display, String url) {
+        MutableComponent text = new TextComponent(display);
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.OPEN_URL, url);
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Go to " + url));
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Go to " + url));
         Style style = Style.EMPTY;
         style = style.applyTo(style.withClickEvent(clickEvent));
         style = style.applyTo(style.withHoverEvent(hoverEvent));
@@ -114,27 +110,27 @@ public class CommandUtils {
         return text;
     }
 
-    public static IFormattableTextComponent createCopyComponent(String display, String toCopy) {
-        IFormattableTextComponent text = new StringTextComponent(display);
+    public static MutableComponent createCopyComponent(String display, String toCopy) {
+        MutableComponent text = new TextComponent(display);
         Style style = Style.EMPTY;
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, toCopy);
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Copy Contents to Clipboard"));
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Copy Contents to Clipboard"));
         style = style.applyTo(style.withClickEvent(clickEvent));
         style = style.applyTo(style.withHoverEvent(hoverEvent));
         text.setStyle(style);
-        text.withStyle(TextFormatting.GREEN);
+        text.withStyle(ChatFormatting.GREEN);
         return text;
     }
 
-    public static IFormattableTextComponent getCommandTextComponent(String display, String command) {
-        IFormattableTextComponent text = new StringTextComponent(display);
+    public static MutableComponent getCommandTextComponent(String display, String command) {
+        MutableComponent text = new TextComponent(display);
         Style style = Style.EMPTY;
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, command);
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Click to execute \u00A76" + command + "\u00A7r"));
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to execute \u00A76" + command + "\u00A7r"));
         style = style.applyTo(style.withClickEvent(clickEvent));
         style = style.applyTo(style.withHoverEvent(hoverEvent));
         text.setStyle(style);
-        text.withStyle(TextFormatting.GOLD);
+        text.withStyle(ChatFormatting.GOLD);
         return text;
     }
 }

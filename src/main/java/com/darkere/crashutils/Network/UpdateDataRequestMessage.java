@@ -6,12 +6,12 @@ import com.darkere.crashutils.DataStructures.EntityData;
 import com.darkere.crashutils.DataStructures.LoadedChunkData;
 import com.darkere.crashutils.DataStructures.PlayerData;
 import com.darkere.crashutils.DataStructures.TileEntityData;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,21 +19,21 @@ import java.util.function.Supplier;
 
 public class UpdateDataRequestMessage {
     private DataRequestType type;
-    private RegistryKey<World> worldKey;
+    private ResourceKey<Level> worldKey;
 
-    public UpdateDataRequestMessage(DataRequestType type, RegistryKey<World> worldKey) {
+    public UpdateDataRequestMessage(DataRequestType type, ResourceKey<Level> worldKey) {
         this.type = type;
         this.worldKey = worldKey;
     }
 
 
-    public static void encode(UpdateDataRequestMessage data, PacketBuffer buf) {
+    public static void encode(UpdateDataRequestMessage data, FriendlyByteBuf buf) {
         buf.writeInt(data.type.ordinal());
         NetworkTools.writeWorldKey(data.worldKey, buf);
     }
 
 
-    public static UpdateDataRequestMessage decode(PacketBuffer buf) {
+    public static UpdateDataRequestMessage decode(FriendlyByteBuf buf) {
         return new UpdateDataRequestMessage(
             DataRequestType.values()[buf.readInt()],
             NetworkTools.readWorldKey(buf)
@@ -46,8 +46,8 @@ public class UpdateDataRequestMessage {
             if (!ctx.get().getSender().hasPermissions(CommandUtils.PERMISSION_LEVEL)) return;
             MinecraftServer server = ctx.get().getSender().getServer();
             if (server == null) return;
-            ServerWorld world = server.getLevel(data.worldKey);
-            List<ServerWorld> worlds = Collections.singletonList(world);
+            ServerLevel world = server.getLevel(data.worldKey);
+            List<ServerLevel> worlds = Collections.singletonList(world);
             switch (data.type) {
                 case LOADEDCHUNKDATA: {
                     LoadedChunkData loadedChunkData = new LoadedChunkData(worlds);

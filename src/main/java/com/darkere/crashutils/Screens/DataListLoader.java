@@ -4,11 +4,11 @@ import com.darkere.crashutils.DataStructures.*;
 import com.darkere.crashutils.Network.*;
 import com.darkere.crashutils.WorldUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -27,15 +27,15 @@ public class DataListLoader {
     Comparator<CUOption> compX = Comparator.comparingInt(x -> x.blockPos.getX());
     Consumer<List<CUOption>> positionSorter = option -> option.sort(compX.thenComparingInt(x -> x.getBlockPos().getZ()));
     CUScreen parent;
-    RegistryKey<World> world;
+    ResourceKey<Level> world;
     Consumer<CUOption> tpAction = option -> {
-        PlayerEntity player = Minecraft.getInstance().player;
+        Player player = Minecraft.getInstance().player;
         if (player == null) return;
         WorldUtils.teleportPlayer(player, player.getCommandSenderWorld(), player.getCommandSenderWorld(), option.blockPos);
     };
     List<Runnable> history = new ArrayList<>();
 
-    public DataListLoader(int XTopLeft, int YTopLeft, int XAcross, int YAcross, CUScreen screen, RegistryKey<World> world) {
+    public DataListLoader(int XTopLeft, int YTopLeft, int XAcross, int YAcross, CUScreen screen, ResourceKey<Level> world) {
         this.XTopLeft = XTopLeft;
         this.YTopLeft = YTopLeft;
         this.XAcross = XAcross;

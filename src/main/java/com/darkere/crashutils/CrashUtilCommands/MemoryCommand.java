@@ -7,27 +7,27 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 
 import java.util.List;
 
 public class MemoryCommand {
 
-    public static ArgumentBuilder<CommandSource, ?> register() {
+    public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("memoryCheck")
             .executes(ctx -> run(ctx, 10))
             .then(Commands.argument("count", IntegerArgumentType.integer())
                 .executes(ctx -> run(ctx, IntegerArgumentType.getInteger(ctx, "count"))));
     }
 
-    private static int run(CommandContext<CommandSource> context, int count) {
+    private static int run(CommandContext<CommandSourceStack> context, int count) {
         if (!CrashUtils.SERVER_CONFIG.getMemoryChecker()) {
-            context.getSource().sendSuccess(new StringTextComponent("Memory Checker not enabled in Config"), true);
+            context.getSource().sendSuccess(new TextComponent("Memory Checker not enabled in Config"), true);
             return 0;
         }
         List<MemoryChecker.MemoryCount> full = MemoryChecker.INSTANCE.counts;
@@ -40,8 +40,8 @@ public class MemoryCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static ITextComponent createVisualMemoryText(MemoryChecker.MemoryCount count) {
-        IFormattableTextComponent text = new StringTextComponent("[");
+    private static Component createVisualMemoryText(MemoryChecker.MemoryCount count) {
+        MutableComponent text = new TextComponent("[");
         double maximum = (Math.ceil(MemoryChecker.inGigaBytes(count.getMaximum())));
         double total = MemoryChecker.inGigaBytes(count.getTotal());
         double used = total - MemoryChecker.inGigaBytes(count.getFree());
@@ -50,16 +50,16 @@ public class MemoryCommand {
 
         for (double i = 0.1D; i <= 1; i += 0.1D) {
             if (i < percentUsed) {
-                text.append(CommandUtils.coloredComponent("I", TextFormatting.RED));
+                text.append(CommandUtils.coloredComponent("I", ChatFormatting.RED));
             } else if (i < percentTotal) {
-                text.append(CommandUtils.coloredComponent("I", TextFormatting.YELLOW));
+                text.append(CommandUtils.coloredComponent("I", ChatFormatting.YELLOW));
             } else {
-                text.append(CommandUtils.coloredComponent("I", TextFormatting.GREEN));
+                text.append(CommandUtils.coloredComponent("I", ChatFormatting.GREEN));
             }
         }
         int usedpercent = (int) (percentUsed * 100);
         int allocatedpercent = (int) (percentTotal * 100);
-        text.append(CommandUtils.coloredComponent("] " + usedpercent + " % Used " + allocatedpercent + " % Allocated", TextFormatting.WHITE));
+        text.append(CommandUtils.coloredComponent("] " + usedpercent + " % Used " + allocatedpercent + " % Allocated", ChatFormatting.WHITE));
 
         return text;
     }

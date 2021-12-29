@@ -1,19 +1,19 @@
 package com.darkere.crashutils.DataStructures;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.TickingBlockEntity;
 
 import java.util.UUID;
 
 public class WorldPos {
     public BlockPos pos;
-    public RegistryKey<World> type;
+    public ResourceKey<Level> type;
     public UUID id;
 
-    public WorldPos(BlockPos pos, RegistryKey<World> type, UUID id) {
+    public WorldPos(BlockPos pos, ResourceKey<Level> type, UUID id) {
         this.pos = pos;
         this.type = type;
         this.id = id;
@@ -23,9 +23,8 @@ public class WorldPos {
         return new WorldPos(new BlockPos(entity.position()), entity.getCommandSenderWorld().dimension(), entity.getUUID());
     }
 
-    public static WorldPos getPosFromTileEntity(TileEntity entity) {
-        if (entity.getLevel() == null) return null;
-        return new WorldPos(entity.getBlockPos(), entity.getLevel().dimension(), UUID.randomUUID());
+    public static WorldPos getPosFromTileEntity(TickingBlockEntity entity, Level level) {
+        return new WorldPos(entity.getPos(), level.dimension(), UUID.randomUUID());
     }
 
     public UUID getID() {

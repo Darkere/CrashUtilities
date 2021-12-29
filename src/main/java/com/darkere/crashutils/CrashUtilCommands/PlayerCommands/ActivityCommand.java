@@ -5,18 +5,18 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.level.Level;
 
 import java.util.Arrays;
 
 public class ActivityCommand {
-    private static final SuggestionProvider<CommandSource> sugg = (ctx, builder) -> ISuggestionProvider.suggest(Arrays.asList("week", "day", "month"), builder);
+    private static final SuggestionProvider<CommandSourceStack> sugg = (ctx, builder) -> SharedSuggestionProvider.suggest(Arrays.asList("week", "day", "month"), builder);
 
-    public static ArgumentBuilder<CommandSource, ?> register() {
+    public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("activity")
             .executes(ActivityCommand::listActivity)
             .then(Commands.argument("time", StringArgumentType.word())
@@ -24,18 +24,18 @@ public class ActivityCommand {
                 .executes(ctx -> listActivityByDate(ctx, StringArgumentType.getString(ctx, "time"))));
     }
 
-    private static int listActivity(CommandContext<CommandSource> context) {
+    private static int listActivity(CommandContext<CommandSourceStack> context) {
         PlayerActivityHistory history = new PlayerActivityHistory(context.getSource().getLevel());
-        context.getSource().sendSuccess(new StringTextComponent("Number of Players active in the last:"), false);
-        context.getSource().sendSuccess(new StringTextComponent("Day: " + history.getDay().size() + " unique players"), false);
-        context.getSource().sendSuccess(new StringTextComponent("Week: " + history.getWeek().size() + " unique players"), false);
-        context.getSource().sendSuccess(new StringTextComponent("Month: " + history.getMonth().size() + " unique players"), false);
+        context.getSource().sendSuccess(new TextComponent("Number of Players active in the last:"), false);
+        context.getSource().sendSuccess(new TextComponent("Day: " + history.getDay().size() + " unique players"), false);
+        context.getSource().sendSuccess(new TextComponent("Week: " + history.getWeek().size() + " unique players"), false);
+        context.getSource().sendSuccess(new TextComponent("Month: " + history.getMonth().size() + " unique players"), false);
         return 1;
     }
 
-    private static int listActivityByDate(CommandContext<CommandSource> context, String time) {
-        PlayerActivityHistory history = new PlayerActivityHistory(context.getSource().getServer().getLevel(World.OVERWORLD));
-        context.getSource().sendSuccess(new StringTextComponent("Active Players in the last " + time), false);
+    private static int listActivityByDate(CommandContext<CommandSourceStack> context, String time) {
+        PlayerActivityHistory history = new PlayerActivityHistory(context.getSource().getServer().getLevel(Level.OVERWORLD));
+        context.getSource().sendSuccess(new TextComponent("Active Players in the last " + time), false);
         StringBuilder b = new StringBuilder();
         switch (time) {
             case "month":
@@ -57,7 +57,7 @@ public class ActivityCommand {
                 });
                 break;
         }
-        context.getSource().sendSuccess(new StringTextComponent(b.toString()), false);
+        context.getSource().sendSuccess(new TextComponent(b.toString()), false);
         return 1;
     }
 

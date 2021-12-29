@@ -1,9 +1,9 @@
 package com.darkere.crashutils;
 
-import net.minecraft.block.Blocks;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.chunk.IChunk;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraftforge.event.world.ChunkDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -27,7 +27,7 @@ public class DeleteBlocks {
         toDelete.add(pos);
     }
 
-    private boolean isInChunk(BlockPos pos, IChunk chunk) {
+    private boolean isInChunk(BlockPos pos, ChunkAccess chunk) {
         return pos.getX() > chunk.getPos().getMinBlockX() &&
             pos.getX() < chunk.getPos().getMaxBlockX() &&
             pos.getZ() > chunk.getPos().getMinBlockZ() &&
@@ -36,8 +36,8 @@ public class DeleteBlocks {
 
     }
 
-    private void deleteBlock(BlockPos pos, IChunk chunk) {
-        IWorld world = chunk.getWorldForge();
+    private void deleteBlock(BlockPos pos, ChunkAccess chunk) {
+        LevelAccessor world = chunk.getWorldForge();
         if (world != null) {
             world.setBlock(pos, Blocks.AIR.defaultBlockState(), 01);
             //  BlockState block = world.getBlockState(pos);

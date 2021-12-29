@@ -6,77 +6,78 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.ChestContainer;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 import java.util.UUID;
 
 public class InventoryOpenEnderChestCommand {
 
-    public static ArgumentBuilder<CommandSource, ?> register() {
+    public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("enderchest")
             .then(Commands.argument("player", StringArgumentType.string())
                 .suggests(CommandUtils.PROFILEPROVIDER)
                 .executes(ctx -> openInventory(StringArgumentType.getString(ctx, "player"), ctx)));
     }
 
-    private static int openInventory(String playerName, CommandContext<CommandSource> ctx) {
-        if (!(ctx.getSource().getEntity() instanceof ServerPlayerEntity)) {
-            ctx.getSource().sendFailure(new StringTextComponent("You need to be a player to use this command, consider using \"cu inventory read\" instead"));
+    private static int openInventory(String playerName, CommandContext<CommandSourceStack> ctx) {
+        if (!(ctx.getSource().getEntity() instanceof ServerPlayer)) {
+            ctx.getSource().sendFailure(new TextComponent("You need to be a player to use this command, consider using \"cu inventory read\" instead"));
             return 0;
         }
-        ServerPlayerEntity sourcePlayer = (ServerPlayerEntity) ctx.getSource().getEntity();
-        PlayerEntity otherPlayer = ctx.getSource().getServer().getPlayerList().getPlayerByName(playerName);
+        ServerPlayer sourcePlayer = (ServerPlayer) ctx.getSource().getEntity();
+        Player otherPlayer = ctx.getSource().getServer().getPlayerList().getPlayerByName(playerName);
         if (otherPlayer == null) {
-            GameProfile profile = ctx.getSource().getServer().getProfileCache().get(playerName);
-            if (profile == null) {
-                sourcePlayer.sendMessage(new StringTextComponent("Cannot find Player"), new UUID(0, 0));
+            Optional<GameProfile> profile = ctx.getSource().getServer().getProfileCache().get(playerName);
+            if (profile.isEmpty()) {
+                sourcePlayer.sendMessage(new TextComponent("Cannot find Player"), new UUID(0, 0));
                 return 0;
             }
-            otherPlayer = new FakePlayer(ctx.getSource().getServer().getLevel(World.OVERWORLD), profile);
-            CompoundNBT nbt = ctx.getSource().getServer().playerDataStorage.load(otherPlayer);
+            otherPlayer = new FakePlayer(ctx.getSource().getServer().getLevel(Level.OVERWORLD), profile.get());
+            CompoundTag nbt = ctx.getSource().getServer().playerDataStorage.load(otherPlayer);
             if (nbt == null) {
-                sourcePlayer.sendMessage(new StringTextComponent("Cannot load playerData"), new UUID(0, 0));
+                sourcePlayer.sendMessage(new TextComponent("Cannot load playerData"), new UUID(0, 0));
                 return 0;
             }
             otherPlayer.load(nbt);
         }
 
-        PlayerEntity finalOtherPlayer = otherPlayer;
+        Player finalOtherPlayer = otherPlayer;
 
-        NetworkHooks.openGui(sourcePlayer, new INamedContainerProvider() {
+        NetworkHooks.openGui(sourcePlayer, new MenuProvider() {
             @Override
-            public ITextComponent getDisplayName() {
+            public Component getDisplayName() {
                 return finalOtherPlayer.getDisplayName();
             }
 
             @Nullable
             @Override
-            public Container createMenu(int id, PlayerInventory p_createMenu_2_, PlayerEntity p_createMenu_3_) {
-                return new ChestContainer(ContainerType.GENERIC_9x3, id, sourcePlayer.inventory, finalOtherPlayer.getEnderChestInventory(), 3){
+            public AbstractContainerMenu createMenu(int id, Inventory p_createMenu_2_, Player p_createMenu_3_) {
+                return new ChestMenu(MenuType.GENERIC_9x3, id, sourcePlayer.getInventory(), finalOtherPlayer.getEnderChestInventory(), 3){
                     @Override
-                    public void removed(PlayerEntity p_75134_1_) {
+                    public void removed(Player p_75134_1_) {
                         super.removed(p_75134_1_);
 
                         ctx.getSource().getServer().playerDataStorage.save(finalOtherPlayer);
                     }
 
                     @Override
-                    public boolean stillValid(PlayerEntity p_75145_1_) {
+                    public boolean stillValid(Player p_75145_1_) {
                         return true;
                     }
                 };

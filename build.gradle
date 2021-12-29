@@ -1,10 +1,10 @@
 buildscript {
     repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
+        maven { url = 'https://maven.minecraftforge.net' }
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
 plugins {
@@ -15,12 +15,13 @@ apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remapper/main/classremapper.gradle'
 
-version = '3.12'
+version = '4.0'
 group = 'com.darkere.crashutilities' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'crashutilities'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Mojang ships Java 8 to end users, so your mod should target Java 8.
+java.toolchain.languageVersion = JavaLanguageVersion.of(17) // Mojang ships Java 8 to end users, so your mod should target Java 8.
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
@@ -30,7 +31,7 @@ minecraft {
     // stable_#            Stables are built at the discretion of the MCP team.
     // Use non-default mappings at your own risk. they may not always work.
     // Simply re-run your setup task after changing the mappings to update your workspace.
-    mappings channel: 'official', version: '1.16.5'
+    mappings channel: 'official', version: '1.18.1'
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
@@ -123,27 +124,27 @@ repositories {
     }
 }
 
-shadowJar {
-    configurations = [project.configurations.compile]
-}
+//shadowJar {
+//    configurations = [project.configurations.implementation]
+//}
 dependencies {
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.16.5-36.1.4'
+    minecraft 'net.minecraftforge:forge:1.18.1-39.0.9'
 
 
-    compile('fr.minuskube:jpastee:1.0.2') { transitive = false }
-    compile('com.mashape.unirest:unirest-java:1.4.9'){ transitive = false }
-    compile group: 'org.apache.httpcomponents', name: 'httpasyncclient', version: '4.1.4'
-    compile group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.12'
-    compile group: 'org.apache.httpcomponents', name: 'httpcore-nio', version: '4.4.13'
-    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.12'
-    compile group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.13'
-    compile group: 'commons-logging', name: 'commons-logging', version: '1.2'
-    compile group: 'org.json', name: 'json', version: '20190722'
-    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.16.2-4.0.0.0")
-    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.16.2-4.0.0.0:api")
+//    implementation('fr.minuskube:jpastee:1.0.2') { transitive = false }
+//    implementation('com.mashape.unirest:unirest-java:1.4.9'){ transitive = false }
+//    implementation group: 'org.apache.httpcomponents', name: 'httpasyncclient', version: '4.1.4'
+//    implementation group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.12'
+//    implementation group: 'org.apache.httpcomponents', name: 'httpcore-nio', version: '4.4.13'
+//    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.12'
+//    implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.13'
+//    implementation group: 'commons-logging', name: 'commons-logging', version: '1.2'
+//    implementation group: 'org.json', name: 'json', version: '20190722'
+       runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.18.1-5.0.4.2")
+       compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.18.1-5.0.4.2:api")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
@@ -171,9 +172,9 @@ def reobfArtifact = artifacts.add('default', reobfFile) {
     builtBy 'reobfJar'
 }
 reobf {
-    shadowJar {
-
-    }
+//    shadowJar {
+//
+//    }
 }
 publishing {
     publications {
@@ -187,21 +188,21 @@ publishing {
         }
     }
 }
-shadowJar {
-    from sourceSets.main.output
-
-    dependencies {
-        include(dependency('fr.minuskube:jpastee:1.0.2'))
-        include(dependency('com.mashape.unirest:unirest-java:1.4.9'))
-        include(dependency(group: 'org.apache.httpcomponents', name: 'httpasyncclient', version: '4.1.4'))
-        include(dependency(group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.12'))
-        include(dependency(group: 'org.apache.httpcomponents', name: 'httpcore-nio', version: '4.4.13'))
-        include(dependency(group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.13'))
-        include(dependency(group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.12'))
-        include(dependency(group: 'org.json', name: 'json', version: '20190722'))
-        include(dependency(group: 'commons-logging', name: 'commons-logging', version: '1.2'))
-    }
-    relocate 'org.apache.http', 'dark.org.http'
-    relocate 'org.apache.commons.logging', 'dark.org.commons.logging'
-    relocate 'org.json', 'dark.org.json'
-}
+//shadowJar {
+//    from sourceSets.main.output
+//
+//    dependencies {
+//        include(dependency('fr.minuskube:jpastee:1.0.2'))
+//        include(dependency('com.mashape.unirest:unirest-java:1.4.9'))
+//        include(dependency(group: 'org.apache.httpcomponents', name: 'httpasyncclient', version: '4.1.4'))
+//        include(dependency(group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.12'))
+//        include(dependency(group: 'org.apache.httpcomponents', name: 'httpcore-nio', version: '4.4.13'))
+//        include(dependency(group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.13'))
+//        include(dependency(group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.12'))
+//        include(dependency(group: 'org.json', name: 'json', version: '20190722'))
+//        include(dependency(group: 'commons-logging', name: 'commons-logging', version: '1.2'))
+//    }
+//    relocate 'org.apache.http', 'dark.org.http'
+//    relocate 'org.apache.commons.logging', 'dark.org.commons.logging'
+//    relocate 'org.json', 'dark.org.json'
+//}

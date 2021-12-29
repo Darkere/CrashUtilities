@@ -5,43 +5,40 @@ import com.darkere.crashutils.Network.*;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.arguments.DimensionArgument;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.DimensionArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.IChunk;
-import net.minecraft.world.gen.Heightmap;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.TickingBlockEntity;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.ITeleporter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class WorldUtils {
 
-    public static List<ServerWorld> getWorldsFromDimensionArgument(CommandContext<CommandSource> context) {
-        ServerWorld world = null;
+    public static List<ServerLevel> getWorldsFromDimensionArgument(CommandContext<CommandSourceStack> context) {
+        ServerLevel world = null;
         try {
             world = DimensionArgument.getDimension(context, "dim");
         } catch (IllegalArgumentException | CommandSyntaxException e) {
             //NO OP
         }
-        List<ServerWorld> worlds = new ArrayList<>();
+        List<ServerLevel> worlds = new ArrayList<>();
         if (world == null) {
             context.getSource().getServer().getAllLevels().forEach(worlds::add);
         } else {
@@ -50,20 +47,20 @@ public class WorldUtils {
         return worlds;
     }
 
-    public static void teleportPlayer(PlayerEntity player, World startWorld, World destWorld, BlockPos newPos) {
+    public static void teleportPlayer(Player player, Level startWorld, Level destWorld, BlockPos newPos) {
         if (player.level.isClientSide) {
             Network.sendToServer(new TeleportMessage(startWorld.dimension(), destWorld.dimension(), newPos));
         }
         if (newPos.getY() == 0) {
-            IChunk chunk = destWorld.getChunkAt(newPos);
-            int y = chunk.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, newPos.getX(), newPos.getZ());
+            ChunkAccess chunk = destWorld.getChunkAt(newPos);
+            int y = chunk.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, newPos.getX(), newPos.getZ());
             newPos = new BlockPos(newPos.getX(), y, newPos.getZ());
         }
         if (startWorld != destWorld) {
             BlockPos finalNewPos = newPos;
-            player.changeDimension((ServerWorld) destWorld, new ITeleporter() {
+            player.changeDimension((ServerLevel) destWorld, new ITeleporter() {
                 @Override
-                public Entity placeEntity(Entity entity, ServerWorld currentWorld, ServerWorld destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
+                public Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
                     Entity entity1 = repositionEntity.apply(false);
                     entity1.teleportTo(finalNewPos.getX(), finalNewPos.getY() + 1, finalNewPos.getZ());
                     return entity1;
@@ -74,16 +71,16 @@ public class WorldUtils {
         }
     }
 
-    public static boolean applyToPlayer(String playerName, MinecraftServer server, Consumer<ServerPlayerEntity> consumer) {
-        ServerPlayerEntity player = server.getPlayerList().getPlayerByName(playerName);
+    public static boolean applyToPlayer(String playerName, MinecraftServer server, Consumer<ServerPlayer> consumer) {
+        ServerPlayer player = server.getPlayerList().getPlayerByName(playerName);
         if (player == null) {
-            GameProfile profile = server.getProfileCache().get(playerName);
-            if (profile == null) {
+            Optional<GameProfile> profile = server.getProfileCache().get(playerName);
+            if (profile.isEmpty()) {
                 return false;
             }
 
-            FakePlayer fakePlayer = new CustomFakePlayer(server.getLevel(World.OVERWORLD), profile);
-            CompoundNBT nbt = server.playerDataStorage.load(fakePlayer);
+            FakePlayer fakePlayer = new CustomFakePlayer(server.getLevel(Level.OVERWORLD), profile.get());
+            CompoundTag nbt = server.playerDataStorage.load(fakePlayer);
             if (nbt == null) return false;
             fakePlayer.load(nbt);
             consumer.accept(fakePlayer);
@@ -102,54 +99,56 @@ public class WorldUtils {
         return new BlockPos(x, 0, z);
     }
 
-    public static void removeEntity(World world, UUID id, boolean force) {
+    public static void removeEntity(Level world, UUID id, boolean force) {
         if (NetworkTools.returnOnNull(world, id)) return;
         if (world.isClientSide) {
             Network.sendToServer(new RemoveEntityMessage(world.dimension(), id, false, force));
             return;
         }
-        Entity e = ((ServerWorld) world).getEntity(id);
+        Entity e = ((ServerLevel) world).getEntity(id);
         if (e == null) return;
         if (force) {
-            ((ServerWorld) world).removeEntityComplete(e, false);
+            ((ServerLevel) world).removeEntityComplete(e, false);
         } else {
-            e.remove();
+            e.remove(Entity.RemovalReason.DISCARDED);
         }
     }
 
-    public static void removeEntityType(World world, ResourceLocation rl, boolean force) {
+    public static void removeEntityType(Level world, ResourceLocation rl, boolean force) {
         if (NetworkTools.returnOnNull(world, rl)) return;
         if (world.isClientSide) {
             Network.sendToServer(new RemoveEntitiesMessage(world.dimension(), rl, null, false, force));
             return;
         }
-        ((ServerWorld) world).getEntities().filter(entity -> Objects.equals(entity.getType().getRegistryName(), rl)).forEach(e -> {
+        ((ServerLevel) world).getEntities().getAll().forEach(entity ->{
+            if(!Objects.equals(entity.getType().getRegistryName(), rl))
+                return;
             if (force) {
-                ((ServerWorld) world).removeEntityComplete(e, false);
+                ((ServerLevel) world).removeEntityComplete(entity, false);
             } else {
-                e.remove();
+                entity.remove(Entity.RemovalReason.DISCARDED);
             }
         });
     }
 
-    public static void removeEntitiesInChunk(World world, ChunkPos pos, ResourceLocation rl, boolean force) {
+    public static void removeEntitiesInChunk(Level world, ChunkPos pos, ResourceLocation rl, boolean force) {
         if (NetworkTools.returnOnNull(world, pos, rl)) return;
         if (world.isClientSide) {
             Network.sendToServer(new RemoveEntitiesMessage(world.dimension(), rl, pos, false, force));
             return;
         }
-        Vector3d start = new Vector3d(pos.getMinBlockX(), 0, pos.getMinBlockZ());
-        Vector3d end = new Vector3d(pos.getMaxBlockX(), 255, pos.getMaxBlockZ());
-        world.getEntities((Entity) null, new AxisAlignedBB(start, end), entity -> Objects.equals(entity.getType().getRegistryName(), rl)).forEach(e -> {
+        Vec3 start = new Vec3(pos.getMinBlockX(), 0, pos.getMinBlockZ());
+        Vec3 end = new Vec3(pos.getMaxBlockX(), 255, pos.getMaxBlockZ());
+        world.getEntities((Entity) null, new AABB(start, end), entity -> Objects.equals(entity.getType().getRegistryName(), rl)).forEach(e -> {
             if (force) {
-                ((ServerWorld) world).removeEntityComplete(e, false);
+                ((ServerLevel) world).removeEntityComplete(e, false);
             } else {
-                e.remove();
+                e.remove(Entity.RemovalReason.DISCARDED);
             }
         });
     }
 
-    public static void removeTileEntity(World world, UUID id, boolean force) {
+    public static void removeTileEntity(Level world, UUID id, boolean force) {
         if (NetworkTools.returnOnNull(world, id)) return;
         if (world.isClientSide) {
             Network.sendToServer(new RemoveEntityMessage(world.dimension(), id, true, force));
@@ -165,42 +164,42 @@ public class WorldUtils {
         });
     }
 
-    public static void removeTileEntityType(World world, ResourceLocation rl, boolean force) {
+    public static void removeTileEntityType(Level world, ResourceLocation rl, boolean force) {
         if (NetworkTools.returnOnNull(world, rl)) return;
         if (world.isClientSide) {
             Network.sendToServer(new RemoveEntitiesMessage(world.dimension(), rl, null, true, force));
             return;
         }
-        for (TileEntity te : world.blockEntityList) {
-            if (te.getType().getRegistryName() != null && Objects.equals(te.getType().getRegistryName(), rl)) {
+        for (TickingBlockEntity te : world.blockEntityTickers) {
+            if (Objects.equals(te.getType(), rl.toString())) {
                 CrashUtils.runNextTick((wld)->{
                     if (force) {
-                        world.removeBlockEntity(te.getBlockPos());
-                        world.removeBlock(te.getBlockPos(), false);
+                        world.removeBlockEntity(te.getPos());
+                        world.removeBlock(te.getPos(), false);
                     } else {
-                        world.removeBlockEntity(te.getBlockPos());
+                        world.removeBlockEntity(te.getPos());
                     }
                 });
             }
         }
     }
 
-    public static void removeTileEntitiesInChunk(World world, ChunkPos pos, ResourceLocation rl, boolean force) {
+    public static void removeTileEntitiesInChunk(Level world, ChunkPos pos, ResourceLocation rl, boolean force) {
         if (NetworkTools.returnOnNull(world, pos, rl)) return;
         if (world.isClientSide) {
             Network.sendToServer(new RemoveEntitiesMessage(world.dimension(), rl, pos, true, force));
             return;
         }
-        Vector3d start = new Vector3d(pos.getMinBlockX(), 0, pos.getMinBlockZ());
-        Vector3d end = new Vector3d(pos.getMaxBlockX(), 255, pos.getMaxBlockZ());
+        Vec3 start = new Vec3(pos.getMinBlockX(), 0, pos.getMinBlockZ());
+        Vec3 end = new Vec3(pos.getMaxBlockX(), 255, pos.getMaxBlockZ());
 
-        world.blockEntityList.stream().filter(te -> Objects.equals(te.getType().getRegistryName(), rl) && new AxisAlignedBB(start, end).contains(Vector3d.atCenterOf(te.getBlockPos()))).forEach(te -> {
+        world.blockEntityTickers.stream().filter(te -> Objects.equals(te.getType(), rl.toString()) && new AABB(start, end).contains(Vec3.atCenterOf(te.getPos()))).forEach(te -> {
             CrashUtils.runNextTick((wld) -> {
                 if (force) {
-                    world.removeBlockEntity(te.getBlockPos());
-                    world.removeBlock(te.getBlockPos(), false);
+                    world.removeBlockEntity(te.getPos());
+                    world.removeBlock(te.getPos(), false);
                 } else {
-                    world.removeBlockEntity(te.getBlockPos());
+                    world.removeBlockEntity(te.getPos());
                 }
             });
         });

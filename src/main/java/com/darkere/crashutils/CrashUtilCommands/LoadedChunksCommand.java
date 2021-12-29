@@ -8,18 +8,18 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.DimensionArgument;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.DimensionArgument;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerLevel;
 
 import java.util.List;
 
 public class LoadedChunksCommand {
 
 
-    public static ArgumentBuilder<CommandSource, ?> register() {
+    public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("chunks")
                 .then(Commands.argument("dim", DimensionArgument.dimension())
                         .executes(x -> run(x, 0, null)))
@@ -33,14 +33,14 @@ public class LoadedChunksCommand {
     }
 
 
-    public static int run(CommandContext<CommandSource> context, int type, String word) throws CommandSyntaxException {
-        List<ServerWorld> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
+    public static int run(CommandContext<CommandSourceStack> context, int type, String word) throws CommandSyntaxException {
+        List<ServerLevel> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
         LoadedChunkData loadedChunkData = new LoadedChunkData(worlds);
         CrashUtils.runNextTick((world) -> reply(type, loadedChunkData, context, word));
         return Command.SINGLE_SUCCESS;
     }
 
-    public static void reply(int type, LoadedChunkData loadedChunkData, CommandContext<CommandSource> context, String word) {
+    public static void reply(int type, LoadedChunkData loadedChunkData, CommandContext<CommandSourceStack> context, String word) {
         try {
             switch (type) {
                 case 0: {
@@ -57,7 +57,7 @@ public class LoadedChunksCommand {
                 }
             }
         } catch (CommandSyntaxException e) {
-            context.getSource().sendSuccess(new StringTextComponent("Exception getting player"), true);
+            context.getSource().sendSuccess(new TextComponent("Exception getting player"), true);
         }
 
     }

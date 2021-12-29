@@ -1,14 +1,14 @@
 package com.darkere.crashutils.DataStructures;
 
-import net.minecraft.profiler.DataPoint;
-import net.minecraft.profiler.IProfileResult;
+import net.minecraft.util.profiling.ProfileResults;
+import net.minecraft.util.profiling.ResultField;
 
 import java.util.List;
 
 public class ProfilingData {
 
-    public ProfilingData(IProfileResult result) {
-        List<DataPoint> data = result.getTimes("root");
+    public ProfilingData(ProfileResults result) {
+        List<ResultField> data = result.getTimes("root");
     }
 
 }

@@ -4,19 +4,20 @@ import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.Screens.PlayerInvContainer;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.network.NetworkEvent;
 import top.theillusivec4.curios.api.CuriosApi;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -27,32 +28,32 @@ public class PlayerInventoryRequestMessage {
         playerName = s;
     }
 
-    public static void encode(PlayerInventoryRequestMessage data, PacketBuffer buf) {
+    public static void encode(PlayerInventoryRequestMessage data, FriendlyByteBuf buf) {
         buf.writeInt(data.playerName.length());
         buf.writeUtf(data.playerName);
 
     }
 
-    public static PlayerInventoryRequestMessage decode(PacketBuffer buf) {
+    public static PlayerInventoryRequestMessage decode(FriendlyByteBuf buf) {
         return new PlayerInventoryRequestMessage(buf.readUtf(buf.readInt()));
     }
 
     public static boolean handle(PlayerInventoryRequestMessage data, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            ServerPlayerEntity player = ctx.get().getSender();
+            ServerPlayer player = ctx.get().getSender();
             MinecraftServer server = player.getServer();
             if(!player.hasPermissions(CommandUtils.PERMISSION_LEVEL)) return;
-            PlayerEntity otherPlayer = ctx.get().getSender().getServer().getPlayerList().getPlayerByName(data.playerName);
+            Player otherPlayer = ctx.get().getSender().getServer().getPlayerList().getPlayerByName(data.playerName);
             if (otherPlayer == null) {
-                GameProfile profile = server.getProfileCache().get(data.playerName);
-                if (profile == null) {
-                    player.sendMessage(new StringTextComponent("Cannot find Player"), new UUID(0, 0));
+                Optional<GameProfile> profile = server.getProfileCache().get(data.playerName);
+                if (profile.isEmpty()) {
+                    player.sendMessage(new TextComponent("Cannot find Player"), new UUID(0, 0));
                     return;
                 }
-                otherPlayer = new FakePlayer(server.getLevel(World.OVERWORLD), profile);
-                CompoundNBT nbt = server.playerDataStorage.load(otherPlayer);
+                otherPlayer = new FakePlayer(server.getLevel(Level.OVERWORLD), profile.get());
+                CompoundTag nbt = server.playerDataStorage.load(otherPlayer);
                 if (nbt == null) {
-                    player.sendMessage(new StringTextComponent("Cannot load playerData"), new UUID(0, 0));
+                    player.sendMessage(new TextComponent("Cannot load playerData"), new UUID(0, 0));
                     return;
                 }
                 otherPlayer.load(nbt);
@@ -71,7 +72,7 @@ public class PlayerInventoryRequestMessage {
 
             Network.sendToPlayer(player, new OpenPlayerInvMessage(id, data.playerName, curios));
             player.containerMenu = new PlayerInvContainer(player, otherPlayer, id, null, null, 0);
-            player.containerMenu.addSlotListener(player);
+            player.initMenu(player.containerMenu);
 
 
         });

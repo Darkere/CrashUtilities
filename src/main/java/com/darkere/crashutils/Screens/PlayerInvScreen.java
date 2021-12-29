@@ -1,16 +1,17 @@
 package com.darkere.crashutils.Screens;
 
 import com.darkere.crashutils.CrashUtils;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
 
 import java.awt.*;
 
-public class PlayerInvScreen extends ContainerScreen<PlayerInvContainer> {
+public class PlayerInvScreen extends AbstractContainerScreen<PlayerInvContainer> {
     Rectangle doubleinv = new Rectangle(7, 14, 213, 229);
     private static final ResourceLocation texture = new ResourceLocation(CrashUtils.MODID, "textures/gui/doubleinv.png");
     PlayerInvContainer container;
@@ -18,7 +19,7 @@ public class PlayerInvScreen extends ContainerScreen<PlayerInvContainer> {
     int centerX;
     int centerY;
 
-    public PlayerInvScreen(PlayerInvContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
+    public PlayerInvScreen(PlayerInvContainer screenContainer, Inventory inv, Component titleIn) {
         super(screenContainer, inv, titleIn);
         this.container = screenContainer;
     }
@@ -31,14 +32,15 @@ public class PlayerInvScreen extends ContainerScreen<PlayerInvContainer> {
     }
 
     @Override
-    protected void renderLabels(MatrixStack p_230451_1_, int p_230451_2_, int p_230451_3_) {
+    protected void renderLabels(PoseStack p_230451_1_, int p_230451_2_, int p_230451_3_) {
 
     }
 
     @Override //drawGuiContainerBackgroundLayer
-    protected void renderBg(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
+    protected void renderBg(PoseStack stack, float partialTicks, int mouseX, int mouseY) {
         //renderTooltip(stack, new StringTextComponent(mouseX + " " + mouseY), mouseX, mouseY);
-        Minecraft.getInstance().textureManager.bind(texture);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, texture);
         blit(stack, centerX - doubleinv.width / 2, centerY - doubleinv.height / 2, doubleinv.x, doubleinv.y, doubleinv.width, doubleinv.height);
         if(hoveredSlot != null && !hoveredSlot.getItem().isEmpty()){
             renderTooltip(stack, hoveredSlot.getItem().getDisplayName(),mouseX,mouseY);

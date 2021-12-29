@@ -7,21 +7,21 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.BlockPosArgument;
-import net.minecraft.command.arguments.DimensionArgument;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.DimensionArgument;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class TeleportCommand implements Command<CommandSource> {
+public class TeleportCommand implements Command<CommandSourceStack> {
     private static final TeleportCommand cmd = new TeleportCommand();
 
-    public static ArgumentBuilder<CommandSource, ?> register() {
+    public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("tp")
                 .then(Commands.argument("player", StringArgumentType.string())
                         .suggests(CommandUtils.PROFILEPROVIDER)
@@ -37,9 +37,9 @@ public class TeleportCommand implements Command<CommandSource> {
     }
 
     @Override
-    public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-        ServerWorld playerWorld = context.getSource().getLevel();
-        ServerWorld destWorld = null;
+    public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        ServerLevel playerWorld = context.getSource().getLevel();
+        ServerLevel destWorld = null;
         String otherPlayerName = "";
         String playerName = "";
         BlockPos pos = null;
@@ -56,7 +56,7 @@ public class TeleportCommand implements Command<CommandSource> {
         }
 
         try {
-            pos = BlockPosArgument.getOrLoadBlockPos(context, "pos");
+            pos = BlockPosArgument.getLoadedBlockPos(context, "pos");
         } catch (IllegalArgumentException e) {
 
         }
@@ -70,12 +70,12 @@ public class TeleportCommand implements Command<CommandSource> {
 
         }
         if (playerName == null) {
-            context.getSource().sendFailure(new StringTextComponent("player to teleport not specified"));
+            context.getSource().sendFailure(new TextComponent("player to teleport not specified"));
             return 0;
         }
 
         //no position specified. Getting other players position
-        ServerPlayerEntity otherPlayer = context.getSource().getServer().getPlayerList().getPlayerByName(otherPlayerName);
+        ServerPlayer otherPlayer = context.getSource().getServer().getPlayerList().getPlayerByName(otherPlayerName);
         if (pos == null && !otherPlayerName.isEmpty()) {
             if (otherPlayer != null) {
                 pos = new BlockPos(otherPlayer.position());
@@ -84,7 +84,7 @@ public class TeleportCommand implements Command<CommandSource> {
                 if (!WorldUtils.applyToPlayer(otherPlayerName, context.getSource().getServer(), fakePlayer -> {
                     offlinePlayerPos.set(new BlockPos(fakePlayer.position()));
                 })) {
-                    context.getSource().sendFailure(new StringTextComponent("Unable to load target players data"));
+                    context.getSource().sendFailure(new TextComponent("Unable to load target players data"));
                     return 0;
                 }
                 pos = offlinePlayerPos.get();
@@ -92,22 +92,22 @@ public class TeleportCommand implements Command<CommandSource> {
         }
 
         //determining source player and teleporting
-        ServerPlayerEntity player = context.getSource().getServer().getPlayerList().getPlayerByName(playerName);
+        ServerPlayer player = context.getSource().getServer().getPlayerList().getPlayerByName(playerName);
         if (player != null) {
             WorldUtils.teleportPlayer(player, playerWorld, destWorld, pos);
         } else {
-            ServerWorld finalDestWorld = destWorld;
+            ServerLevel finalDestWorld = destWorld;
             BlockPos finalPos = pos;
             if (!WorldUtils.applyToPlayer(playerName, context.getSource().getServer(), fakePlayer -> {
                 fakePlayer.setPos(finalPos.getX(), finalPos.getY(), finalPos.getZ());
                 fakePlayer.setLevel(finalDestWorld);
             })) {
-                context.getSource().sendFailure(new StringTextComponent("Unable to read source player data"));
+                context.getSource().sendFailure(new TextComponent("Unable to read source player data"));
                 return 0;
             }
         }
 
-        context.getSource().sendSuccess(new StringTextComponent("Teleported " + playerName + " to " + pos.toString()),true);
+        context.getSource().sendSuccess(new TextComponent("Teleported " + playerName + " to " + pos.toString()),true);
 
         return Command.SINGLE_SUCCESS;
     }

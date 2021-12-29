@@ -1,8 +1,8 @@
 package com.darkere.crashutils.Network;
 
 import com.darkere.crashutils.ClientEvents;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,7 +19,7 @@ public class OpenPlayerInvMessage {
         this.slotAmounts = curios;
     }
 
-    public static void encode(OpenPlayerInvMessage data, PacketBuffer buf) {
+    public static void encode(OpenPlayerInvMessage data, FriendlyByteBuf buf) {
         buf.writeInt(data.windowID);
         buf.writeUtf(data.otherPlayerName);
         buf.writeInt(data.slotAmounts.size());
@@ -30,7 +30,7 @@ public class OpenPlayerInvMessage {
 
     }
 
-    public static OpenPlayerInvMessage decode(PacketBuffer buf) {
+    public static OpenPlayerInvMessage decode(FriendlyByteBuf buf) {
         Map<String, Integer> curios = new LinkedHashMap<>();
         int id = buf.readInt();
         String name = buf.readUtf();

@@ -1,8 +1,8 @@
 package com.darkere.crashutils.DataStructures;
 
 import com.darkere.crashutils.Screens.CUOption;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.ChunkPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.ChunkPos;
 
 import java.util.ArrayList;
 import java.util.HashMap;

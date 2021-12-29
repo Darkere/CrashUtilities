@@ -8,12 +8,12 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.ItemStack;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 
@@ -25,14 +25,14 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class RemoveFromInventorySlotCommand {
     private static final List<String> invTypes = new ArrayList<>(Arrays.asList("inventory", "armor", "offhand"));
-    private static SuggestionProvider<CommandSource> invtype;
+    private static SuggestionProvider<CommandSourceStack> invtype;
 
-    public static ArgumentBuilder<CommandSource, ?> register() {
+    public static ArgumentBuilder<CommandSourceStack, ?> register() {
         if (CrashUtils.curiosLoaded && CuriosApi.getSlotHelper() != null) {
             invTypes.addAll(CuriosApi.getSlotHelper().getSlotTypeIds());
         }
 
-        invtype = (ctx, builder) -> ISuggestionProvider.suggest(invTypes.stream(), builder);
+        invtype = (ctx, builder) -> SharedSuggestionProvider.suggest(invTypes.stream(), builder);
 
         return Commands.literal("remove")
             .then(Commands.argument("name", StringArgumentType.string())
@@ -45,36 +45,36 @@ public class RemoveFromInventorySlotCommand {
                     .executes(ctx -> removeFromSlot(ctx, StringArgumentType.getString(ctx, "name"), "inventory", IntegerArgumentType.getInteger(ctx, "slot")))));
     }
 
-    private static int removeFromSlot(CommandContext<CommandSource> context, String name, String inventoryType, int slot) {
-        AtomicReference<IFormattableTextComponent> text = new AtomicReference<>(new StringTextComponent(""));
+    private static int removeFromSlot(CommandContext<CommandSourceStack> context, String name, String inventoryType, int slot) {
+        AtomicReference<MutableComponent> text = new AtomicReference<>(new TextComponent(""));
         AtomicBoolean success = new AtomicBoolean(false);
         WorldUtils.applyToPlayer(name, context.getSource().getServer(), (player) -> {
             switch (inventoryType) {
                 case "inventory": {
-                    if(player.inventory.items.get(slot).isEmpty()) {
+                    if(player.getInventory().items.get(slot).isEmpty()) {
                         success.set(false);
                         return;
                     }
-                    text.set(player.inventory.items.get(slot).getDisplayName().copy());
-                    player.inventory.items.set(slot, ItemStack.EMPTY);
+                    text.set(player.getInventory().items.get(slot).getDisplayName().copy());
+                    player.getInventory().items.set(slot, ItemStack.EMPTY);
                     break;
                 }
                 case "armor": {
-                    if(player.inventory.armor.get(slot).isEmpty()) {
+                    if(player.getInventory().armor.get(slot).isEmpty()) {
                         success.set(false);
                         return;
                     }
-                    text.set(player.inventory.armor.get(slot).getDisplayName().copy());
-                    player.inventory.armor.set(slot, ItemStack.EMPTY);
+                    text.set(player.getInventory().armor.get(slot).getDisplayName().copy());
+                    player.getInventory().armor.set(slot, ItemStack.EMPTY);
                     break;
                 }
                 case "offhand": {
-                    if(player.inventory.offhand.get(slot).isEmpty()) {
+                    if(player.getInventory().offhand.get(slot).isEmpty()) {
                         success.set(false);
                         return;
                     }
-                    text.set(player.inventory.offhand.get(slot).getDisplayName().copy());
-                    player.inventory.offhand.set(slot, ItemStack.EMPTY);
+                    text.set(player.getInventory().offhand.get(slot).getDisplayName().copy());
+                    player.getInventory().offhand.set(slot, ItemStack.EMPTY);
                     break;
                 }
                 default: {
@@ -92,9 +92,9 @@ public class RemoveFromInventorySlotCommand {
             success.set(true);
         });
         if(success.get()){
-            context.getSource().sendSuccess(text.get().append(new StringTextComponent(" has been deleted from " + name + "'s InventorySlot")), true);
+            context.getSource().sendSuccess(text.get().append(new TextComponent(" has been deleted from " + name + "'s InventorySlot")), true);
         } else {
-            context.getSource().sendSuccess(new StringTextComponent("Failed to delete item from slot" + slot +  ", slot is empty?"), true);
+            context.getSource().sendSuccess(new TextComponent("Failed to delete item from slot" + slot +  ", slot is empty?"), true);
         }
 
         return 1;

@@ -2,23 +2,23 @@ package com.darkere.crashutils.CrashUtilCommands;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.TextComponent;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class HelpCommand {
 
-    public static ArgumentBuilder<CommandSource, ?> register() {
+    public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("help")
             .executes(HelpCommand::run);
 
 
     }
 
-    private static int run(CommandContext<CommandSource> context) {
+    private static int run(CommandContext<CommandSourceStack> context) {
         List<String> text = Arrays.asList(
             "/cu entities",
             "   list: Lists all loaded Entities on the Server",
@@ -44,7 +44,7 @@ public class HelpCommand {
             "/cu chunks: report all loaded chunks");
 
         for (String s : text) {
-            context.getSource().sendSuccess(new StringTextComponent(s), true);
+            context.getSource().sendSuccess(new TextComponent(s), true);
         }
         return 1;
     }
