@@ -24,6 +24,7 @@ public class LoadedChunkData {
     Map<String, Set<ChunkPos>> chunksByLocationType = new HashMap<>();
     Map<ChunkPos, Set<String>> ticketsByChunk = new HashMap<>();
     Map<ChunkPos, String> locationTypeByChunk = new HashMap<>();
+    Map<String, LocationTickets> ticketsByLocation = new HashMap<>();
 
     int total = 0;
 
@@ -53,11 +54,17 @@ public class LoadedChunkData {
             Iterable<ChunkHolder> chunkHolders = chunkManager.getChunks();
             chunkHolders.forEach(chunkHolder -> {
                 IChunk chunk = chunkHolder.getLastAvailable();
+                LocationTickets ticketCounter = null;
                 if (chunk == null) {
                     chunksByLocationType.merge("PRIMED", new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (list, newer) -> {
                         list.add(chunkHolder.getPos());
                         return list;
                     });
+                    ticketsByLocation.merge("PRIMED", new LocationTickets(), (x, y) -> {
+                        x.count++;
+                        return x;
+                    });
+                    ticketCounter = ticketsByLocation.get("PRIMED");
                 } else {
                     if (chunk instanceof Chunk) {
                         Chunk actualChunk = (Chunk) chunk;
@@ -65,12 +72,22 @@ public class LoadedChunkData {
                             list.add(chunkHolder.getPos());
                             return list;
                         });
+                        ticketsByLocation.merge(actualChunk.getFullStatus().toString(), new LocationTickets(), (x, y) -> {
+                            x.count++;
+                            return x;
+                        });
+                        ticketCounter = ticketsByLocation.get(actualChunk.getFullStatus().toString());
                     } else {
                         if (chunk instanceof ChunkPrimer) {
                             chunksByLocationType.merge(chunk.getStatus().getName().equals("full") ? "FULL" : "PARTIALLYGENERATED", new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (list, newer) -> {
                                 list.add(chunkHolder.getPos());
                                 return list;
                             });
+                            ticketsByLocation.merge(chunk.getStatus().getName().equals("full") ? "FULL" : "PARTIALLYGENERATED", new LocationTickets(), (x, y) -> {
+                                x.count++;
+                                return x;
+                            });
+                            ticketCounter = ticketsByLocation.get(chunk.getStatus().getName().equals("full") ? "FULL" : "PARTIALLYGENERATED");
                         }
 
                     }
@@ -82,10 +99,14 @@ public class LoadedChunkData {
                         return old;
                     });
                 } else {
-                    tickets.forEach(ticket -> chunksByTicketName.merge(ticket.getType().toString(), new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (old, nothing) -> {
-                        old.add(chunkHolder.getPos());
-                        return old;
-                    }));
+                    for (Ticket<?> ticket : tickets) {
+                        chunksByTicketName.merge(ticket.getType().toString(), new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (old, nothing) -> {
+                            old.add(chunkHolder.getPos());
+                            return old;
+                        });
+                        if(ticketCounter != null)
+                            ticketCounter.tickets.merge(ticket.getType().toString(),1,Integer::sum);
+                    }
                 }
 
             });
@@ -93,22 +114,19 @@ public class LoadedChunkData {
     }
 
     public void reply(CommandSource source) {
-        source.sendSuccess(new StringTextComponent("Total loaded Chunks: " + total), true);
-        source.sendSuccess(new StringTextComponent("Loaded Chunks by Type: "), true);
-        chunksByLocationType.forEach((x, y) -> {
-            CommandUtils.sendCommandMessage(source, new StringTextComponent(x + " : " + y.size()), "/cu loadedChunks byLocation " + x, true);
+        ticketsByLocation.forEach((name,locationticket)->{
+            source.sendSuccess(new StringTextComponent(name + ": " + locationticket.count),true);
+            locationticket.tickets.forEach((ticket,count)->{
+                source.sendSuccess(new StringTextComponent("    " + ticket + ": " + count), true);
+            });
         });
-        source.sendSuccess(new StringTextComponent("Loaded Chunks by Ticket: "), true);
-        chunksByTicketName.forEach((x, y) -> {
-            CommandUtils.sendCommandMessage(source, new StringTextComponent(x + " : " + y.size()), "/cu loadedChunks byTicket " + x, true);
-        });
-
+        source.sendSuccess(new StringTextComponent("Non-Ticking chunks have little to no performance impact. See the GUI and minecraft wiki for what each type represents."), false);
     }
 
     public void replyWithLocation(CommandSource source, String word) throws CommandSyntaxException {
         source.sendSuccess(new StringTextComponent("Chunks with LocationType " + word), true);
         Set<ChunkPos> chunkPos = chunksByLocationType.get(word);
-        if(chunkPos != null){
+        if (chunkPos != null) {
             sendChunkPositions(source, chunkPos);
         }
 
@@ -123,7 +141,7 @@ public class LoadedChunkData {
 
     public void replyWithTicket(CommandSource source, String word) throws CommandSyntaxException {
         Set<ChunkPos> chunks = chunksByTicketName.get(word);
-        if(chunks == null)return;
+        if (chunks == null) return;
         source.sendSuccess(new StringTextComponent("Chunks with " + word + " Ticket"), true);
         sendChunkPositions(source, chunks);
     }
@@ -179,4 +197,11 @@ public class LoadedChunkData {
         }
         return list;
     }
+
+    private static class LocationTickets {
+        int count;
+        Map<String, Integer> tickets = new HashMap<>();
+
+    }
 }
+
