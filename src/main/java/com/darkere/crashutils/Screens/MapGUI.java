@@ -31,9 +31,11 @@ public class MapGUI extends CUContentPane {
     int hoveringX, hoveringY = 0;
     long blinkTime = 0;
     private String entityFilter;
+    BlockPos initial;
 
     MapGUI(CUScreen screen, RegistryKey<World> dim, BlockPos initial) {
         super(dim, screen);
+        this.initial = initial;
         goTo(initial);
         DataHolder.setRequestType(DataRequestType.LOADEDCHUNKDATA);
         DataHolder.requestUpdates(0, dim, true);
@@ -76,7 +78,7 @@ public class MapGUI extends CUContentPane {
         FillMany.fillMany(stack.last().pose(), list);
     }
 
-    private void goTo(BlockPos pos) {
+    public void goTo(BlockPos pos) {
         ChunkPos chunkPos = new ChunkPos(pos);
         XOffset = -170 + chunkPos.x;
         YOffset = -90 + chunkPos.z;

@@ -33,6 +33,7 @@ public class DataListLoader {
         if (player == null) return;
         WorldUtils.teleportPlayer(player, player.getCommandSenderWorld(), player.getCommandSenderWorld(), option.blockPos);
     };
+    List<Runnable> history = new ArrayList<>();
 
     public DataListLoader(int XTopLeft, int YTopLeft, int XAcross, int YAcross, CUScreen screen, RegistryKey<World> world) {
         this.XTopLeft = XTopLeft;
@@ -44,8 +45,23 @@ public class DataListLoader {
         setCurrentList(new ArrayList<>(), null, null, false);
     }
 
-    private void setCurrentList(List<CUOption> list, Consumer<List<CUOption>> sorter, Consumer<CUOption> action, boolean update) {
-        if (update) {
+    public void goBack() {
+        if (history.size() > 0)
+            history.remove(history.size() - 1);
+        if (history.size() > 0)
+            history.get(history.size() - 1).run();
+        else
+            loadOrderedEntityList(true);
+        System.out.println("GONE BACK");
+    }
+    
+    private void addToHistory(Runnable runnable){
+        history.add(runnable);
+        System.out.println("Added");
+    }
+
+    private void setCurrentList(List<CUOption> list, Consumer<List<CUOption>> sorter, Consumer<CUOption> action, boolean isUpdate) {
+        if (isUpdate) {
             currentList.updateOptions(list, sorter, action);
         } else {
             currentList = new CUList(list, XTopLeft, YTopLeft, XAcross, YAcross, parent, sorter, action);
@@ -59,8 +75,13 @@ public class DataListLoader {
 
     }
 
-    public void loadOrderedEntityList(boolean update) {
-        if (!update) setReloadListener(DataRequestType.ENTITYDATA, () -> loadOrderedEntityList(true));
+    public void loadOrderedEntityList(boolean isUpdate) {
+
+        if (!isUpdate) {
+            setReloadListener(DataRequestType.ENTITYDATA, () -> loadOrderedEntityList(true));
+            addToHistory(() -> loadOrderedEntityList(true));
+        }
+
         EntityData data = DataHolder.getLatestEntityData();
         if (data == null) return;
         List<CUOption> list = data.getAsCUOptions();
@@ -73,11 +94,15 @@ public class DataListLoader {
                 x -> WorldUtils.removeEntityType(Minecraft.getInstance().level, option.rl, true));
         });
         Consumer<CUOption> action = option -> loadChunkListForEntity(option.getRl(), false);
-        setCurrentList(list, numberComparer, action, update);
+        setCurrentList(list, numberComparer, action, isUpdate);
     }
 
-    public void loadChunkListForEntity(ResourceLocation name, boolean update) {
-        if (!update) setReloadListener(DataRequestType.ENTITYDATA, () -> loadChunkListForEntity(name, true));
+    public void loadChunkListForEntity(ResourceLocation name, boolean isUpdate) {
+
+        if (!isUpdate){
+            setReloadListener(DataRequestType.ENTITYDATA, () -> loadChunkListForEntity(name, true));
+            addToHistory(() -> loadChunkListForEntity(name, true));
+        }
         EntityData data = DataHolder.getLatestEntityData();
         if (data == null) return;
         List<CUOption> list = data.getAsCUOptionsOfType(name);
@@ -90,12 +115,15 @@ public class DataListLoader {
                 x -> WorldUtils.removeEntitiesInChunk(Minecraft.getInstance().level, option.chunkPos, option.rl, true));
         });
         Consumer<CUOption> action = option -> loadEntitiesInChunkAsList(option.chunkPos, name, false);
-        setCurrentList(list, numberComparer, action, update);
+        setCurrentList(list, numberComparer, action, isUpdate);
     }
 
-    public void loadEntitiesInChunkAsList(ChunkPos chunkPos, ResourceLocation name, boolean update) {
-        if (!update)
+    public void loadEntitiesInChunkAsList(ChunkPos chunkPos, ResourceLocation name, boolean isUpdate) {
+        if (!isUpdate){
             setReloadListener(DataRequestType.ENTITYDATA, () -> loadEntitiesInChunkAsList(chunkPos, name, true));
+            addToHistory(() -> loadEntitiesInChunkAsList(chunkPos, name, true));
+        }
+
         EntityData data = DataHolder.getLatestEntityData();
         if (data == null) return;
         List<CUOption> list = data.getInChunkAsCUOptions(chunkPos, name);
@@ -110,11 +138,14 @@ public class DataListLoader {
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Forcefully remove this Entity", x, y, parent),
                 x -> WorldUtils.removeEntity(Minecraft.getInstance().level, option.id, true));
         });
-        setCurrentList(list, positionSorter, null, update);
+        setCurrentList(list, positionSorter, null, isUpdate);
     }
 
-    public void loadOrderedTileEntityList(boolean update) {
-        if (!update) setReloadListener(DataRequestType.TILEENTITYDATA, () -> loadOrderedTileEntityList(true));
+    public void loadOrderedTileEntityList(boolean isUpdate) {
+        if (!isUpdate){
+            setReloadListener(DataRequestType.TILEENTITYDATA, () -> loadOrderedTileEntityList(true));
+            addToHistory(() -> loadOrderedTileEntityList(true));
+        }
         TileEntityData data = DataHolder.getLatestTileEntityData();
         if (data == null) return;
         List<CUOption> list = data.getAsCUOptions();
@@ -126,11 +157,14 @@ public class DataListLoader {
                 b -> WorldUtils.removeTileEntityType(Minecraft.getInstance().level, option.rl, true));
         });
         Consumer<CUOption> action = option -> loadChunkListForTileEntity(option.rl, false);
-        setCurrentList(list, numberComparer, action, update);
+        setCurrentList(list, numberComparer, action, isUpdate);
     }
 
-    public void loadChunkListForTileEntity(ResourceLocation name, boolean update) {
-        if (!update) setReloadListener(DataRequestType.TILEENTITYDATA, () -> loadChunkListForTileEntity(name, true));
+    public void loadChunkListForTileEntity(ResourceLocation name, boolean isUpdate) {
+        if (!isUpdate){
+            setReloadListener(DataRequestType.TILEENTITYDATA, () -> loadChunkListForTileEntity(name, true));
+            addToHistory(() -> loadChunkListForTileEntity(name, true));
+        }
         TileEntityData data = DataHolder.getLatestTileEntityData();
         if (data == null) return;
         List<CUOption> list = data.getAsCUOptionsOfType(name);
@@ -146,12 +180,16 @@ public class DataListLoader {
                 x -> WorldUtils.removeTileEntitiesInChunk(Minecraft.getInstance().level, option.chunkPos, option.rl, true));
         });
         Consumer<CUOption> action = option -> loadTileEntitiesInChunkList(option.chunkPos, name, false);
-        setCurrentList(list, numberComparer, action, update);
+        setCurrentList(list, numberComparer, action, isUpdate);
     }
 
-    public void loadTileEntitiesInChunkList(ChunkPos chunkPos, ResourceLocation name, boolean update) {
-        if (!update)
+    public void loadTileEntitiesInChunkList(ChunkPos chunkPos, ResourceLocation name, boolean isUpdate) {
+
+        if (!isUpdate){
             setReloadListener(DataRequestType.TILEENTITYDATA, () -> loadTileEntitiesInChunkList(chunkPos, name, true));
+            addToHistory(() -> loadTileEntitiesInChunkList(chunkPos, name, true));
+        }
+
         TileEntityData data = DataHolder.getLatestTileEntityData();
         if (data == null) return;
         List<CUOption> list = data.getInChunkAsCUOptions(chunkPos, name);
@@ -166,20 +204,28 @@ public class DataListLoader {
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Delete Block of this TileEntity", x, y, parent),
                 x -> WorldUtils.removeTileEntity(Minecraft.getInstance().level, option.id, true));
         });
-        setCurrentList(list, positionSorter, tpAction, update);
+        setCurrentList(list, positionSorter, tpAction, isUpdate);
     }
 
-    public void loadStateList(boolean update) {
-        if (!update) setReloadListener(DataRequestType.LOADEDCHUNKDATA, () -> loadStateList(true));
+    public void loadStateList(boolean isUpdate) {
+
+        if (!isUpdate){
+            setReloadListener(DataRequestType.LOADEDCHUNKDATA, () -> loadStateList(true));
+            addToHistory(() -> loadStateList(true));
+        }
         LoadedChunkData data = DataHolder.getLatestChunkData();
         if (data == null) return;
         List<CUOption> list = data.getStatesAsDropdownOptions("");
         Consumer<CUOption> action = option -> loadFilteredStateList(option.getString(), false);
-        setCurrentList(list, null, action, update);
+        setCurrentList(list, null, action, isUpdate);
     }
 
-    private void loadFilteredStateList(String filter, boolean update) {
-        if (!update) setReloadListener(DataRequestType.LOADEDCHUNKDATA, () -> loadFilteredStateList(filter, true));
+    private void loadFilteredStateList(String filter, boolean isUpdate) {
+
+        if (!isUpdate){
+            setReloadListener(DataRequestType.LOADEDCHUNKDATA, () -> loadFilteredStateList(filter, true));
+            addToHistory(() -> loadFilteredStateList(filter, true));
+        }
         LoadedChunkData data = DataHolder.getLatestChunkData();
         if (data == null) return;
         List<CUOption> list = data.getStatesAsDropdownOptions(filter);
@@ -187,20 +233,28 @@ public class DataListLoader {
             option.addButton("Teleport",
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Teleport to the center of the chunk", x, y, parent),
                 (x) -> WorldUtils.teleportPlayer(Minecraft.getInstance().player, Minecraft.getInstance().player.getCommandSenderWorld(), Minecraft.getInstance().player.getCommandSenderWorld(), WorldUtils.getChunkCenter(option.chunkPos))));
-        setCurrentList(list, null, null, update);
+        setCurrentList(list, null, null, isUpdate);
     }
 
-    public void loadTicketList(boolean update) {
-        if (!update) setReloadListener(DataRequestType.LOADEDCHUNKDATA, () -> loadTicketList(true));
+    public void loadTicketList(boolean isUpdate) {
+
+        if (!isUpdate){
+            setReloadListener(DataRequestType.LOADEDCHUNKDATA, () -> loadTicketList(true));
+            addToHistory(() -> loadTicketList(true));
+        }
         LoadedChunkData data = DataHolder.getLatestChunkData();
         if (data == null) return;
         List<CUOption> list = data.getTicketsAsDropdownOptions("");
         Consumer<CUOption> action = option -> loadFilteredTicketList(option.getString(), false);
-        setCurrentList(list, null, action, update);
+        setCurrentList(list, null, action, isUpdate);
     }
 
-    private void loadFilteredTicketList(String filter, boolean update) {
-        if (!update) setReloadListener(DataRequestType.LOADEDCHUNKDATA, () -> loadFilteredTicketList(filter, true));
+    private void loadFilteredTicketList(String filter, boolean isUpdate) {
+
+        if (!isUpdate){
+            setReloadListener(DataRequestType.LOADEDCHUNKDATA, () -> loadFilteredTicketList(filter, true));
+            addToHistory(() -> loadFilteredTicketList(filter, true));
+        }
         LoadedChunkData data = DataHolder.getLatestChunkData();
         if (data == null) return;
         List<CUOption> list = data.getTicketsAsDropdownOptions(filter);
@@ -208,11 +262,15 @@ public class DataListLoader {
             option.addButton("Teleport",
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Teleport to the center of the chunk", x, y, parent),
                 (x) -> WorldUtils.teleportPlayer(Minecraft.getInstance().player, Minecraft.getInstance().player.getCommandSenderWorld(), Minecraft.getInstance().player.getCommandSenderWorld(), WorldUtils.getChunkCenter(option.chunkPos))));
-        setCurrentList(list, null, null, update);
+        setCurrentList(list, null, null, isUpdate);
     }
 
-    public void loadPlayerList(boolean update) {
-        if (!update) setReloadListener(DataRequestType.PLAYERDATA, () -> loadPlayerList(true));
+    public void loadPlayerList(boolean isUpdate) {
+
+        if (!isUpdate){
+            setReloadListener(DataRequestType.PLAYERDATA, () -> loadPlayerList(true));
+            addToHistory(() -> loadPlayerList(true));
+        }
         PlayerData data = DataHolder.getLatestPlayerData();
         if (data == null) return;
         List<CUOption> list = data.getCUPlayers(Minecraft.getInstance().player.getName().getString());
@@ -229,10 +287,10 @@ public class DataListLoader {
             });
             option.addButton("EnderChest", (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Open Enderchest", x, y, parent), x -> {
                 if (option.getString() != null) {
-                   Network.sendToServer(new OpenEnderChestMessage(option.string));
+                    Network.sendToServer(new OpenEnderChestMessage(option.string));
                 }
             });
         });
-        setCurrentList(list, stringSorter, null, update);
+        setCurrentList(list, stringSorter, null, isUpdate);
     }
 }

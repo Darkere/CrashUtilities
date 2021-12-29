@@ -39,6 +39,7 @@ public class CUScreen extends Screen {
     private static final ResourceLocation TABS = new ResourceLocation(CrashUtils.MODID, "textures/gui/tabs.png");
     public List<CUDropDown> topDropDowns = new ArrayList<>();
     ExtendedButton button;
+    ExtendedButton backButton;
     boolean dragging;
     BlockPos initial;
     static boolean keep = false;
@@ -52,18 +53,29 @@ public class CUScreen extends Screen {
 
     @Override
     protected void init() {
+        super.init();
         centerY = height / 2;
         centerX = width / 2;
         if (!keep) {
             contentGUI = new MapGUI(this, dim, initial);
             DataHolder.setRequestType(DataRequestType.LOADEDCHUNKDATA);
+        }
             button = new ExtendedButton(centerX + 174, centerY - 103, 20, 10, new StringTextComponent(String.valueOf(contentGUI.updateSpeed)),
                 (x) -> {
                     contentGUI.shouldUpdate = !contentGUI.shouldUpdate;
                     contentGUI.setUpdateSpeed();
                 });
             this.addButton(button);
-        }
+            backButton = new ExtendedButton(centerX + 145, centerY - 103, 20,10 ,new StringTextComponent("<-"),
+            button->{
+                if(contentGUI instanceof DataListGUI)
+                    ((DataListGUI) contentGUI).loader.goBack();
+                else if (contentGUI instanceof MapGUI)
+                    ((MapGUI)contentGUI).goTo(((MapGUI)contentGUI).initial);
+
+
+            });
+            addButton(backButton);
     }
 
     @Override
@@ -86,10 +98,13 @@ public class CUScreen extends Screen {
         fill(stack, centerX + 173, centerY - 105, centerX + 195, centerY - 93, contentGUI.shouldUpdate ? 0xff51f542 : 0xfff54242);
         button.x = centerX + 174;
         button.y = centerY - 104;
+        backButton.x = centerX + 145;
+        backButton.y = centerY - 103;
 
         topDropDowns.forEach(x -> x.render(stack, centerX, centerY));
         renderToolTips(stack, mx, my);
         button.renderButton(stack, mx, my, partialTicks);
+        backButton.renderButton(stack, mx, my, partialTicks);
         super.render(stack, mx, my, partialTicks);
     }
 
@@ -132,6 +147,9 @@ public class CUScreen extends Screen {
             tooltips.add(new StringTextComponent("Currently " + (contentGUI.shouldUpdate ? "enabled" : "disabled")));
             tooltips.add(new StringTextComponent("Scroll to change update Speed"));
             tooltips.add(new StringTextComponent("(It may be possible to lag a server using this)"));
+        }
+        if(backButton.isMouseOver(mx,my)){
+            tooltips.add(new StringTextComponent(contentGUI instanceof  MapGUI ? "Return to player" : "Go Back"));
         }
         if (!tooltips.isEmpty()) {
             GuiUtils.drawHoveringText(stack, tooltips, mx, my, width, height, 150, Minecraft.getInstance().font);
@@ -207,6 +225,7 @@ public class CUScreen extends Screen {
         if (contentGUI.mouseClickedOutside(mx, my, centerX, centerY)) {
             return true;
         }
+
         if (contentGUI.isMouseOver(mx, my, centerX, centerY)) {
             dragging = true;
             if ((contentGUI.mouseClicked(mx, my, mouseButton))) {
@@ -318,6 +337,7 @@ public class CUScreen extends Screen {
             keep = false;
             stored = new CUScreen(world, pos);
         }
+
         DataHolder.notifyListener();
         return stored;
     }
