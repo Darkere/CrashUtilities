@@ -43,7 +43,6 @@ public class DeleteBlocks {
             //  BlockState block = world.getBlockState(pos);
             //    world.removeBlock(pos,false);
             chunk.removeBlockEntity(pos);
-            System.out.println("TE GONE ");
         }
     }
 }

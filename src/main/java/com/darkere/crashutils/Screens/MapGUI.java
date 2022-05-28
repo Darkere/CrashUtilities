@@ -292,7 +292,7 @@ public class MapGUI extends CUContentPane {
     }
 
     @Override
-    public boolean mouseClickedOutside(double mx, double my, int centerX, int centerY) {
+    public boolean mouseClickedOutside(double mx, double my, int centerX, int centerY, int mouseButton) {
         return false;
     }
 

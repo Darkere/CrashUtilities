@@ -116,6 +116,7 @@ public class WorldUtils {
 
     public static void removeEntityType(Level world, ResourceLocation rl, boolean force) {
         if (NetworkTools.returnOnNull(world, rl)) return;
+        List<Runnable> runnables = new ArrayList<>();
         if (world.isClientSide) {
             Network.sendToServer(new RemoveEntitiesMessage(world.dimension(), rl, null, false, force));
             return;
@@ -124,11 +125,13 @@ public class WorldUtils {
             if(!Objects.equals(entity.getType().getRegistryName(), rl))
                 return;
             if (force) {
-                ((ServerLevel) world).removeEntityComplete(entity, false);
+                runnables.add(()-> ((ServerLevel) world).removeEntityComplete(entity, false));
             } else {
-                entity.remove(Entity.RemovalReason.DISCARDED);
+                runnables.add(()-> entity.remove(Entity.RemovalReason.DISCARDED));
             }
         });
+
+        runnables.forEach(Runnable::run);
     }
 
     public static void removeEntitiesInChunk(Level world, ChunkPos pos, ResourceLocation rl, boolean force) {

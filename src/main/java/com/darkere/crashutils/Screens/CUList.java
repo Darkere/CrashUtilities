@@ -24,6 +24,7 @@ public class CUList extends GuiComponent {
     private final int fitOnScreen = 14;
     private Consumer<List<CUOption>> sorter;
     private Consumer<CUOption> action;
+    private String currentFilter;
 
     public CUList(List<CUOption> allOptions, int posX, int posY, int width, int height, CUScreen parent, Consumer<List<CUOption>> sorter, Consumer<CUOption> action) {
         this.allOptions = allOptions;
@@ -68,10 +69,11 @@ public class CUList extends GuiComponent {
         allOptions = options;
         this.sorter = sorter;
         this.action = action;
-        updateFilter("");
+        updateFilter(currentFilter);
     }
 
     public void updateFilter(String filter) {
+        currentFilter = filter;
         currentOptions.clear();
         currentOptions.addAll(allOptions);
         currentOptions.removeIf(x -> x.shouldBeFilteredOut(filter));

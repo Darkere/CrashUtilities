@@ -85,7 +85,7 @@ public class CUOption {
     List<Button> buttons = new ArrayList<>();
 
     public CUOption addButton(String text, Button.OnTooltip tooltip, Button.OnPress action) {
-        buttons.add(new Button(0, 0, Minecraft.getInstance().font.width(text) + 4, Minecraft.getInstance().font.lineHeight + 3, new TextComponent(text), action, tooltip));
+        buttons.add(new CUButton(0, 0, Minecraft.getInstance().font.width(text) + 4, Minecraft.getInstance().font.lineHeight + 3, new TextComponent(text), action, tooltip));
         return this;
     }
 

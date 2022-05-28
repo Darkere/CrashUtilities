@@ -27,15 +27,22 @@ public class DataListGUI extends CUContentPane {
         screen.topDropDowns.add(SELECTOR);
         SELECTOR.setEnabled(true);
         loader.loadOrderedEntityList(false);
-        filterWidget = new EditBox(Minecraft.getInstance().font, centerX - 107, centerY - 104, 150, Minecraft.getInstance().font.lineHeight + 2, new TextComponent("Filter"));
+        filterWidget = new EditBox(Minecraft.getInstance().font, centerX - 107, centerY - 104, 150, Minecraft.getInstance().font.lineHeight + 2, new TextComponent("Filter")){
+            @Override
+            public boolean mouseClicked(double p_94125_, double p_94126_, int p_94127_) {
+                if(p_94127_ == 1)
+                    filterWidget.setValue("");
+                return super.mouseClicked(p_94125_, p_94126_, p_94127_);
+            }
+        };
         filterWidget.setResponder(r -> loader.currentList.updateFilter(r));
     }
 
     @Override
     public void render(PoseStack stack, int centerX, int centerY, int mx, int my, float partialTicks) {
+        filterWidget.render(stack, mx, my, partialTicks);
         super.render(stack, centerX, centerY, mx, my, partialTicks);
         loader.currentList.render(stack, mx, my, partialTicks);
-        filterWidget.render(stack, mx, my, partialTicks);
     }
 
     @Override
@@ -44,8 +51,10 @@ public class DataListGUI extends CUContentPane {
     }
 
     @Override
-    public boolean mouseClickedOutside(double mx, double my, int centerX, int centerY) {
-        return filterWidget.mouseClicked(mx, my, 0);
+    public boolean mouseClickedOutside(double mx, double my, int centerX, int centerY, int mouseButton) {
+        if(filterWidget.isMouseOver(mx,my))
+            return filterWidget.mouseClicked(mx, my, mouseButton);
+        return false;
     }
 
     @Override

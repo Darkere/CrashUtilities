@@ -33,7 +33,7 @@ public class DataListLoader {
         if (player == null) return;
         WorldUtils.teleportPlayer(player, player.getCommandSenderWorld(), player.getCommandSenderWorld(), option.blockPos);
     };
-    List<Runnable> history = new ArrayList<>();
+    List<Consumer<Boolean>> history = new ArrayList<>();
 
     public DataListLoader(int XTopLeft, int YTopLeft, int XAcross, int YAcross, CUScreen screen, ResourceKey<Level> world) {
         this.XTopLeft = XTopLeft;
@@ -49,15 +49,13 @@ public class DataListLoader {
         if (history.size() > 0)
             history.remove(history.size() - 1);
         if (history.size() > 0)
-            history.get(history.size() - 1).run();
+            history.get(history.size() - 1).accept(true);
         else
             loadOrderedEntityList(true);
-        System.out.println("GONE BACK");
     }
     
-    private void addToHistory(Runnable runnable){
+    private void addToHistory(Consumer<Boolean> runnable){
         history.add(runnable);
-        System.out.println("Added");
     }
 
     private void setCurrentList(List<CUOption> list, Consumer<List<CUOption>> sorter, Consumer<CUOption> action, boolean isUpdate) {
@@ -79,7 +77,7 @@ public class DataListLoader {
 
         if (!isUpdate) {
             setReloadListener(DataRequestType.ENTITYDATA, () -> loadOrderedEntityList(true));
-            addToHistory(() -> loadOrderedEntityList(true));
+            addToHistory(this::loadOrderedEntityList);
         }
 
         EntityData data = DataHolder.getLatestEntityData();
@@ -101,7 +99,7 @@ public class DataListLoader {
 
         if (!isUpdate){
             setReloadListener(DataRequestType.ENTITYDATA, () -> loadChunkListForEntity(name, true));
-            addToHistory(() -> loadChunkListForEntity(name, true));
+            addToHistory((newUpdate) -> loadChunkListForEntity(name, newUpdate));
         }
         EntityData data = DataHolder.getLatestEntityData();
         if (data == null) return;
@@ -121,7 +119,7 @@ public class DataListLoader {
     public void loadEntitiesInChunkAsList(ChunkPos chunkPos, ResourceLocation name, boolean isUpdate) {
         if (!isUpdate){
             setReloadListener(DataRequestType.ENTITYDATA, () -> loadEntitiesInChunkAsList(chunkPos, name, true));
-            addToHistory(() -> loadEntitiesInChunkAsList(chunkPos, name, true));
+            addToHistory((newUpdate) -> loadEntitiesInChunkAsList(chunkPos, name, newUpdate));
         }
 
         EntityData data = DataHolder.getLatestEntityData();
@@ -144,7 +142,7 @@ public class DataListLoader {
     public void loadOrderedTileEntityList(boolean isUpdate) {
         if (!isUpdate){
             setReloadListener(DataRequestType.TILEENTITYDATA, () -> loadOrderedTileEntityList(true));
-            addToHistory(() -> loadOrderedTileEntityList(true));
+            addToHistory(this::loadOrderedTileEntityList);
         }
         TileEntityData data = DataHolder.getLatestTileEntityData();
         if (data == null) return;
@@ -163,7 +161,7 @@ public class DataListLoader {
     public void loadChunkListForTileEntity(ResourceLocation name, boolean isUpdate) {
         if (!isUpdate){
             setReloadListener(DataRequestType.TILEENTITYDATA, () -> loadChunkListForTileEntity(name, true));
-            addToHistory(() -> loadChunkListForTileEntity(name, true));
+            addToHistory((newUpdate) -> loadChunkListForTileEntity(name, newUpdate));
         }
         TileEntityData data = DataHolder.getLatestTileEntityData();
         if (data == null) return;
@@ -187,7 +185,7 @@ public class DataListLoader {
 
         if (!isUpdate){
             setReloadListener(DataRequestType.TILEENTITYDATA, () -> loadTileEntitiesInChunkList(chunkPos, name, true));
-            addToHistory(() -> loadTileEntitiesInChunkList(chunkPos, name, true));
+            addToHistory((newUpdate) -> loadTileEntitiesInChunkList(chunkPos, name, newUpdate));
         }
 
         TileEntityData data = DataHolder.getLatestTileEntityData();
@@ -211,7 +209,7 @@ public class DataListLoader {
 
         if (!isUpdate){
             setReloadListener(DataRequestType.LOADEDCHUNKDATA, () -> loadStateList(true));
-            addToHistory(() -> loadStateList(true));
+            addToHistory(this::loadStateList);
         }
         LoadedChunkData data = DataHolder.getLatestChunkData();
         if (data == null) return;
@@ -224,7 +222,7 @@ public class DataListLoader {
 
         if (!isUpdate){
             setReloadListener(DataRequestType.LOADEDCHUNKDATA, () -> loadFilteredStateList(filter, true));
-            addToHistory(() -> loadFilteredStateList(filter, true));
+            addToHistory((newUpdate) -> loadFilteredStateList(filter, newUpdate));
         }
         LoadedChunkData data = DataHolder.getLatestChunkData();
         if (data == null) return;
@@ -240,7 +238,7 @@ public class DataListLoader {
 
         if (!isUpdate){
             setReloadListener(DataRequestType.LOADEDCHUNKDATA, () -> loadTicketList(true));
-            addToHistory(() -> loadTicketList(true));
+            addToHistory((newUpdate) -> loadTicketList(newUpdate));
         }
         LoadedChunkData data = DataHolder.getLatestChunkData();
         if (data == null) return;
@@ -253,7 +251,7 @@ public class DataListLoader {
 
         if (!isUpdate){
             setReloadListener(DataRequestType.LOADEDCHUNKDATA, () -> loadFilteredTicketList(filter, true));
-            addToHistory(() -> loadFilteredTicketList(filter, true));
+            addToHistory((newUpdate) -> loadFilteredTicketList(filter, newUpdate));
         }
         LoadedChunkData data = DataHolder.getLatestChunkData();
         if (data == null) return;
@@ -269,7 +267,7 @@ public class DataListLoader {
 
         if (!isUpdate){
             setReloadListener(DataRequestType.PLAYERDATA, () -> loadPlayerList(true));
-            addToHistory(() -> loadPlayerList(true));
+            addToHistory(this::loadPlayerList);
         }
         PlayerData data = DataHolder.getLatestPlayerData();
         if (data == null) return;

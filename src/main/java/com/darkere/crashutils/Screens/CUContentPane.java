@@ -18,7 +18,7 @@ public abstract class CUContentPane extends GuiComponent {
     boolean firstTileEntity = false;
     boolean firstChunks = false;
     boolean firstPlayer = false;
-    int updateSpeed = 60;
+    int updateSpeed = 5;
     boolean shouldUpdate = false;
     ResourceKey<Level> dim;
     CUScreen screen;
@@ -67,7 +67,7 @@ public abstract class CUContentPane extends GuiComponent {
         YTopLeft = centerY + defaultRenderOffsetY;
     }
 
-    public abstract boolean mouseClickedOutside(double mx, double my, int centerX, int centerY);
+    public abstract boolean mouseClickedOutside(double mx, double my, int centerX, int centerY, int mouseButton);
 
     public abstract boolean keyPressed(int keyCode, int scanCode, int modifiers);
 
