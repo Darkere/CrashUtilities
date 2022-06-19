@@ -5,7 +5,6 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -20,7 +19,6 @@ import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 public class OpenEnderChestMessage {
@@ -49,13 +47,13 @@ public class OpenEnderChestMessage {
             if (otherPlayer == null) {
                 Optional<GameProfile> profile = player.getServer().getProfileCache().get(data.playerName);
                 if (profile.isEmpty()) {
-                    player.sendMessage(new TextComponent("Cannot find Player"), new UUID(0, 0));
+                    CommandUtils.sendMessageToPlayer(player,"Cannot find Player" );
                     return;
                 }
                 otherPlayer = new FakePlayer(player.getServer().getLevel(Level.OVERWORLD), profile.get());
                 CompoundTag nbt = player.getServer().playerDataStorage.load(otherPlayer);
                 if (nbt == null) {
-                    player.sendMessage(new TextComponent("Cannot load playerData"), new UUID(0, 0));
+                    CommandUtils.sendMessageToPlayer(player,"Cannot load playerData");
                     return;
                 }
                 otherPlayer.load(nbt);

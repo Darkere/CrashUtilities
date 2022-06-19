@@ -12,7 +12,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 
 import java.util.List;
 
@@ -27,7 +26,7 @@ public class MemoryCommand {
 
     private static int run(CommandContext<CommandSourceStack> context, int count) {
         if (!CrashUtils.SERVER_CONFIG.getMemoryChecker()) {
-            context.getSource().sendSuccess(new TextComponent("Memory Checker not enabled in Config"), true);
+            context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Memory Checker not enabled in Config"), true);
             return 0;
         }
         List<MemoryChecker.MemoryCount> full = MemoryChecker.INSTANCE.counts;
@@ -41,7 +40,7 @@ public class MemoryCommand {
     }
 
     private static Component createVisualMemoryText(MemoryChecker.MemoryCount count) {
-        MutableComponent text = new TextComponent("[");
+        MutableComponent text = CommandUtils.CreateTextComponent("[");
         double maximum = (Math.ceil(MemoryChecker.inGigaBytes(count.getMaximum())));
         double total = MemoryChecker.inGigaBytes(count.getTotal());
         double used = total - MemoryChecker.inGigaBytes(count.getFree());

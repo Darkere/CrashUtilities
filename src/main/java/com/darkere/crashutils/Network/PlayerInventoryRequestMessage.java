@@ -6,7 +6,6 @@ import com.darkere.crashutils.Screens.PlayerInvContainer;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -18,7 +17,6 @@ import top.theillusivec4.curios.api.CuriosApi;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 public class PlayerInventoryRequestMessage {
@@ -47,13 +45,13 @@ public class PlayerInventoryRequestMessage {
             if (otherPlayer == null) {
                 Optional<GameProfile> profile = server.getProfileCache().get(data.playerName);
                 if (profile.isEmpty()) {
-                    player.sendMessage(new TextComponent("Cannot find Player"), new UUID(0, 0));
+                    CommandUtils.sendMessageToPlayer(player,"Cannot find Player");
                     return;
                 }
                 otherPlayer = new FakePlayer(server.getLevel(Level.OVERWORLD), profile.get());
                 CompoundTag nbt = server.playerDataStorage.load(otherPlayer);
                 if (nbt == null) {
-                    player.sendMessage(new TextComponent("Cannot load playerData"), new UUID(0, 0));
+                    CommandUtils.sendMessageToPlayer(player,"Cannot load playerData");
                     return;
                 }
                 otherPlayer.load(nbt);

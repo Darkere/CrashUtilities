@@ -8,7 +8,6 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -49,7 +48,7 @@ public class ClientEvents {
         if (event.getScreen() instanceof AbstractContainerScreen) {
             AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) event.getScreen();
             if (screen.getSlotUnderMouse() == null) return;
-            screen.renderTooltip(event.getPoseStack(), new TextComponent("Index: " + screen.getSlotUnderMouse().getSlotIndex()), event.getMouseX(), event.getMouseY());
+            screen.renderTooltip(event.getPoseStack(), CommandUtils.CreateTextComponent("Index: " + screen.getSlotUnderMouse().getSlotIndex()), event.getMouseX(), event.getMouseY());
         }
 
     }
@@ -76,9 +75,9 @@ public class ClientEvents {
                 Minecraft.getInstance().setScreen(CUScreen.openCUScreen(worldKey, new BlockPos(Minecraft.getInstance().player.position())));
             } else {
                 if (!Minecraft.getInstance().hasSingleplayerServer()) {
-                    Minecraft.getInstance().gui.setOverlayMessage(new TextComponent("You need to be OP to use the Crash Utils GUI"), false);
+                    Minecraft.getInstance().gui.setOverlayMessage(CommandUtils.CreateTextComponent("You need to be OP to use the Crash Utils GUI"), false);
                 } else {
-                    Minecraft.getInstance().gui.setOverlayMessage(new TextComponent("Cheats need to be enabled to use the Crash Utils GUI"), false);
+                    Minecraft.getInstance().gui.setOverlayMessage(CommandUtils.CreateTextComponent("Cheats need to be enabled to use the Crash Utils GUI"), false);
                 }
 
             }
@@ -91,6 +90,6 @@ public class ClientEvents {
         if (player == null) return;
         PlayerInvContainer c = new PlayerInvContainer(player, /*clientside null */null, id, playerName, curios, curios.values().stream().mapToInt(x -> x).sum());
         player.containerMenu = c;
-        Minecraft.getInstance().setScreen(new PlayerInvScreen(c, player.getInventory(), new TextComponent("cuinventoryscreen")));
+        Minecraft.getInstance().setScreen(new PlayerInvScreen(c, player.getInventory(), CommandUtils.CreateTextComponent("cuinventoryscreen")));
     }
 }

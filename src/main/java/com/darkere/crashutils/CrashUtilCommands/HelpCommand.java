@@ -1,10 +1,10 @@
 package com.darkere.crashutils.CrashUtilCommands;
 
+import com.darkere.crashutils.CommandUtils;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TextComponent;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +44,7 @@ public class HelpCommand {
             "/cu chunks: report all loaded chunks");
 
         for (String s : text) {
-            context.getSource().sendSuccess(new TextComponent(s), true);
+            context.getSource().sendSuccess(CommandUtils.CreateTextComponent(s), true);
         }
         return 1;
     }

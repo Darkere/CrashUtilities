@@ -12,7 +12,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
@@ -46,7 +45,7 @@ public class RemoveFromInventorySlotCommand {
     }
 
     private static int removeFromSlot(CommandContext<CommandSourceStack> context, String name, String inventoryType, int slot) {
-        AtomicReference<MutableComponent> text = new AtomicReference<>(new TextComponent(""));
+        AtomicReference<MutableComponent> text = new AtomicReference<>(CommandUtils.CreateTextComponent(""));
         AtomicBoolean success = new AtomicBoolean(false);
         WorldUtils.applyToPlayer(name, context.getSource().getServer(), (player) -> {
             switch (inventoryType) {
@@ -92,9 +91,9 @@ public class RemoveFromInventorySlotCommand {
             success.set(true);
         });
         if(success.get()){
-            context.getSource().sendSuccess(text.get().append(new TextComponent(" has been deleted from " + name + "'s InventorySlot")), true);
+            context.getSource().sendSuccess(text.get().append(CommandUtils.CreateTextComponent(" has been deleted from " + name + "'s InventorySlot")), true);
         } else {
-            context.getSource().sendSuccess(new TextComponent("Failed to delete item from slot" + slot +  ", slot is empty?"), true);
+            context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Failed to delete item from slot" + slot +  ", slot is empty?"), true);
         }
 
         return 1;

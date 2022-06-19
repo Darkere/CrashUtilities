@@ -1,12 +1,12 @@
 package com.darkere.crashutils.Screens;
 
+import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.DataStructures.DataHolder;
 import com.darkere.crashutils.Network.DataRequestType;
 import com.darkere.crashutils.Screens.Types.DropDownType;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
@@ -27,7 +27,7 @@ public class DataListGUI extends CUContentPane {
         screen.topDropDowns.add(SELECTOR);
         SELECTOR.setEnabled(true);
         loader.loadOrderedEntityList(false);
-        filterWidget = new EditBox(Minecraft.getInstance().font, centerX - 107, centerY - 104, 150, Minecraft.getInstance().font.lineHeight + 2, new TextComponent("Filter")){
+        filterWidget = new EditBox(Minecraft.getInstance().font, centerX - 107, centerY - 104, 150, Minecraft.getInstance().font.lineHeight + 2, CommandUtils.CreateTextComponent("Filter")){
             @Override
             public boolean mouseClicked(double p_94125_, double p_94126_, int p_94127_) {
                 if(p_94127_ == 1)

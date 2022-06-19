@@ -58,8 +58,8 @@ public class FillMany {
             addRectangle(bufferbuilder, matrix, rect.x0, rect.y0, rect.x1, rect.y1, rect.color);
         }
 
-        bufferbuilder.end();
-        BufferUploader.end(bufferbuilder);
+
+        BufferUploader.drawWithShader(bufferbuilder.end());
 
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();

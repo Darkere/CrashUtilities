@@ -43,7 +43,7 @@ public class RemoveEntityMessage {
             if (data.tile) {
                 WorldUtils.removeTileEntity(player.getServer().getLevel(data.worldRegistryKey), data.id, data.force);
             } else {
-                WorldUtils.removeEntity(player.getServer().getLevel(data.worldRegistryKey), data.id, data.force);
+                WorldUtils.removeEntity(player.getServer().getLevel(data.worldRegistryKey), data.id);
             }
         });
         return true;

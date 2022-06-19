@@ -4,12 +4,10 @@ import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.network.NetworkEvent;
 
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -42,7 +40,7 @@ public class TeleportToPlayerMessage {
                 otherPos.set(o.blockPosition());
             });
             if (otherPos.get() == null) {
-                player.sendMessage(new TextComponent("Failed to load Player"), new UUID(0, 0));
+                CommandUtils.sendMessageToPlayer(player,"Failed to load Player");
             }
             WorldUtils.teleportPlayer(player, ori, dest.get(), otherPos.get());
         });

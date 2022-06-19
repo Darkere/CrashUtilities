@@ -1,11 +1,11 @@
 package com.darkere.crashutils.Screens;
 
+import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.DataStructures.DataHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 
@@ -85,7 +85,7 @@ public class CUOption {
     List<Button> buttons = new ArrayList<>();
 
     public CUOption addButton(String text, Button.OnTooltip tooltip, Button.OnPress action) {
-        buttons.add(new CUButton(0, 0, Minecraft.getInstance().font.width(text) + 4, Minecraft.getInstance().font.lineHeight + 3, new TextComponent(text), action, tooltip));
+        buttons.add(new CUButton(0, 0, Minecraft.getInstance().font.width(text) + 4, Minecraft.getInstance().font.lineHeight + 3, CommandUtils.CreateTextComponent(text), action, tooltip));
         return this;
     }
 

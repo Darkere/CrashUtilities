@@ -24,6 +24,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.ITeleporter;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -99,19 +100,15 @@ public class WorldUtils {
         return new BlockPos(x, 0, z);
     }
 
-    public static void removeEntity(Level world, UUID id, boolean force) {
+    public static void removeEntity(Level world, UUID id) {
         if (NetworkTools.returnOnNull(world, id)) return;
         if (world.isClientSide) {
-            Network.sendToServer(new RemoveEntityMessage(world.dimension(), id, false, force));
+            Network.sendToServer(new RemoveEntityMessage(world.dimension(), id, false, false));
             return;
         }
         Entity e = ((ServerLevel) world).getEntity(id);
         if (e == null) return;
-        if (force) {
-            ((ServerLevel) world).removeEntityComplete(e, false);
-        } else {
-            e.remove(Entity.RemovalReason.DISCARDED);
-        }
+        e.remove(Entity.RemovalReason.DISCARDED);
     }
 
     public static void removeEntityType(Level world, ResourceLocation rl, boolean force) {
@@ -122,13 +119,10 @@ public class WorldUtils {
             return;
         }
         ((ServerLevel) world).getEntities().getAll().forEach(entity ->{
-            if(!Objects.equals(entity.getType().getRegistryName(), rl))
+            var rl2 = ForgeRegistries.ENTITIES.getKey(entity.getType());
+            if(!Objects.equals(rl2, rl))
                 return;
-            if (force) {
-                runnables.add(()-> ((ServerLevel) world).removeEntityComplete(entity, false));
-            } else {
-                runnables.add(()-> entity.remove(Entity.RemovalReason.DISCARDED));
-            }
+            runnables.add(()-> entity.remove(Entity.RemovalReason.DISCARDED));
         });
 
         runnables.forEach(Runnable::run);
@@ -142,13 +136,7 @@ public class WorldUtils {
         }
         Vec3 start = new Vec3(pos.getMinBlockX(), 0, pos.getMinBlockZ());
         Vec3 end = new Vec3(pos.getMaxBlockX(), 255, pos.getMaxBlockZ());
-        world.getEntities((Entity) null, new AABB(start, end), entity -> Objects.equals(entity.getType().getRegistryName(), rl)).forEach(e -> {
-            if (force) {
-                ((ServerLevel) world).removeEntityComplete(e, false);
-            } else {
-                e.remove(Entity.RemovalReason.DISCARDED);
-            }
-        });
+        world.getEntities((Entity) null, new AABB(start, end), entity -> Objects.equals(ForgeRegistries.ENTITIES.getKey(entity.getType()), rl)).forEach(e -> e.remove(Entity.RemovalReason.DISCARDED));
     }
 
     public static void removeTileEntity(Level world, UUID id, boolean force) {

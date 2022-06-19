@@ -1,5 +1,6 @@
 package com.darkere.crashutils.CrashUtilCommands;
 
+import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.DataStructures.LoadedChunkData;
 import com.darkere.crashutils.WorldUtils;
@@ -11,7 +12,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.DimensionArgument;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerLevel;
 
 import java.util.List;
@@ -57,7 +57,7 @@ public class LoadedChunksCommand {
                 }
             }
         } catch (CommandSyntaxException e) {
-            context.getSource().sendSuccess(new TextComponent("Exception getting player"), true);
+            context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Exception getting player"), true);
         }
 
     }

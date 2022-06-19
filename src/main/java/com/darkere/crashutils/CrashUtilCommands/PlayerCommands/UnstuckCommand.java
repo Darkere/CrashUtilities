@@ -10,7 +10,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
@@ -47,9 +46,9 @@ public class UnstuckCommand implements Command<CommandSourceStack> {
         }
 
         if (success.get()) {
-            context.getSource().sendSuccess(new TextComponent("Sent Player " + name + " to Spawn"), true);
+            context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Sent Player " + name + " to Spawn"), true);
         } else {
-            context.getSource().sendSuccess(new TextComponent("Unable to load playerdata for " + name), true);
+            context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Unable to load playerdata for " + name), true);
         }
 
         return 0;

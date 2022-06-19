@@ -13,8 +13,8 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -32,7 +32,6 @@ import javax.annotation.Nullable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 public class InventoryOpenCommand {
 
@@ -46,7 +45,7 @@ public class InventoryOpenCommand {
 
     private static int openInventory(String playerName, CommandContext<CommandSourceStack> ctx) {
         if (!(ctx.getSource().getEntity() instanceof ServerPlayer)) {
-            ctx.getSource().sendFailure(new TextComponent("You need to be a player to use this command, consider using \"cu inventory read\" instead"));
+            ctx.getSource().sendFailure(CommandUtils.CreateTextComponent("You need to be a player to use this command, consider using \"cu inventory read\" instead"));
             return 0;
         }
         ServerPlayer sourcePlayer = (ServerPlayer) ctx.getSource().getEntity();
@@ -54,13 +53,13 @@ public class InventoryOpenCommand {
         if (otherPlayer == null) {
             Optional<GameProfile> profile = ctx.getSource().getServer().getProfileCache().get(playerName);
             if (profile.isEmpty()) {
-                sourcePlayer.sendMessage(new TextComponent("Cannot find Player"), new UUID(0, 0));
+                CommandUtils.sendMessageToPlayer(sourcePlayer, "Cannot find Player");
                 return 0;
             }
             otherPlayer = new FakePlayer(ctx.getSource().getServer().getLevel(Level.OVERWORLD), profile.get());
             CompoundTag nbt = ctx.getSource().getServer().playerDataStorage.load(otherPlayer);
             if (nbt == null) {
-                sourcePlayer.sendMessage(new TextComponent("Cannot load playerData"), new UUID(0, 0));
+                sourcePlayer.sendSystemMessage(CommandUtils.CreateTextComponent("Cannot load playerData"), ChatType.SYSTEM);
                 return 0;
             }
             otherPlayer.load(nbt);

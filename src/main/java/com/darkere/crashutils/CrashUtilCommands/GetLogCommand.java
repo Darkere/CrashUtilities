@@ -33,20 +33,20 @@
 //        if (archivedLog != null) {
 //            uploadString(context, archivedLog, LogHandler.getStringFromArchive(archivedLog));
 //        } else {
-//            context.getSource().sendSuccess(new TextComponent("No Archived Log found"), true);
+//            context.getSource().sendSuccess(CommandUtils.CreateTextComponent("No Archived Log found"), true);
 //        }
 //        return 1;
 //    }
 //
 //    private static void uploadString(CommandContext<CommandSourceStack> context, Path logPath, String text) {
-//        context.getSource().sendSuccess(new TextComponent("Uploading..."), false);
+//        context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Uploading..."), false);
 //        String description = "Log Created " + LogHandler.getRelativePathDateInMin(logPath) + "min before upload";
 //        String url = LogHandler.uploadLog(description, logPath.getFileName().toString(), text);
 //        if (url.startsWith("https")) {
 //            context.getSource().sendSuccess(CommandUtils.createURLComponent(url, url), true);
 //        } else {
-//            context.getSource().sendSuccess(new TextComponent("Upload Failed: " + url), true);
-//            context.getSource().sendSuccess(new TextComponent("Try again or use Copy"), true);
+//            context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Upload Failed: " + url), true);
+//            context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Try again or use Copy"), true);
 //        }
 //    }
 //
@@ -59,7 +59,7 @@
 //    private static int uploadCrashReport(CommandContext<CommandSourceStack> context) {
 //        Path crashreport = LogHandler.getLatestCrashReportPath();
 //        if (crashreport == null) {
-//            context.getSource().sendSuccess(new TextComponent("No crash report found"), true);
+//            context.getSource().sendSuccess(CommandUtils.CreateTextComponent("No crash report found"), true);
 //            return 1;
 //        }
 //        uploadString(context, crashreport, LogHandler.getFileAsStringFromPath(crashreport));
@@ -68,20 +68,20 @@
 //
 //
 //    private static int getLogOverview(CommandContext<CommandSourceStack> ctx) {
-//        MutableComponent latestlogText = new TextComponent("Log from current Game").withStyle(ChatFormatting.YELLOW);
+//        MutableComponent latestlogText = CommandUtils.CreateTextComponent("Log from current Game").withStyle(ChatFormatting.YELLOW);
 //        latestlogText.append(CommandUtils.getCommandTextComponent(" [Upload]", "/cu log uploadLatestLog"));
 //        latestlogText.append(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getFileAsStringFromPath(LogHandler.latestlog)));
 //        ctx.getSource().sendSuccess(latestlogText, true);
 //        Path crashreport = LogHandler.getLatestCrashReportPath();
 //        if (crashreport != null) {
-//            MutableComponent crashreporttext = new TextComponent("Latest Crash Report ").withStyle(ChatFormatting.RED).append(new TextComponent(LogHandler.getRelativePathDateInMin(crashreport) + " Minutes old").withStyle(ChatFormatting.AQUA));
+//            MutableComponent crashreporttext = CommandUtils.CreateTextComponent("Latest Crash Report ").withStyle(ChatFormatting.RED).append(CommandUtils.CreateTextComponent(LogHandler.getRelativePathDateInMin(crashreport) + " Minutes old").withStyle(ChatFormatting.AQUA));
 //            crashreporttext.append(CommandUtils.getCommandTextComponent(" [Upload]", "/cu log uploadCrashReport"));
 //            crashreporttext.append(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getFileAsStringFromPath(crashreport)));
 //            ctx.getSource().sendSuccess(crashreporttext, true);
 //        }
 //        Path archivedLog = LogHandler.getLatestArchivedLogPath();
 //        if (archivedLog != null) {
-//            MutableComponent archivedText = new TextComponent("Archived Latest.log ").withStyle(ChatFormatting.GREEN).append(new TextComponent(LogHandler.getRelativePathDateInMin(archivedLog) + " Minutes old").withStyle(ChatFormatting.AQUA));
+//            MutableComponent archivedText = CommandUtils.CreateTextComponent("Archived Latest.log ").withStyle(ChatFormatting.GREEN).append(CommandUtils.CreateTextComponent(LogHandler.getRelativePathDateInMin(archivedLog) + " Minutes old").withStyle(ChatFormatting.AQUA));
 //            archivedText.append(CommandUtils.getCommandTextComponent(" [Upload]", "/cu log uploadArchivedLog"));
 //            archivedText.append(CommandUtils.createCopyComponent(" [Copy]", LogHandler.getStringFromArchive(archivedLog)));
 //            ctx.getSource().sendSuccess(archivedText, true);

@@ -1,5 +1,6 @@
 package com.darkere.crashutils.Screens;
 
+import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.DataStructures.DataHolder;
 import com.darkere.crashutils.Network.DataRequestType;
@@ -13,7 +14,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
@@ -46,7 +46,7 @@ public class CUScreen extends Screen {
     static boolean keep = false;
 
     public CUScreen(ResourceKey<Level> worldKey, BlockPos position) {
-        super(new TextComponent("CUScreen"));
+        super(CommandUtils.CreateTextComponent("CUScreen"));
         dim = worldKey;
         initial = position;
 
@@ -65,13 +65,13 @@ public class CUScreen extends Screen {
         List<String> updateButtonText = new ArrayList<>();
         updateButtonText.add("Requesting data every " + contentGUI.updateSpeed + " seconds");
         updateButtonText.add("Scroll to change update Speed");
-        updateButton = new CUButton(centerX + 174, centerY - 103, 20, 10, new TextComponent(String.valueOf(contentGUI.updateSpeed)),
+        updateButton = new CUButton(centerX + 174, centerY - 103, 20, 10, CommandUtils.CreateTextComponent(String.valueOf(contentGUI.updateSpeed)),
             (x) -> {
                 contentGUI.shouldUpdate = !contentGUI.shouldUpdate;
                 contentGUI.setUpdateSpeed();
             }, (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, updateButtonText, x, y, this));
         this.addWidget(updateButton);
-        backButton = new CUButton(centerX + 145, centerY - 103, 20, 10, new TextComponent("<-"),
+        backButton = new CUButton(centerX + 145, centerY - 103, 20, 10, CommandUtils.CreateTextComponent("<-"),
             button -> {
                 if (contentGUI instanceof DataListGUI)
                     ((DataListGUI) contentGUI).loader.goBack();
@@ -127,9 +127,9 @@ public class CUScreen extends Screen {
             if (contentGUI instanceof MapGUI) {
                 MapGUI gui = (MapGUI) contentGUI;
                 ChunkPos chunkPos = gui.getChunkFor(mx, my);
-                tooltips.add(new TextComponent("Chunk: X: " + chunkPos.x + " Z: " + chunkPos.z));
+                tooltips.add(CommandUtils.CreateTextComponent("Chunk: X: " + chunkPos.x + " Z: " + chunkPos.z));
                 String loc = gui.getLocFor(mx, my);
-                tooltips.add(new TextComponent("State: " + gui.getNameForLocationType(loc)));
+                tooltips.add(CommandUtils.CreateTextComponent("State: " + gui.getNameForLocationType(loc)));
                 StringBuilder builder = new StringBuilder();
                 switch (gui.type) {
                     case TICKET:
@@ -150,8 +150,8 @@ public class CUScreen extends Screen {
                         break;
                 }
 
-                tooltips.add(new TextComponent(builder.toString()));
-                tooltips.add(new TextComponent("(Double click to teleport)"));
+                tooltips.add(CommandUtils.CreateTextComponent(builder.toString()));
+                tooltips.add(CommandUtils.CreateTextComponent("(Double click to teleport)"));
             }
         }
 
@@ -298,7 +298,7 @@ public class CUScreen extends Screen {
             } else if (delta < 0 && contentGUI.updateSpeed <= 5 && contentGUI.updateSpeed > 1) {
                 contentGUI.updateSpeed -= 1;
             }
-            updateButton.setMessage(new TextComponent(String.valueOf(contentGUI.updateSpeed)));
+            updateButton.setMessage(CommandUtils.CreateTextComponent(String.valueOf(contentGUI.updateSpeed)));
             contentGUI.setUpdateSpeed();
             return true;
         }

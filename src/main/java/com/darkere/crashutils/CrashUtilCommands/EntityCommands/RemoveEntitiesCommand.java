@@ -1,5 +1,6 @@
 package com.darkere.crashutils.CrashUtilCommands.EntityCommands;
 
+import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.WorldUtils;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -9,7 +10,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -72,10 +72,11 @@ public class RemoveEntitiesCommand {
         worlds.forEach(world -> world.getEntities().getAll().forEach(entity -> {
             if (type == null) {
                 if(!entity.hasCustomName())
-                    removeEntity(context, world, entity);
+                    entity.remove(Entity.RemovalReason.DISCARDED);
             } else {
-                if (entity.getType().getRegistryName() != null && entity.getType().getRegistryName().equals(type)) {
-                    removeEntity(context, world, entity);
+                var resourceLocation = ForgeRegistries.ENTITIES.getKey(entity.getType());
+                if (resourceLocation != null && resourceLocation.equals(type)) {
+                    entity.remove(Entity.RemovalReason.DISCARDED);
                 }
             }
         }));
@@ -91,12 +92,13 @@ public class RemoveEntitiesCommand {
             if (regex == null) {
                 remove = !entity.hasCustomName();
             } else {
-                if (entity != null && entity.getType().getRegistryName() != null) {
-                    remove = (entity.getType().getRegistryName().toString().matches(regex));
+                var resourceLocation = ForgeRegistries.ENTITIES.getKey(entity.getType());
+                if (resourceLocation != null) {
+                    remove = resourceLocation.toString().matches(regex);
                 }
             }
             if (remove)
-                removeEntity(context, world, entity);
+                entity.remove(Entity.RemovalReason.DISCARDED);
         }));
         respond(context);
         return 1;
@@ -108,9 +110,9 @@ public class RemoveEntitiesCommand {
         worlds.forEach(world -> world.getEntities().getAll().forEach(entity -> {
             if (entity instanceof ItemEntity) {
                 if (type == null)
-                    removeEntity(context, world, entity);
+                    entity.remove(Entity.RemovalReason.DISCARDED);
                 else if (entity.getName().getString().contains(type))
-                    removeEntity(context, world, entity);
+                    entity.remove(Entity.RemovalReason.DISCARDED);
             }
         }));
         respond(context);
@@ -122,30 +124,13 @@ public class RemoveEntitiesCommand {
         List<ServerLevel> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
         worlds.forEach(world -> world.getEntities().getAll().forEach(entity -> {
             if (entity.getType().getCategory() == MobCategory.MONSTER && !entity.hasCustomName())
-                removeEntity(context, world, entity);
+                entity.remove(Entity.RemovalReason.DISCARDED);
         }));
         respond(context);
         return 1;
     }
 
-    private static void removeEntity(CommandContext<CommandSourceStack> context, ServerLevel world, Entity x) {
-        boolean force = false;
-        try {
-            String forced = StringArgumentType.getString(context, "force");
-            force = forced.equals("force");
-        } catch (Exception e) {
-
-        }
-
-        if (force) {
-            world.removeEntityComplete(x, false);
-        } else {
-            x.remove(Entity.RemovalReason.DISCARDED);
-        }
-        counter++;
-    }
-
     private static void respond(CommandContext<CommandSourceStack> context) {
-        context.getSource().sendSuccess(new TextComponent("Removed " + counter + " Entities"), true);
+        context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Removed " + counter + " Entities"), true);
     }
 }

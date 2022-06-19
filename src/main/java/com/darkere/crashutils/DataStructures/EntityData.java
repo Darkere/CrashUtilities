@@ -31,7 +31,7 @@ public class EntityData extends LocationData {
         List<Entity> entities = new ArrayList<>();
         worlds.forEach(x -> x.getEntities().getAll().forEach(entities::add));
         for (Entity entity : entities) {
-            map.get(entity.getType().getRegistryName()).add(WorldPos.getPosFromEntity(entity));
+            map.get(ForgeRegistries.ENTITIES.getKey(entity.getType())).add(WorldPos.getPosFromEntity(entity));
         }
         total = entities.size();
     }

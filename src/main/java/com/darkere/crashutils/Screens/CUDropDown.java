@@ -1,12 +1,12 @@
 package com.darkere.crashutils.Screens;
 
+import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.Screens.Types.DropDownType;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Transformation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.network.chat.TextComponent;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -58,7 +58,7 @@ public class CUDropDown extends GuiComponent {
         } else {
             this.width = width;
         }
-        widget = new EditBox(Minecraft.getInstance().font, this.posX, this.posY, this.width, height, new TextComponent(selected));
+        widget = new EditBox(Minecraft.getInstance().font, this.posX, this.posY, this.width, height, CommandUtils.CreateTextComponent(selected));
         widget.setValue(selected);
         widget.moveCursorToStart();
         maxOffset = options.size() - fitOnScreen;

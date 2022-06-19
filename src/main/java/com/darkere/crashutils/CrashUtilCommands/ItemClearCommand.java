@@ -1,16 +1,15 @@
 package com.darkere.crashutils.CrashUtilCommands;
 
 import com.darkere.crashutils.ClearItemTask;
+import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.CrashUtils;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.TextComponent;
 
 public class ItemClearCommand implements Command<CommandSourceStack> {
 
@@ -27,10 +26,10 @@ public class ItemClearCommand implements Command<CommandSourceStack> {
         if (CrashUtils.SERVER_CONFIG.getEnabled()) {
             ClearItemTask.INSTANCE.run();
             CrashUtils.runNextTick((world)->{
-                world.getServer().getPlayerList().broadcastMessage(new TextComponent(ClearItemTask.INSTANCE.lastCount + " Item Entities in World. Limit is set to " + CrashUtils.SERVER_CONFIG.getMaximum()), ChatType.SYSTEM, Util.NIL_UUID);
+                world.getServer().getPlayerList().broadcastSystemMessage(CommandUtils.CreateTextComponent(ClearItemTask.INSTANCE.lastCount + " Item Entities in World. Limit is set to " + CrashUtils.SERVER_CONFIG.getMaximum()), ChatType.SYSTEM);
             });
         } else {
-            context.getSource().sendSuccess(new TextComponent("ItemClears are not enabled in the config"), false);
+            context.getSource().sendSuccess(CommandUtils.CreateTextComponent("ItemClears are not enabled in the config"), false);
         }
         return 1;
     }

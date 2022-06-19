@@ -2,10 +2,8 @@ package com.darkere.crashutils;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -87,9 +85,9 @@ public class ClearItemTask extends TimerTask {
                         int size = list.size();
                         if (size > maxItems) {
                             entityList.forEach(entity -> entity.remove(Entity.RemovalReason.DISCARDED));
-                            world.getServer().getPlayerList().broadcastMessage(new TextComponent(size + " Items cleared"), ChatType.SYSTEM, Util.NIL_UUID);
+                            world.getServer().getPlayerList().broadcastSystemMessage(CommandUtils.CreateTextComponent(size + " Items cleared"), ChatType.SYSTEM);
                         } else {
-                            world.getServer().getPlayerList().broadcastMessage(new TextComponent("Item Clear prevented. Only " + size + " items on the ground"),ChatType.SYSTEM, Util.NIL_UUID);
+                            world.getServer().getPlayerList().broadcastSystemMessage(CommandUtils.CreateTextComponent("Item Clear prevented. Only " + size + " items on the ground"),ChatType.SYSTEM);
                         }
 
                     }
@@ -97,11 +95,11 @@ public class ClearItemTask extends TimerTask {
 
             }
             String intText = text.replaceFirst("%", integer.toString());
-            Component message = new TextComponent("[=== ").append(new TextComponent(intText).withStyle(ChatFormatting.RED)).append(new TextComponent(" ===]"));
+            Component message = CommandUtils.CreateTextComponent("[=== ").append(CommandUtils.CreateTextComponent(intText).withStyle(ChatFormatting.RED)).append(CommandUtils.CreateTextComponent(" ===]"));
             new java.util.Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    world.getServer().getPlayerList().broadcastMessage(message, ChatType.SYSTEM,Util.NIL_UUID);
+                    world.getServer().getPlayerList().broadcastSystemMessage(message, ChatType.SYSTEM);
                 }
             }, (last - integer) * 1000L);
 

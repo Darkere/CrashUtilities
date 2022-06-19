@@ -5,7 +5,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -27,9 +29,12 @@ public class TileEntityData extends LocationData {
     }
 
     public void createLists(List<ServerLevel> worlds) {
-        List<TickingBlockEntity> ticking = new ArrayList<>();
+        List<BlockEntity> ticking = new ArrayList<>();
         worlds.forEach(level -> {
-            ticking.addAll(level.blockEntityTickers);
+            for (ChunkHolder chunk : level.getChunkSource().chunkMap.getChunks()) {
+                if(chunk.getTickingChunk() != null)
+                    ticking.addAll(chunk.getTickingChunk().getBlockEntities().values());
+            }
             for (TickingBlockEntity tileEntity : level.blockEntityTickers) {
                 WorldPos pos = WorldPos.getPosFromTileEntity(tileEntity,level);
                 TEID.put(pos.getID(), pos);

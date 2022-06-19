@@ -12,7 +12,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -70,7 +69,7 @@ public class TeleportCommand implements Command<CommandSourceStack> {
 
         }
         if (playerName == null) {
-            context.getSource().sendFailure(new TextComponent("player to teleport not specified"));
+            context.getSource().sendFailure(CommandUtils.CreateTextComponent("player to teleport not specified"));
             return 0;
         }
 
@@ -84,7 +83,7 @@ public class TeleportCommand implements Command<CommandSourceStack> {
                 if (!WorldUtils.applyToPlayer(otherPlayerName, context.getSource().getServer(), fakePlayer -> {
                     offlinePlayerPos.set(new BlockPos(fakePlayer.position()));
                 })) {
-                    context.getSource().sendFailure(new TextComponent("Unable to load target players data"));
+                    context.getSource().sendFailure(CommandUtils.CreateTextComponent("Unable to load target players data"));
                     return 0;
                 }
                 pos = offlinePlayerPos.get();
@@ -102,12 +101,12 @@ public class TeleportCommand implements Command<CommandSourceStack> {
                 fakePlayer.setPos(finalPos.getX(), finalPos.getY(), finalPos.getZ());
                 fakePlayer.setLevel(finalDestWorld);
             })) {
-                context.getSource().sendFailure(new TextComponent("Unable to read source player data"));
+                context.getSource().sendFailure(CommandUtils.CreateTextComponent("Unable to read source player data"));
                 return 0;
             }
         }
 
-        context.getSource().sendSuccess(new TextComponent("Teleported " + playerName + " to " + pos.toString()),true);
+        context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Teleported " + playerName + " to " + pos.toString()),true);
 
         return Command.SINGLE_SUCCESS;
     }

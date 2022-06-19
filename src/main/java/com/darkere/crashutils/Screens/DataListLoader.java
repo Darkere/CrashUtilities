@@ -131,10 +131,10 @@ public class DataListLoader {
                 x -> tpAction.accept(option));
             option.addButton("Remove",
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Remove this Entity", x, y, parent),
-                x -> WorldUtils.removeEntity(Minecraft.getInstance().level, option.id, false));
+                x -> WorldUtils.removeEntity(Minecraft.getInstance().level, option.id));
             option.addButton("Wipe",
                 (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, "Forcefully remove this Entity", x, y, parent),
-                x -> WorldUtils.removeEntity(Minecraft.getInstance().level, option.id, true));
+                x -> WorldUtils.removeEntity(Minecraft.getInstance().level, option.id));
         });
         setCurrentList(list, positionSorter, null, isUpdate);
     }
