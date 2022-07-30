@@ -20,7 +20,7 @@ import java.util.List;
 
 public class FindLoadedTEsCommand implements Command<CommandSourceStack> {
     private static final FindLoadedTEsCommand cmd = new FindLoadedTEsCommand();
-    private static final SuggestionProvider<CommandSourceStack> sugg = (ctx, builder) -> SharedSuggestionProvider.suggestResource(ForgeRegistries.BLOCK_ENTITIES.getKeys().stream(), builder);
+    private static final SuggestionProvider<CommandSourceStack> sugg = (ctx, builder) -> SharedSuggestionProvider.suggestResource(ForgeRegistries.BLOCK_ENTITY_TYPES.getKeys().stream(), builder);
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("find")

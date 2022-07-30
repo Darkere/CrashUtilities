@@ -21,7 +21,7 @@ import java.util.List;
 public class FindEntitiesCommand implements Command<CommandSourceStack> {
 
     private static final FindEntitiesCommand cmd = new FindEntitiesCommand();
-    private static final SuggestionProvider<CommandSourceStack> sugg = (ctx, builder) -> SharedSuggestionProvider.suggestResource(ForgeRegistries.ENTITIES.getKeys().stream(), builder);
+    private static final SuggestionProvider<CommandSourceStack> sugg = (ctx, builder) -> SharedSuggestionProvider.suggestResource(ForgeRegistries.ENTITY_TYPES.getKeys().stream(), builder);
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("find")

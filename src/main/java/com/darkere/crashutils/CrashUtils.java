@@ -34,7 +34,6 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.server.ServerLifecycleHooks;
@@ -63,7 +62,6 @@ public class CrashUtils {
 
     public CrashUtils() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::common);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::client);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::configReload);
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> MinecraftForge.EVENT_BUS.register(new ClientEvents()));
         //MinecraftForge.EVENT_BUS.register(new DeleteBlocks());
@@ -73,11 +71,6 @@ public class CrashUtils {
         curiosLoaded = ModList.get().isLoaded("curios");
         sparkLoaded = ModList.get().isLoaded("spark");
     }
-
-    public void client(FMLClientSetupEvent event) {
-        ClientEvents.registerKeybindings();
-    }
-
 
     public void common(FMLCommonSetupEvent event) {
         Network.register();
@@ -165,7 +158,7 @@ public class CrashUtils {
                     LOGGER.info(history.getPlayersInChunkClearTime().size() + " Player(s) affected ");
                     for (String player : history.getPlayersInChunkClearTime()) {
                         LOGGER.info("Unloading " + player + "'s Chunks");
-                        world.getServer().getCommands().performCommand(world.getServer().createCommandSourceStack(),
+                        world.getServer().getCommands().performPrefixedCommand(world.getServer().createCommandSourceStack(),
                                 "ftbchunks unload_all " + player);
                     }
                 }
@@ -184,9 +177,9 @@ public class CrashUtils {
     }
 
     @SubscribeEvent
-    public void onWorldTick(TickEvent.WorldTickEvent event) {
+    public void onWorldTick(TickEvent.LevelTickEvent event) {
         if ( event.phase != TickEvent.Phase.END) return;
-        if(event.world.isClientSide && !runnables.isEmpty()){
+        if(event.level.isClientSide && !runnables.isEmpty()){
             runnables.clear();
             return;
         }
@@ -196,7 +189,7 @@ public class CrashUtils {
                 skipNext = false;
                 return;
             }
-            runnables.forEach(c -> c.accept((ServerLevel) event.world));
+            runnables.forEach(c -> c.accept((ServerLevel) event.level));
             runnables.clear();
         }
     }

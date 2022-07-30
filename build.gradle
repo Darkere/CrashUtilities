@@ -7,6 +7,7 @@ plugins {
 version = '5.0'
 group = 'com.darkere.crashutilities' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'crashutilities'
+apply from: 'https://raw.githubusercontent.com/SizableShrimp/ForgeUpdatesRemapper/main/remapper.gradle'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17) // Mojang ships Java 8 to end users, so your mod should target Java 8.
 
@@ -18,7 +19,7 @@ minecraft {
     // stable_#            Stables are built at the discretion of the MCP team.
     // Use non-default mappings at your own risk. they may not always work.
     // Simply re-run your setup task after changing the mappings to update your workspace.
-    mappings channel: 'official', version: '1.19'
+    mappings channel: 'official', version: '1.19.1'
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
@@ -118,7 +119,7 @@ dependencies {
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.19-41.0.1'
+    minecraft 'net.minecraftforge:forge:1.19.1-42.0.1'
 
 
 //    implementation('fr.minuskube:jpastee:1.0.2') { transitive = false }
@@ -130,8 +131,8 @@ dependencies {
 //    implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.13'
 //    implementation group: 'commons-logging', name: 'commons-logging', version: '1.2'
 //    implementation group: 'org.json', name: 'json', version: '20190722'
-       runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.19-5.1.0.0")
-       compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.19-5.1.0.0:api")
+       runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.19.1-5.1.0.5")
+       compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.19.1-5.1.0.5:api")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..

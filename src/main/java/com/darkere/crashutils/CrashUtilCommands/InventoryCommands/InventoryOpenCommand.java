@@ -13,7 +13,6 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
@@ -59,7 +58,7 @@ public class InventoryOpenCommand {
             otherPlayer = new FakePlayer(ctx.getSource().getServer().getLevel(Level.OVERWORLD), profile.get());
             CompoundTag nbt = ctx.getSource().getServer().playerDataStorage.load(otherPlayer);
             if (nbt == null) {
-                sourcePlayer.sendSystemMessage(CommandUtils.CreateTextComponent("Cannot load playerData"), ChatType.SYSTEM);
+                sourcePlayer.sendSystemMessage(CommandUtils.CreateTextComponent("Cannot load playerData"), false);
                 return 0;
             }
             otherPlayer.load(nbt);
@@ -86,7 +85,7 @@ public class InventoryOpenCommand {
         }
 
         Player finalOtherPlayer = otherPlayer;
-        NetworkHooks.openGui(sourcePlayer, new MenuProvider() {
+        NetworkHooks.openScreen(sourcePlayer, new MenuProvider() {
             @Override
             public Component getDisplayName() {
                 return finalOtherPlayer.getDisplayName();

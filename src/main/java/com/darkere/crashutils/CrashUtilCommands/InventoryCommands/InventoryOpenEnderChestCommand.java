@@ -62,7 +62,7 @@ public class InventoryOpenEnderChestCommand {
 
         Player finalOtherPlayer = otherPlayer;
 
-        NetworkHooks.openGui(sourcePlayer, new MenuProvider() {
+        NetworkHooks.openScreen(sourcePlayer, new MenuProvider() {
             @Override
             public Component getDisplayName() {
                 return finalOtherPlayer.getDisplayName();

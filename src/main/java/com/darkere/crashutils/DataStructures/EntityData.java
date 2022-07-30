@@ -18,7 +18,7 @@ import java.util.Map;
 public class EntityData extends LocationData {
 
     public EntityData() {
-        for (Map.Entry<ResourceKey<EntityType<?>>, EntityType<?>> entry : ForgeRegistries.ENTITIES.getEntries()) {
+        for (Map.Entry<ResourceKey<EntityType<?>>, EntityType<?>> entry : ForgeRegistries.ENTITY_TYPES.getEntries()) {
             map.put(entry.getKey().location(), new ArrayList<>());
         }
     }
@@ -31,7 +31,7 @@ public class EntityData extends LocationData {
         List<Entity> entities = new ArrayList<>();
         worlds.forEach(x -> x.getEntities().getAll().forEach(entities::add));
         for (Entity entity : entities) {
-            map.get(ForgeRegistries.ENTITIES.getKey(entity.getType())).add(WorldPos.getPosFromEntity(entity));
+            map.get(ForgeRegistries.ENTITY_TYPES.getKey(entity.getType())).add(WorldPos.getPosFromEntity(entity));
         }
         total = entities.size();
     }

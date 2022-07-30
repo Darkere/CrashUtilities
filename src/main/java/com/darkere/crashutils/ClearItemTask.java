@@ -2,7 +2,6 @@ package com.darkere.crashutils;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -85,9 +84,9 @@ public class ClearItemTask extends TimerTask {
                         int size = list.size();
                         if (size > maxItems) {
                             entityList.forEach(entity -> entity.remove(Entity.RemovalReason.DISCARDED));
-                            world.getServer().getPlayerList().broadcastSystemMessage(CommandUtils.CreateTextComponent(size + " Items cleared"), ChatType.SYSTEM);
+                            world.getServer().getPlayerList().broadcastSystemMessage(CommandUtils.CreateTextComponent(size + " Items cleared"),false);
                         } else {
-                            world.getServer().getPlayerList().broadcastSystemMessage(CommandUtils.CreateTextComponent("Item Clear prevented. Only " + size + " items on the ground"),ChatType.SYSTEM);
+                            world.getServer().getPlayerList().broadcastSystemMessage(CommandUtils.CreateTextComponent("Item Clear prevented. Only " + size + " items on the ground"),false);
                         }
 
                     }
@@ -99,7 +98,7 @@ public class ClearItemTask extends TimerTask {
             new java.util.Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    world.getServer().getPlayerList().broadcastSystemMessage(message, ChatType.SYSTEM);
+                    world.getServer().getPlayerList().broadcastSystemMessage(message, false);
                 }
             }, (last - integer) * 1000L);
 

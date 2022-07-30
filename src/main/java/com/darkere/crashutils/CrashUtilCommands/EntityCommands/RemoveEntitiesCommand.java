@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class RemoveEntitiesCommand {
-    private static final SuggestionProvider<CommandSourceStack> sugg = (ctx, builder) -> SharedSuggestionProvider.suggestResource(ForgeRegistries.ENTITIES.getKeys().stream(), builder);
+    private static final SuggestionProvider<CommandSourceStack> sugg = (ctx, builder) -> SharedSuggestionProvider.suggestResource(ForgeRegistries.ENTITY_TYPES.getKeys().stream(), builder);
     private static final SuggestionProvider<CommandSourceStack> boolsugg = (ctx, builder) -> SharedSuggestionProvider.suggest(Collections.singletonList("force"), builder);
     private static int counter = 0;
 
@@ -74,7 +74,7 @@ public class RemoveEntitiesCommand {
                 if(!entity.hasCustomName())
                     entity.remove(Entity.RemovalReason.DISCARDED);
             } else {
-                var resourceLocation = ForgeRegistries.ENTITIES.getKey(entity.getType());
+                var resourceLocation = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
                 if (resourceLocation != null && resourceLocation.equals(type)) {
                     entity.remove(Entity.RemovalReason.DISCARDED);
                 }
@@ -92,7 +92,7 @@ public class RemoveEntitiesCommand {
             if (regex == null) {
                 remove = !entity.hasCustomName();
             } else {
-                var resourceLocation = ForgeRegistries.ENTITIES.getKey(entity.getType());
+                var resourceLocation = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
                 if (resourceLocation != null) {
                     remove = resourceLocation.toString().matches(regex);
                 }

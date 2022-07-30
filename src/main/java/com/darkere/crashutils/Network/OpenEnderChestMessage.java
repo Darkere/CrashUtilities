@@ -61,7 +61,7 @@ public class OpenEnderChestMessage {
 
             Player finalOtherPlayer = otherPlayer;
 
-            NetworkHooks.openGui(player, new MenuProvider() {
+            NetworkHooks.openScreen(player, new MenuProvider() {
                 @Override
                 public Component getDisplayName() {
                     return finalOtherPlayer.getDisplayName();

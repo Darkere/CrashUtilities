@@ -19,7 +19,7 @@ public class TileEntityData extends LocationData {
     public static Map<UUID, WorldPos> TEID = new HashMap<>();
 
     public TileEntityData() {
-        for (Map.Entry<ResourceKey<BlockEntityType<?>>, BlockEntityType<?>> entry : ForgeRegistries.BLOCK_ENTITIES.getEntries()) {
+        for (Map.Entry<ResourceKey<BlockEntityType<?>>, BlockEntityType<?>> entry : ForgeRegistries.BLOCK_ENTITY_TYPES.getEntries()) {
             map.put(entry.getKey().location(), new ArrayList<>());
         }
     }

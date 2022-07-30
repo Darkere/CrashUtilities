@@ -9,7 +9,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.ChatType;
 
 public class ItemClearCommand implements Command<CommandSourceStack> {
 
@@ -26,7 +25,7 @@ public class ItemClearCommand implements Command<CommandSourceStack> {
         if (CrashUtils.SERVER_CONFIG.getEnabled()) {
             ClearItemTask.INSTANCE.run();
             CrashUtils.runNextTick((world)->{
-                world.getServer().getPlayerList().broadcastSystemMessage(CommandUtils.CreateTextComponent(ClearItemTask.INSTANCE.lastCount + " Item Entities in World. Limit is set to " + CrashUtils.SERVER_CONFIG.getMaximum()), ChatType.SYSTEM);
+                world.getServer().getPlayerList().broadcastSystemMessage(CommandUtils.CreateTextComponent(ClearItemTask.INSTANCE.lastCount + " Item Entities in World. Limit is set to " + CrashUtils.SERVER_CONFIG.getMaximum()),false);
             });
         } else {
             context.getSource().sendSuccess(CommandUtils.CreateTextComponent("ItemClears are not enabled in the config"), false);

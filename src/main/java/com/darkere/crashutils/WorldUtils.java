@@ -119,7 +119,7 @@ public class WorldUtils {
             return;
         }
         ((ServerLevel) world).getEntities().getAll().forEach(entity ->{
-            var rl2 = ForgeRegistries.ENTITIES.getKey(entity.getType());
+            var rl2 = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
             if(!Objects.equals(rl2, rl))
                 return;
             runnables.add(()-> entity.remove(Entity.RemovalReason.DISCARDED));
@@ -136,7 +136,7 @@ public class WorldUtils {
         }
         Vec3 start = new Vec3(pos.getMinBlockX(), 0, pos.getMinBlockZ());
         Vec3 end = new Vec3(pos.getMaxBlockX(), 255, pos.getMaxBlockZ());
-        world.getEntities((Entity) null, new AABB(start, end), entity -> Objects.equals(ForgeRegistries.ENTITIES.getKey(entity.getType()), rl)).forEach(e -> e.remove(Entity.RemovalReason.DISCARDED));
+        world.getEntities((Entity) null, new AABB(start, end), entity -> Objects.equals(ForgeRegistries.ENTITY_TYPES.getKey(entity.getType()), rl)).forEach(e -> e.remove(Entity.RemovalReason.DISCARDED));
     }
 
     public static void removeTileEntity(Level world, UUID id, boolean force) {

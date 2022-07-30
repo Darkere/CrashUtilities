@@ -1,7 +1,5 @@
 package com.darkere.crashutils;
 
-import net.minecraft.network.chat.ChatType;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -82,8 +80,8 @@ public class MemoryChecker extends TimerTask {
                 CrashUtils.SERVER_CONFIG.disableHeapDump();
                 ranHeapDump = true;
                 CrashUtils.runNextTick((world) -> {
-                    world.getServer().getPlayerList().broadcastSystemMessage(CommandUtils.CreateTextComponent("Running Heapdump. Massive Lagspike incoming!"), ChatType.SYSTEM);
-                    world.getServer().getCommands().performCommand(world.getServer().createCommandSourceStack(), "/spark heapdump");
+                    world.getServer().getPlayerList().broadcastSystemMessage(CommandUtils.CreateTextComponent("Running Heapdump. Massive Lagspike incoming!"), false);
+                    world.getServer().getCommands().performPrefixedCommand(world.getServer().createCommandSourceStack(), "/spark heapdump");
                 });
             }
             CrashUtils.LOGGER.info("Memory full, using" + usedPerc + "% of memory");

@@ -11,8 +11,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
@@ -24,26 +24,27 @@ import java.util.Map;
 public class ClientEvents {
 
     public static final KeyMapping OPENSCREEN =
-        new KeyMapping("Open the Crash Utilities Screen",
+        new KeyMapping("crashutils.openscreen",
             KeyConflictContext.IN_GAME, KeyModifier.CONTROL,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_U, "Crash Utilities");
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_U, "crashutils.keycategory");
     public static final KeyMapping COPYCLASS =
-        new KeyMapping("Copy Container Class",
-            KeyConflictContext.GUI, InputConstants.UNKNOWN, "Crash Utilities");
+        new KeyMapping("crashutils.copycontainer",
+            KeyConflictContext.GUI, InputConstants.UNKNOWN, "crashutils.keycategory");
     public static final KeyMapping TOGGLEINDEXES =
-        new KeyMapping("Show Slot Index Tooltips",
-            KeyConflictContext.IN_GAME, InputConstants.UNKNOWN, "Crash Utilities");
+        new KeyMapping("crashutils.slottooltips",
+            KeyConflictContext.IN_GAME, InputConstants.UNKNOWN, "crashutils.keycategory");
 
     private static boolean renderslotnumbers;
 
-    public static void registerKeybindings() {
-        ClientRegistry.registerKeyBinding(OPENSCREEN);
-        ClientRegistry.registerKeyBinding(COPYCLASS);
-        ClientRegistry.registerKeyBinding(TOGGLEINDEXES);
+    @SubscribeEvent
+    public static void registerKeybindings(RegisterKeyMappingsEvent event) {
+        event.register(OPENSCREEN);
+        event.register(COPYCLASS);
+        event.register(TOGGLEINDEXES);
     }
 
     @SubscribeEvent
-    public void drawEvent(ScreenEvent.DrawScreenEvent event) {
+    public void drawEvent(ScreenEvent.Render event) {
         if (!renderslotnumbers) return;
         if (event.getScreen() instanceof AbstractContainerScreen) {
             AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) event.getScreen();
@@ -54,7 +55,7 @@ public class ClientEvents {
     }
 
     @SubscribeEvent
-    public void GUIKeyEvent(ScreenEvent.KeyboardKeyPressedEvent.Post event) {
+    public void GUIKeyEvent(ScreenEvent.KeyPressed.Post event) {
         if (Minecraft.getInstance().player == null || !(event.getScreen() instanceof AbstractContainerScreen)) return;
         if (COPYCLASS.consumeClick()) {
             String toCopy = Minecraft.getInstance().player.containerMenu.getClass().getName();
@@ -66,7 +67,7 @@ public class ClientEvents {
     }
 
     @SubscribeEvent
-    public void keyEvent(InputEvent.KeyInputEvent event) {
+    public void keyEvent(InputEvent.Key event) {
         if (Minecraft.getInstance().player == null || Minecraft.getInstance().level == null) return;
         if (event.getAction() != GLFW.GLFW_PRESS) return;
         if (OPENSCREEN.consumeClick()) {
