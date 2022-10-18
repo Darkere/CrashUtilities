@@ -32,7 +32,7 @@ public class PlayerData {
         playerNames.remove(requestingPlayer);
         List<CUOption> list = new ArrayList<>();
         for (String name : playerNames) {
-            list.add(new CUOption(name, !Minecraft.getInstance().hasSingleplayerServer() && Minecraft.getInstance().getCurrentServer() != null && Minecraft.getInstance().getCurrentServer().playerList.stream().map(Component::getString).anyMatch(name::equals) ? "( online)" : null));
+            list.add(new CUOption(name, !Minecraft.getInstance().hasSingleplayerServer() && Minecraft.getInstance().getCurrentServer() != null && Minecraft.getInstance().getCurrentServer().playerList != null &&  Minecraft.getInstance().getCurrentServer().playerList.stream().map(Component::getString).anyMatch(name::equals) ? "( online)" : null));
         }
         return list;
     }

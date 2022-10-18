@@ -192,7 +192,8 @@ public class LoadedChunkData {
         if (filter.isEmpty()) {
             chunkMap.forEach((string, set) -> list.add(new CUOption(string, set.size())));
         } else {
-            chunkMap.get(filter).forEach(chunkPos -> list.add(new CUOption(chunkPos)));
+            if(!chunkMap.get(filter).isEmpty())
+                chunkMap.get(filter).forEach(chunkPos -> list.add(new CUOption(chunkPos)));
         }
         return list;
     }
