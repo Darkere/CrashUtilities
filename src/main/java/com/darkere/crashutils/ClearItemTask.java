@@ -81,7 +81,7 @@ public class ClearItemTask extends TimerTask {
                                 entityList.add(x);
 
                         });
-                        int size = list.size();
+                        int size = entityList.size();
                         if (size > maxItems) {
                             entityList.forEach(entity -> entity.remove(Entity.RemovalReason.DISCARDED));
                             world.getServer().getPlayerList().broadcastSystemMessage(CommandUtils.CreateTextComponent(size + " Items cleared"),false);
