@@ -27,4 +27,5 @@ public class GuiTools {
 
         screen.renderTooltip(stack, text, Optional.empty(), x, y, Minecraft.getInstance().font);
     }
+
 }

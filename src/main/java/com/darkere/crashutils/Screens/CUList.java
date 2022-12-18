@@ -52,10 +52,10 @@ public class CUList extends GuiComponent {
             List<Button> buttons = currentOption.getButtons();
             for (int i = 0, buttonsSize = buttons.size(); i < buttonsSize; i++) {
                 Button button = buttons.get(i);
-                button.x = x + width - currentOption.getButtonWidth(i);
-                button.y = y - 1;
+                button.setX(x + width - currentOption.getButtonWidth(i));
+                button.setY(y - 1);
                 button.isHovered = button.isMouseOver(mx, my);
-                button.renderButton(stack, button.x, button.y, partialTicks);
+                button.renderButton(stack, button.getX(), button.getY(), partialTicks);
             }
             y += lineHeight;
             if (j == currentOffset + fitOnScreen) break;

@@ -69,7 +69,7 @@ public class CUScreen extends Screen {
             (x) -> {
                 contentGUI.shouldUpdate = !contentGUI.shouldUpdate;
                 contentGUI.setUpdateSpeed();
-            }, (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, updateButtonText, x, y, this));
+            }, updateButtonText);
         this.addWidget(updateButton);
         backButton = new CUButton(centerX + 145, centerY - 103, 20, 10, CommandUtils.CreateTextComponent("<-"),
             button -> {
@@ -77,7 +77,7 @@ public class CUScreen extends Screen {
                     ((DataListGUI) contentGUI).loader.goBack();
                 else if (contentGUI instanceof MapGUI)
                     ((MapGUI) contentGUI).goTo(((MapGUI) contentGUI).initial);
-            }, (button, stack, x, y) -> GuiTools.drawTextToolTip(stack, contentGUI instanceof MapGUI ? "Return to player" : "Go Back", x, y, this)) {
+            }, contentGUI instanceof MapGUI ? "Return to player" : "Go Back") {
             @Override
             public boolean isActive() {
                 if (contentGUI instanceof DataListGUI)
@@ -108,10 +108,10 @@ public class CUScreen extends Screen {
         centerX = width / 2;
         centerY = height / 2;
         fill(stack, centerX + 173, centerY - 105, centerX + 195, centerY - 93, contentGUI.shouldUpdate ? 0xff51f542 : 0xfff54242);
-        updateButton.x = centerX + 174;
-        updateButton.y = centerY - 104;
-        backButton.x = centerX + 145;
-        backButton.y = centerY - 103;
+        updateButton.setX(centerX + 174);
+        updateButton.setY(centerY - 104);
+        backButton.setX(centerX + 145);
+        backButton.setY(centerY - 103);
 
         updateButton.renderButton(stack, mx, my, partialTicks);
         backButton.renderButton(stack, mx, my, partialTicks);
