@@ -4,7 +4,7 @@ plugins {
     id 'net.minecraftforge.gradle' version '5.+'
 }
 
-version = '7.0'
+version = '7.1'
 group = 'com.darkere.crashutilities' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'crashutilities'
 apply from: 'https://raw.githubusercontent.com/SizableShrimp/ForgeUpdatesRemapper/main/remapper.gradle'
