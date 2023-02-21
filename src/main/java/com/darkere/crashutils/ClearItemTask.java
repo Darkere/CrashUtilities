@@ -75,20 +75,21 @@ public class ClearItemTask extends TimerTask {
                 new java.util.Timer().schedule(new TimerTask() {
                     @Override
                     public void run() {
-                        List<Entity> entityList = new ArrayList<>();
-                        world.getEntities().getAll().forEach(x->{
-                            if(x.getType().equals(EntityType.ITEM))
-                                entityList.add(x);
+                        CrashUtils.runNextTick((world)->{
+                            List<Entity> entityList = new ArrayList<>();
+                            world.getEntities().getAll().forEach(x->{
+                                if(x.getType().equals(EntityType.ITEM))
+                                    entityList.add(x);
 
+                            });
+                            int size = entityList.size();
+                            if (size > maxItems) {
+                                entityList.forEach(entity -> entity.remove(Entity.RemovalReason.DISCARDED));
+                                world.getServer().getPlayerList().broadcastSystemMessage(CommandUtils.CreateTextComponent(size + " Items cleared"),false);
+                            } else {
+                                world.getServer().getPlayerList().broadcastSystemMessage(CommandUtils.CreateTextComponent("Item Clear prevented. Only " + size + " items on the ground"),false);
+                            }
                         });
-                        int size = entityList.size();
-                        if (size > maxItems) {
-                            entityList.forEach(entity -> entity.remove(Entity.RemovalReason.DISCARDED));
-                            world.getServer().getPlayerList().broadcastSystemMessage(CommandUtils.CreateTextComponent(size + " Items cleared"),false);
-                        } else {
-                            world.getServer().getPlayerList().broadcastSystemMessage(CommandUtils.CreateTextComponent("Item Clear prevented. Only " + size + " items on the ground"),false);
-                        }
-
                     }
                 }, integer * 1000L);
 
