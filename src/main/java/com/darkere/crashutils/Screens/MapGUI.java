@@ -5,6 +5,7 @@ import com.darkere.crashutils.Network.DataRequestType;
 import com.darkere.crashutils.Screens.Types.DropDownType;
 import com.darkere.crashutils.Screens.Types.GridRenderType;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -65,8 +66,8 @@ public class MapGUI extends CUContentPane {
         });
     }
 
-    public void render(PoseStack stack, int centerX, int centerY, int mx, int my, float partialTicks) {
-        super.render(stack, centerX, centerY, mx, my, partialTicks);
+    public void render(GuiGraphics guiGraphics, int centerX, int centerY, int mx, int my, float partialTicks) {
+        super.render(guiGraphics, centerX, centerY, mx, my, partialTicks);
         List<FillMany.ColoredRectangle> list = new ArrayList<>();
         for (int i = 0; i < XAcross; i++) {
             for (int j = 0; j < YAcross; j++) {
@@ -75,7 +76,7 @@ public class MapGUI extends CUContentPane {
                 list.add(new FillMany.ColoredRectangle(i + XTopLeft, j + YTopLeft, i + 1 + XTopLeft, j + 1 + YTopLeft, x));
             }
         }
-        FillMany.fillMany(stack.last().pose(), list);
+        FillMany.fillMany(guiGraphics.pose().last().pose(), list);
     }
 
     public void goTo(BlockPos pos) {

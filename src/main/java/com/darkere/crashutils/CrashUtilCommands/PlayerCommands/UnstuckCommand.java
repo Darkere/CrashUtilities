@@ -42,13 +42,13 @@ public class UnstuckCommand implements Command<CommandSourceStack> {
 
         } else {
             BlockPos p = context.getSource().getServer().getLevel(Level.OVERWORLD).getSharedSpawnPos();
-            WorldUtils.teleportPlayer(player, player.getLevel(), player.getServer().getLevel(Level.OVERWORLD), p);
+            WorldUtils.teleportPlayer(player, player.getCommandSenderWorld(), player.getServer().getLevel(Level.OVERWORLD), p);
         }
 
         if (success.get()) {
-            context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Sent Player " + name + " to Spawn"), true);
+            context.getSource().sendSuccess(()->CommandUtils.CreateTextComponent("Sent Player " + name + " to Spawn"), true);
         } else {
-            context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Unable to load playerdata for " + name), true);
+            context.getSource().sendSuccess(()->CommandUtils.CreateTextComponent("Unable to load playerdata for " + name), true);
         }
 
         return 0;

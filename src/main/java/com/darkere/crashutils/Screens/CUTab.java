@@ -1,8 +1,9 @@
 package com.darkere.crashutils.Screens;
 
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiComponent;
+import com.darkere.crashutils.CrashUtils;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
 
 public enum CUTab {
     ITL(0, 0, 27, 26),
@@ -14,7 +15,7 @@ public enum CUTab {
     INVSEETABICON(0, 52, 63, 115),
     LISTTABICON(64, 52, 127, 115),
     MAPTABICON(128, 52, 191, 115);
-
+    private static final ResourceLocation TABS = new ResourceLocation(CrashUtils.MODID, "textures/gui/tabs.png");
     int x, y, cx, cy;
 
     CUTab(int x, int y, int cx, int cy) {
@@ -24,8 +25,8 @@ public enum CUTab {
         this.cy = cy;
     }
 
-    public void drawTab(PoseStack stack, GuiComponent gui, int i, int j, CUTab icon, float iconScale) {
-        gui.blit(stack, i, j, x, y, cx, cy);
-        gui.blit(stack, i + 5, j + 6, gui.getBlitOffset(), (float) icon.x / iconScale, (float) icon.y / iconScale, 17, 17, (int) (256f / iconScale), (int) (256f / iconScale));
+    public void drawTab(GuiGraphics gui, int i, int j, CUTab icon, float iconScale) {
+        gui.blit(TABS, i, j, x, y, cx, cy);
+        gui.blit(TABS,i + 5, j + 6, 2, (float) icon.x / iconScale, (float) icon.y / iconScale, 17, 17, (int) (256f / iconScale), (int) (256f / iconScale));
     }
 }

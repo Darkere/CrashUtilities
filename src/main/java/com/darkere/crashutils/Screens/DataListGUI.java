@@ -6,7 +6,9 @@ import com.darkere.crashutils.Network.DataRequestType;
 import com.darkere.crashutils.Screens.Types.DropDownType;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
@@ -23,7 +25,7 @@ public class DataListGUI extends CUContentPane {
         loader = new DataListLoader(XTopLeft, YTopLeft, XAcross, YAcross, screen, dim);
         DataHolder.setRequestType(DataRequestType.ENTITYDATA);
         DataHolder.requestUpdates(0, dim, true);
-        SELECTOR = new CUDropDown(DropDownType.SELECTOR, screen, Arrays.asList("ENTITIES", "TILEENTITIES", "TICKETS", "STATES", "PLAYERS"), "ENTITIES", -192, -105, 75);
+        SELECTOR = new CUDropDown(DropDownType.SELECTOR, screen, Arrays.asList("ENTITIES", "BLOCKENTITIES", "TICKETS", "STATES", "PLAYERS"), "ENTITIES", -192, -105, 80);
         screen.topDropDowns.add(SELECTOR);
         SELECTOR.setEnabled(true);
         loader.loadOrderedEntityList(false);
@@ -32,6 +34,7 @@ public class DataListGUI extends CUContentPane {
             public boolean mouseClicked(double p_94125_, double p_94126_, int p_94127_) {
                 if(p_94127_ == 1)
                     filterWidget.setValue("");
+                setFocused(true);
                 return super.mouseClicked(p_94125_, p_94126_, p_94127_);
             }
         };
@@ -39,10 +42,10 @@ public class DataListGUI extends CUContentPane {
     }
 
     @Override
-    public void render(PoseStack stack, int centerX, int centerY, int mx, int my, float partialTicks) {
-        filterWidget.render(stack, mx, my, partialTicks);
-        super.render(stack, centerX, centerY, mx, my, partialTicks);
-        loader.currentList.render(stack, mx, my, partialTicks);
+    public void render(GuiGraphics guiGraphics, int centerX, int centerY, int mx, int my, float partialTicks) {
+        filterWidget.render(guiGraphics, mx, my, partialTicks);
+        super.render(guiGraphics, centerX, centerY, mx, my, partialTicks);
+        loader.currentList.render(guiGraphics, mx, my, partialTicks);
     }
 
     @Override
@@ -83,7 +86,7 @@ public class DataListGUI extends CUContentPane {
                     firstEntity = true;
                     loader.loadOrderedEntityList(false);
                     break;
-                case "TILEENTITIES":
+                case "BLOCKENTITIES":
                     DataHolder.setRequestType(DataRequestType.TILEENTITYDATA);
                     DataHolder.requestUpdates(0, screen.dim, !firstTileEntity);
                     currentType = DataRequestType.TILEENTITYDATA;

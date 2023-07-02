@@ -3,12 +3,11 @@ package com.darkere.crashutils.Screens;
 import com.darkere.crashutils.DataStructures.DataHolder;
 import com.darkere.crashutils.Network.DataRequestType;
 import com.darkere.crashutils.Screens.Types.DropDownType;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
-public abstract class CUContentPane extends GuiComponent {
+public abstract class CUContentPane {
     int defaultRenderOffsetX = -191;
     int defaultRenderOffsetY = -90;
     int centerX;
@@ -51,9 +50,9 @@ public abstract class CUContentPane extends GuiComponent {
         return (mx >= XTopLeft && mx <= XTopLeft + XAcross && my >= YTopLeft && my <= YTopLeft + YAcross);
     }
 
-    public void render(PoseStack stack, int centerX, int centerY, int mx, int my, float partialTicks) {
+    public void render(GuiGraphics guiGraphics, int centerX, int centerY, int mx, int my, float partialTicks) {
         updateRenderValues(centerX, centerY);
-        fill(stack, XTopLeft, YTopLeft, XAcross + XTopLeft, YAcross + YTopLeft, 0xFF000000);
+        guiGraphics.fill( XTopLeft, YTopLeft, XAcross + XTopLeft, YAcross + YTopLeft, 0xFF000000);
     }
 
     public abstract void updateSelection(DropDownType ddtype, String s);

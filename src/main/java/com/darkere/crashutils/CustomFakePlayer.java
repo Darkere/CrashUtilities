@@ -12,9 +12,9 @@ public class CustomFakePlayer extends FakePlayer {
         super(world, name);
     }
 
-    @Override
-    public Vec3 position() {
-        return position;
-    }
+//    @Override
+//    public Vec3 position() {
+//        return position;
+//    }
 
 }

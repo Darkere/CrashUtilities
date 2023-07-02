@@ -26,16 +26,16 @@ public class ActivityCommand {
 
     private static int listActivity(CommandContext<CommandSourceStack> context) {
         PlayerActivityHistory history = new PlayerActivityHistory(context.getSource().getLevel());
-        context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Number of Players active in the last:"), false);
-        context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Day: " + history.getDay().size() + " unique players"), false);
-        context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Week: " + history.getWeek().size() + " unique players"), false);
-        context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Month: " + history.getMonth().size() + " unique players"), false);
+        context.getSource().sendSuccess(()->CommandUtils.CreateTextComponent("Number of Players active in the last:"), false);
+        context.getSource().sendSuccess(()->CommandUtils.CreateTextComponent("Day: " + history.getDay().size() + " unique players"), false);
+        context.getSource().sendSuccess(()->CommandUtils.CreateTextComponent("Week: " + history.getWeek().size() + " unique players"), false);
+        context.getSource().sendSuccess(()->CommandUtils.CreateTextComponent("Month: " + history.getMonth().size() + " unique players"), false);
         return 1;
     }
 
     private static int listActivityByDate(CommandContext<CommandSourceStack> context, String time) {
         PlayerActivityHistory history = new PlayerActivityHistory(context.getSource().getServer().getLevel(Level.OVERWORLD));
-        context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Active Players in the last " + time), false);
+        context.getSource().sendSuccess(()->CommandUtils.CreateTextComponent("Active Players in the last " + time), false);
         StringBuilder b = new StringBuilder();
         switch (time) {
             case "month":
@@ -57,7 +57,7 @@ public class ActivityCommand {
                 });
                 break;
         }
-        context.getSource().sendSuccess(CommandUtils.CreateTextComponent(b.toString()), false);
+        context.getSource().sendSuccess(()->CommandUtils.CreateTextComponent(b.toString()), false);
         return 1;
     }
 

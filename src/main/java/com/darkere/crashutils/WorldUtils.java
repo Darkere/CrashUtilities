@@ -49,7 +49,7 @@ public class WorldUtils {
     }
 
     public static void teleportPlayer(Player player, Level startWorld, Level destWorld, BlockPos newPos) {
-        if (player.level.isClientSide) {
+        if (player.getCommandSenderWorld().isClientSide()) {
             Network.sendToServer(new TeleportMessage(startWorld.dimension(), destWorld.dimension(), newPos));
         }
         if (newPos.getY() == 0) {

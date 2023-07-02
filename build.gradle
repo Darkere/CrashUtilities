@@ -1,37 +1,68 @@
 plugins {
     id 'eclipse'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '5.+'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'net.darkhax.curseforgegradle' version '1.1.15'
 }
 
-version = '7.1'
-group = 'com.darkere.crashutilities' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'crashutilities'
-apply from: 'https://raw.githubusercontent.com/SizableShrimp/ForgeUpdatesRemapper/main/remapper.gradle'
+version = mod_version
+group = mod_group_id
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17) // Mojang ships Java 8 to end users, so your mod should target Java 8.
+base {
+    archivesName = mod_id
+}
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 minecraft {
-    // The mappings can be changed at any time, and must be in the following format.
-    // snapshot_YYYYMMDD   Snapshot are built nightly.
-    // stable_#            Stables are built at the discretion of the MCP team.
-    // Use non-default mappings at your own risk. they may not always work.
+    // The mappings can be changed at any time and must be in the following format.
+    // Channel:   Version:
+    // official   MCVersion             Official field/method names from Mojang mapping files
+    // parchment  YYYY.MM.DD-MCVersion  Open community-sourced parameter names and javadocs layered on top of official
+    //
+    // You must be aware of the Mojang license when using the 'official' or 'parchment' mappings.
+    // See more information here: https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
+    //
+    // Parchment is an unofficial project maintained by ParchmentMC, separate from MinecraftForge
+    // Additional setup is needed to use their mappings: https://parchmentmc.org/docs/getting-started
+    //
+    // Use non-default mappings at your own risk. They may not always work.
     // Simply re-run your setup task after changing the mappings to update your workspace.
-    mappings channel: 'official', version: '1.19.3'
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+    mappings channel: mapping_channel, version: mapping_version
 
+    // When true, this property will have all Eclipse/IntelliJ IDEA run configurations run the "prepareX" task for the given run configuration before launching the game.
+    // In most cases, it is not necessary to enable.
+    // enableEclipsePrepareRuns = true
+    // enableIdeaPrepareRuns = true
+
+    // This property allows configuring Gradle's ProcessResources task(s) to run on IDE output locations before launching the game.
+    // It is REQUIRED to be set to true for this template to function.
+    // See https://docs.gradle.org/current/dsl/org.gradle.language.jvm.tasks.ProcessResources.html
+    copyIdeResources = true
+
+    // When true, this property will add the folder name of all declared run configurations to generated IDE run configurations.
+    // The folder name can be set on a run configuration using the "folderName" property.
+    // By default, the folder name of a run configuration is the name of the Gradle project containing it.
+    // generateRunFolders = true
+
+    // This property enables access transformers for use in development.
+    // They will be applied to the Minecraft artifact.
+    // The access transformer file can be anywhere in the project.
+    // However, it must be at "META-INF/accesstransformer.cfg" in the final mod jar to be loaded by Forge.
+    // This default location is a best practice to automatically put the file in the right place in the final jar.
+    // See https://docs.minecraftforge.net/en/latest/advanced/accesstransformers/ for more information.
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     // Default run configurations.
     // These can be tweaked, removed, or duplicated as needed.
     runs {
-        client {
+        // applies to all the run configs below
+        configureEach {
             workingDirectory project.file('run')
 
             // Recommended logging data for a userdev environment
-            // The markers can be changed as needed.
+            // The markers can be added/remove as needed separated by commas.
             // "SCAN": For mods scan.
             // "REGISTRIES": For firing of registry events.
             // "REGISTRYDUMP": For getting the contents of all registries.
@@ -43,60 +74,43 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                examplemod {
+                "${mod_id}" {
                     source sourceSets.main
                 }
             }
+        }
+
+        client {
+            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+            property 'forge.enabledGameTestNamespaces', mod_id
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
         }
 
         server {
-            workingDirectory project.file('run')
+            property 'forge.enabledGameTestNamespaces', mod_id
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
+            args '--nogui'
+        }
 
-            // Recommended logging data for a userdev environment
-            // The markers can be changed as needed.
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                examplemod {
-                    source sourceSets.main
-                }
-            }
+        // This run config launches GameTestServer and runs all registered gametests, then exits.
+        // By default, the server will crash when no gametests are provided.
+        // The gametest system is also enabled by default for other run configs under the /test command.
+        gameTestServer {
+            property 'forge.enabledGameTestNamespaces', mod_id
         }
 
         data {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            // The markers can be changed as needed.
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-            property 'forge.logging.console.level', 'debug'
+            // example of overriding the workingDirectory set in configureEach above
+            workingDirectory project.file('run-data')
 
             // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            args '--mod', 'examplemod', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-
-            mods {
-                examplemod {
-                    source sourceSets.main
-                }
-            }
+            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
         }
     }
 }
+
 repositories {
     maven {
         url = "https://maven.theillusivec4.top/"
@@ -112,85 +126,83 @@ repositories {
     }
 }
 
-//shadowJar {
-//    configurations = [project.configurations.implementation]
-//}
 dependencies {
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.19.3-44.0.30'
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-
-//    implementation('fr.minuskube:jpastee:1.0.2') { transitive = false }
-//    implementation('com.mashape.unirest:unirest-java:1.4.9'){ transitive = false }
-//    implementation group: 'org.apache.httpcomponents', name: 'httpasyncclient', version: '4.1.4'
-//    implementation group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.12'
-//    implementation group: 'org.apache.httpcomponents', name: 'httpcore-nio', version: '4.4.13'
-//    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.12'
-//    implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.13'
-//    implementation group: 'commons-logging', name: 'commons-logging', version: '1.2'
-//    implementation group: 'org.json', name: 'json', version: '20190722'
-       runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.19.3-5.1.1.2")
-       compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.19.3-5.1.1.2:api")
+    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}+${minecraft_version}")
+    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}+${minecraft_version}:api")
 }
 
-// Example for how to get properties into the manifest for reading by the runtime..
-jar {
-    manifest {
-        attributes([
-                "Specification-Title"     : "crashutilities",
-                "Specification-Vendor"    : "crashutilities",
-                "Specification-Version"   : "1", // We are version 1 of ourselves
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : "${version}",
-                "Implementation-Vendor"   : "examplemodsareus",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-        ])
+
+// This block of code expands all declared replace properties in the specified resource targets.
+// A missing property will result in an error. Properties are expanded using ${} Groovy notation.
+// When "copyIdeResources" is enabled, this will also run before the game launches in IDE environments.
+// See https://docs.gradle.org/current/dsl/org.gradle.language.jvm.tasks.ProcessResources.html
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+            minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
+            forge_version: forge_version, forge_version_range: forge_version_range,
+            loader_version_range: loader_version_range,
+            mod_id: mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
+            mod_authors: mod_authors, mod_description: mod_description,
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
     }
 }
 
-// Example configuration to allow publishing using the maven-publish task
-// we define a custom artifact that is sourced from the reobfJar output task
-// and then declare that to be published
-// Note you'll need to add a repository here
-def reobfFile = file("$buildDir/reobfJar/output.jar")
-def reobfArtifact = artifacts.add('default', reobfFile) {
-    type 'jar'
-    builtBy 'reobfJar'
+// Example for how to get properties into the manifest for reading by the runtime..
+tasks.named('jar', Jar).configure {
+    manifest {
+        attributes([
+                'Specification-Title'     : mod_id,
+                'Specification-Vendor'    : mod_authors,
+                'Specification-Version'   : '1', // We are version 1 of ourselves
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                'Implementation-Vendor'   : mod_authors,
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+
+    // This is the preferred method to reobfuscate your jar file
+    finalizedBy 'reobfJar'
 }
-reobf {
-//    shadowJar {
-//
-//    }
+
+task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
+    apiToken = System.getenv('curseforge_token')
+    def mainFile = upload(371813, jar)
+    mainFile.releaseType = "beta"
+    mainFile.changelog = '- fixed crash on launch'
 }
+
+// Example configuration to allow publishing using the maven-publish plugin
 publishing {
     publications {
-        mavenJava(MavenPublication) {
-            artifact reobfArtifact
+        register('mavenJava', MavenPublication) {
+            artifact jar
         }
     }
     repositories {
         maven {
-            url "file:///${project.projectDir}/mcmodsrepo"
+            url "file://${project.projectDir}/mcmodsrepo"
         }
     }
 }
-//shadowJar {
-//    from sourceSets.main.output
-//
-//    dependencies {
-//        include(dependency('fr.minuskube:jpastee:1.0.2'))
-//        include(dependency('com.mashape.unirest:unirest-java:1.4.9'))
-//        include(dependency(group: 'org.apache.httpcomponents', name: 'httpasyncclient', version: '4.1.4'))
-//        include(dependency(group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.12'))
-//        include(dependency(group: 'org.apache.httpcomponents', name: 'httpcore-nio', version: '4.4.13'))
-//        include(dependency(group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.13'))
-//        include(dependency(group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.12'))
-//        include(dependency(group: 'org.json', name: 'json', version: '20190722'))
-//        include(dependency(group: 'commons-logging', name: 'commons-logging', version: '1.2'))
-//    }
-//    relocate 'org.apache.http', 'dark.org.http'
-//    relocate 'org.apache.commons.logging', 'dark.org.commons.logging'
-//    relocate 'org.json', 'dark.org.json'
-//}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+allprojects {
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xmaxerrs" << "1000"
+        }
+    }
+}

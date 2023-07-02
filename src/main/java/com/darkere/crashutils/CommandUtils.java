@@ -28,7 +28,8 @@ public class CommandUtils {
         Style style = Style.EMPTY;
         text = text.setStyle(style);
         text.withStyle(color);
-        source.sendSuccess(text, true);
+        MutableComponent finalText = text;
+        source.sendSuccess(() -> finalText, true);
     }
 
 
@@ -41,7 +42,7 @@ public class CommandUtils {
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, CommandUtils.CreateTextComponent("Click to execute \u00A76" + command + "\u00A7r"));
         style = style.applyTo(style.withHoverEvent(hoverEvent));
         MutableComponent tex = text.setStyle(style);
-        source.sendSuccess(tex, false);
+        source.sendSuccess(()->tex, false);
         LOGGER.info(text.getString() + " " + command);
     }
 

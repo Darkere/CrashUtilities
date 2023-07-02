@@ -64,7 +64,7 @@ public class InventoryOpenCommand {
             otherPlayer.load(nbt);
         }
 
-        ConnectionData data = NetworkHooks.getConnectionData(sourcePlayer.connection.getConnection());
+        ConnectionData data = NetworkHooks.getConnectionData(sourcePlayer.connection.connection);
         if (data != null && data.getModList().contains(CrashUtils.MODID)) {
             sourcePlayer.doCloseContainer();
             sourcePlayer.nextContainerCounter();

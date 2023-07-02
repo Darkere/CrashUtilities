@@ -6,18 +6,18 @@
 # The name of the mod loader type to load - for regular FML @Mod mods it should be javafml
 modLoader="javafml" #mandatory
 # A version range to match for said mod loader - for regular FML @Mod it will be the forge version
-loaderVersion="[32,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+loaderVersion="${loader_version_range}" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
 # A URL to refer people to when problems occur with this mod
 license= "MIT LICENSE"
 issueTrackerURL= "https://github.com/Darkere/CrashUtilities/issues"
 [[mods]] #mandatory
 # The modid of the mod
-modId="crashutilities" #mandatory
+modId="${mod_id}" #mandatory
 # The version number of the mod - there's a few well known ${} variables useable here or just hardcode it
-version="${file.jarVersion}" #mandatory
+version="${mod_version}" #mandatory
  # A display name for the mod
-displayName="Crash Utilities" #mandatory
-license= "MIT LICENSE"
+displayName="${mod_name}" #mandatory
+license="${mod_license}"
 # A URL to query for updates for this mod. See the JSON update specification <here>
 # A URL for the "homepage" for this mod, displayed in the mod UI
 # A file name (in the root of the mod JAR) containing a logo for display
@@ -30,19 +30,21 @@ List by Gregor Cresnar from the Noun Project
 '''
 
 # A text field displayed in the mod UI
-authors="Darkere" #optional
+authors="${mod_authors}" #optional
 # The description text for the mod (multi line!) (#mandatory)
-description='''
-Mod for debugging and fixing Modded Minecraft Issues
-'''
-[[dependencies.crashutilities]] #optional
-    # the modid of the dependency
-    modId="forge" #mandatory
-    # Does this dependency have to exist - if not, ordering below must be specified
-    mandatory=true #mandatory
-    # The version range of the dependency
-    versionRange="[32.0.67,]" #mandatory
-    # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
-    ordering="NONE"
-    # Side this dependency is applied on - BOTH, CLIENT or SERVER
-    side="BOTH"
+description='''${mod_description}'''
+displayTest="IGNORE_SERVER_VERSION" # MATCH_VERSION is the default if nothing is specified (#optional)
+
+[[dependencies.${mod_id}]] #optional
+# the modid of the dependency
+modId="forge" #mandatory
+# Does this dependency have to exist - if not, ordering below must be specified
+mandatory=true #mandatory
+# The version range of the dependency
+versionRange="${forge_version_range}" #mandatory
+# An ordering relationship for the dependency - BEFORE or AFTER required if the dependency is not mandatory
+# BEFORE - This mod is loaded BEFORE the dependency
+# AFTER - This mod is loaded AFTER the dependency
+ordering="NONE"
+# Side this dependency is applied on - BOTH, CLIENT, or SERVER
+side="BOTH"

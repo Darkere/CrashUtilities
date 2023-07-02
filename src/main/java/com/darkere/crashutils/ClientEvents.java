@@ -8,6 +8,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -46,10 +47,9 @@ public class ClientEvents {
     @SubscribeEvent
     public void drawEvent(ScreenEvent.Render event) {
         if (!renderslotnumbers) return;
-        if (event.getScreen() instanceof AbstractContainerScreen) {
-            AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) event.getScreen();
+        if (event.getScreen() instanceof AbstractContainerScreen<?> screen) {
             if (screen.getSlotUnderMouse() == null) return;
-            screen.renderTooltip(event.getPoseStack(), CommandUtils.CreateTextComponent("Index: " + screen.getSlotUnderMouse().getSlotIndex()), event.getMouseX(), event.getMouseY());
+            event.getGuiGraphics().renderTooltip(Minecraft.getInstance().font,CommandUtils.CreateTextComponent("Index: " + screen.getSlotUnderMouse().getSlotIndex()), event.getMouseX(), event.getMouseY());
         }
 
     }
@@ -73,7 +73,9 @@ public class ClientEvents {
         if (OPENSCREEN.consumeClick()) {
             ResourceKey<Level> worldKey = Minecraft.getInstance().player.getCommandSenderWorld().dimension();
             if (Minecraft.getInstance().player.hasPermissions(CommandUtils.PERMISSION_LEVEL)) {
-                Minecraft.getInstance().setScreen(CUScreen.openCUScreen(worldKey, new BlockPos(Minecraft.getInstance().player.position())));
+                var pos = Minecraft.getInstance().player.position();
+                var posi = new Vec3i ((int)pos.x,(int)pos.y,(int)pos.z);
+                Minecraft.getInstance().setScreen(CUScreen.openCUScreen(worldKey, new BlockPos(posi)));
             } else {
                 if (!Minecraft.getInstance().hasSingleplayerServer()) {
                     Minecraft.getInstance().gui.setOverlayMessage(CommandUtils.CreateTextComponent("You need to be OP to use the Crash Utils GUI"), false);

@@ -2,10 +2,9 @@ package com.darkere.crashutils.Screens;
 
 import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.Screens.Types.DropDownType;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Transformation;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import org.apache.commons.lang3.StringUtils;
 
@@ -13,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class CUDropDown extends GuiComponent {
+public class CUDropDown {
     private List<String> allOptions;
     private List<String> options = new ArrayList<>();
     private String selected = "";
@@ -70,13 +69,14 @@ public class CUDropDown extends GuiComponent {
         this.fitOnScreen = fitOnScreen;
     }
 
-    public void render(PoseStack stack, int centerX, int centerY) {
+    public void render(GuiGraphics guiGraphics, int centerX, int centerY) {
+        guiGraphics.pose().pushPose();
         posX = centerX + defaultXRenderOffset + 1;
         posY = centerY + defaultYRenderOffset + 1;
         if (!isEnabled) return;
         List<FillMany.ColoredRectangle> list = new ArrayList<>();
         strings = new ArrayList<>();
-        widget.render(stack, posX, posY, 0);
+        widget.render(guiGraphics, posX, posY, 0);
 
         if (expanded) {
             boolean colored = false;
@@ -95,8 +95,8 @@ public class CUDropDown extends GuiComponent {
             }
         }
         FillMany.fillMany(Transformation.identity().getMatrix(), list);
-        FillMany.drawStrings(stack, Minecraft.getInstance().font, strings);
-
+        FillMany.drawStrings(guiGraphics, Minecraft.getInstance().font, strings);
+        guiGraphics.pose().popPose();
     }
 
     public void setSortByName(boolean sortByname) {
@@ -159,11 +159,11 @@ public class CUDropDown extends GuiComponent {
     public void setExpanded(boolean expanded) {
         if (!alwaysExpanded) {
             this.expanded = expanded;
-            widget.setFocus(expanded);
+            widget.setFocused(expanded);
             widget.setEditable(expanded);
         } else {
             this.expanded = true;
-            widget.setFocus(true);
+            widget.setFocused(true);
             widget.setEditable(true);
         }
 

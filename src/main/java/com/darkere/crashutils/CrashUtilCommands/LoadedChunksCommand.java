@@ -57,7 +57,7 @@ public class LoadedChunksCommand {
                 }
             }
         } catch (CommandSyntaxException e) {
-            context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Exception getting player"), true);
+            context.getSource().sendSuccess(()->CommandUtils.CreateTextComponent("Exception getting player"), true);
         }
 
     }

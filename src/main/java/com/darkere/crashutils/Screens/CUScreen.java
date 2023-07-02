@@ -10,6 +10,7 @@ import com.darkere.crashutils.Screens.Types.DropDownType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
@@ -37,7 +38,7 @@ public class CUScreen extends Screen {
     int activeTab = 0;
     int tabs = 2;
     private static final ResourceLocation WINDOW = new ResourceLocation(CrashUtils.MODID, "textures/gui/cuscreen.png");
-    private static final ResourceLocation TABS = new ResourceLocation(CrashUtils.MODID, "textures/gui/tabs.png");
+
     public List<CUDropDown> topDropDowns = new ArrayList<>();
     CUButton updateButton;
     CUButton backButton;
@@ -90,38 +91,36 @@ public class CUScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(PoseStack stack) {
+    public void renderBackground(GuiGraphics guiGraphics) {
         assert this.minecraft != null;
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, WINDOW);
         int i = centerX - (400 / 2);
         int j = centerY - (216 / 2);
-        blit(stack, i, j, 0, 0, 400, 216, 512, 512);
-        renderTabs(stack);
+        guiGraphics.blit(WINDOW, i, j, 0, 0, 400, 216, 512, 512);
+        renderTabs(guiGraphics);
 
     }
 
     @Override
-    public void render(PoseStack stack, int mx, int my, float partialTicks) {
-        renderBackground(stack);
+    public void render(GuiGraphics guiGraphics, int mx, int my, float partialTicks) {
+        renderBackground(guiGraphics);
 
         centerX = width / 2;
         centerY = height / 2;
-        fill(stack, centerX + 173, centerY - 105, centerX + 195, centerY - 93, contentGUI.shouldUpdate ? 0xff51f542 : 0xfff54242);
+        guiGraphics.fill( centerX + 173, centerY - 105, centerX + 195, centerY - 93, contentGUI.shouldUpdate ? 0xff51f542 : 0xfff54242);
         updateButton.setX(centerX + 174);
         updateButton.setY(centerY - 104);
         backButton.setX(centerX + 145);
         backButton.setY(centerY - 103);
 
-        updateButton.renderButton(stack, mx, my, partialTicks);
-        backButton.renderButton(stack, mx, my, partialTicks);
-        contentGUI.render(stack, centerX, centerY, mx, my, partialTicks);
-        topDropDowns.forEach(x -> x.render(stack, centerX, centerY));
-        renderToolTips(stack, mx, my);
-        super.render(stack, mx, my, partialTicks);
+        updateButton.render(guiGraphics, mx, my, partialTicks);
+        backButton.render(guiGraphics, mx, my, partialTicks);
+        contentGUI.render(guiGraphics, centerX, centerY, mx, my, partialTicks);
+        topDropDowns.forEach(x -> x.render(guiGraphics, centerX, centerY));
+        renderToolTips(guiGraphics, mx, my);
+        super.render(guiGraphics, mx, my, partialTicks);
     }
 
-    private void renderToolTips(PoseStack stack, int mx, int my) {
+    private void renderToolTips(GuiGraphics guiGraphics, int mx, int my) {
         List<Component> tooltips = new ArrayList<>();
         if (contentGUI.isMouseOver(mx, my, centerX, centerY)) {
             if (contentGUI instanceof MapGUI) {
@@ -156,16 +155,15 @@ public class CUScreen extends Screen {
         }
 
         if (!tooltips.isEmpty()) {
-            renderTooltip(stack, tooltips, Optional.empty(), mx, my, Minecraft.getInstance().font);
+            guiGraphics.renderTooltip( Minecraft.getInstance().font,tooltips, Optional.empty(), mx, my);
         }
     }
 
-    private void renderTabs(PoseStack stack) {
+    private void renderTabs(GuiGraphics guiGraphics) {
         int x = centerX - (400 / 2);
         int y = centerY - (216 / 2) - 22;
-        assert this.minecraft != null;
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, TABS);
+//        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+//        RenderSystem.setShaderTexture(0, TABS);
         float iconScale = 3.75f;
         List<CUTab> tabIcons = new ArrayList<>();
         tabIcons.add(CUTab.MAPTABICON);
@@ -174,15 +172,15 @@ public class CUScreen extends Screen {
         for (int i = 0; i < tabs; i++) {
             if (i == 0) {
                 if (i == activeTab) {
-                    CUTab.ATL.drawTab(stack, this, x, y, tabIcons.get(i), iconScale);
+                    CUTab.ATL.drawTab(guiGraphics, x, y, tabIcons.get(i), iconScale);
                 } else {
-                    CUTab.ITL.drawTab(stack, this, x, y, tabIcons.get(i), iconScale);
+                    CUTab.ITL.drawTab(guiGraphics, x, y, tabIcons.get(i), iconScale);
                 }
             } else {
                 if (i == activeTab) {
-                    CUTab.ATC.drawTab(stack, this, x + (i * 27), y, tabIcons.get(i), iconScale);
+                    CUTab.ATC.drawTab(guiGraphics, x + (i * 27), y, tabIcons.get(i), iconScale);
                 } else {
-                    CUTab.ITC.drawTab(stack, this, x + (i * 27), y, tabIcons.get(i), iconScale);
+                    CUTab.ITC.drawTab(guiGraphics, x + (i * 27), y, tabIcons.get(i), iconScale);
                 }
             }
         }

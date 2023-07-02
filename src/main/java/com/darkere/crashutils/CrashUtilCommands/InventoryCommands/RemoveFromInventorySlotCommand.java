@@ -91,9 +91,9 @@ public class RemoveFromInventorySlotCommand {
             success.set(true);
         });
         if(success.get()){
-            context.getSource().sendSuccess(text.get().append(CommandUtils.CreateTextComponent(" has been deleted from " + name + "'s InventorySlot")), true);
+            context.getSource().sendSuccess(()->text.get().append(CommandUtils.CreateTextComponent(" has been deleted from " + name + "'s InventorySlot")), true);
         } else {
-            context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Failed to delete item from slot" + slot +  ", slot is empty?"), true);
+            context.getSource().sendSuccess(()->CommandUtils.CreateTextComponent("Failed to delete item from slot" + slot +  ", slot is empty?"), true);
         }
 
         return 1;

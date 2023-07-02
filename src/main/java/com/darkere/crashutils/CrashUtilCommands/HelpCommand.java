@@ -44,7 +44,7 @@ public class HelpCommand {
             "/cu chunks: report all loaded chunks");
 
         for (String s : text) {
-            context.getSource().sendSuccess(CommandUtils.CreateTextComponent(s), true);
+            context.getSource().sendSuccess(()->CommandUtils.CreateTextComponent(s), true);
         }
         return 1;
     }

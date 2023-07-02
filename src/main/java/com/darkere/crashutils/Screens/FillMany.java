@@ -3,6 +3,7 @@ package com.darkere.crashutils.Screens;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import org.joml.Matrix4f;
 
@@ -39,15 +40,16 @@ public class FillMany {
         }
     }
 
-    public static void drawStrings(PoseStack stack, Font renderer, List<Text> texts) {
+    public static void drawStrings(GuiGraphics guiGraphics, Font renderer, List<Text> texts) {
         for (Text text : texts) {
-            renderer.draw(stack, text.text, text.x, text.y, text.color);
+            guiGraphics.drawString(renderer,text.text,text.x,text.y,text.color, false);
+//            renderer.drawInBatch(guiGraphics, text.text, text.x, text.y, text.color);
         }
     }
 
     public static void fillMany(Matrix4f matrix, List<ColoredRectangle> rects) {
         RenderSystem.enableBlend();
-        RenderSystem.disableTexture();
+//        RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
@@ -61,7 +63,7 @@ public class FillMany {
 
         BufferUploader.drawWithShader(bufferbuilder.end());
 
-        RenderSystem.enableTexture();
+//        RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }
 

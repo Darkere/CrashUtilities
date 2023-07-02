@@ -28,7 +28,7 @@ public class ItemClearCommand implements Command<CommandSourceStack> {
                 world.getServer().getPlayerList().broadcastSystemMessage(CommandUtils.CreateTextComponent(ClearItemTask.INSTANCE.lastCount + " Item Entities in World. Limit is set to " + CrashUtils.SERVER_CONFIG.getMaximum()),false);
             });
         } else {
-            context.getSource().sendSuccess(CommandUtils.CreateTextComponent("ItemClears are not enabled in the config"), false);
+            context.getSource().sendSuccess(()->CommandUtils.CreateTextComponent("ItemClears are not enabled in the config"), false);
         }
         return 1;
     }

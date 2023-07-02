@@ -20,7 +20,7 @@ public class WorldPos {
     }
 
     public static WorldPos getPosFromEntity(Entity entity) {
-        return new WorldPos(new BlockPos(entity.position()), entity.getCommandSenderWorld().dimension(), entity.getUUID());
+        return new WorldPos(entity.getOnPos(), entity.getCommandSenderWorld().dimension(), entity.getUUID());
     }
 
     public static WorldPos getPosFromTileEntity(TickingBlockEntity entity, Level level) {

@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.ProtoChunk;
 
@@ -65,8 +66,7 @@ public class LoadedChunkData {
                     });
                     ticketCounter = ticketsByLocation.get("PRIMED");
                 } else {
-                    if (chunk instanceof LevelChunk) {
-                        LevelChunk actualChunk = (LevelChunk) chunk;
+                    if (chunk instanceof LevelChunk actualChunk) {
                         chunksByLocationType.merge(actualChunk.getFullStatus().toString(), new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (list, newer) -> {
                             list.add(chunkHolder.getPos());
                             return list;
@@ -78,15 +78,15 @@ public class LoadedChunkData {
                         ticketCounter = ticketsByLocation.get(actualChunk.getFullStatus().toString());
                     } else {
                         if (chunk instanceof ProtoChunk) {
-                            chunksByLocationType.merge(chunk.getStatus().getName().equals("full") ? "FULL" : "PARTIALLYGENERATED", new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (list, newer) -> {
+                            chunksByLocationType.merge(chunk.getStatus() == ChunkStatus.FULL ? "FULL" : "PARTIALLYGENERATED", new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (list, newer) -> {
                                 list.add(chunkHolder.getPos());
                                 return list;
                             });
-                            ticketsByLocation.merge(chunk.getStatus().getName().equals("full") ? "FULL" : "PARTIALLYGENERATED", new LocationTickets(), (x, y) -> {
+                            ticketsByLocation.merge(chunk.getStatus() == ChunkStatus.FULL  ? "FULL" : "PARTIALLYGENERATED", new LocationTickets(), (x, y) -> {
                                 x.count++;
                                 return x;
                             });
-                            ticketCounter = ticketsByLocation.get(chunk.getStatus().getName().equals("full") ? "FULL" : "PARTIALLYGENERATED");
+                            ticketCounter = ticketsByLocation.get(chunk.getStatus() == ChunkStatus.FULL  ? "FULL" : "PARTIALLYGENERATED");
                         }
 
                     }
@@ -114,16 +114,16 @@ public class LoadedChunkData {
 
     public void reply(CommandSourceStack source) {
         ticketsByLocation.forEach((name,locationticket)->{
-            source.sendSuccess(CommandUtils.CreateTextComponent(name + ": " + locationticket.count),true);
+            source.sendSuccess(()->CommandUtils.CreateTextComponent(name + ": " + locationticket.count),true);
             locationticket.tickets.forEach((ticket,count)->{
-                source.sendSuccess(CommandUtils.CreateTextComponent("    " + ticket + ": " + count), true);
+                source.sendSuccess(()->CommandUtils.CreateTextComponent("    " + ticket + ": " + count), true);
             });
         });
-        source.sendSuccess(CommandUtils.CreateTextComponent("Non-Ticking chunks have little to no performance impact. See the GUI and minecraft wiki for what each type represents."), false);
+        source.sendSuccess(()->CommandUtils.CreateTextComponent("Non-Ticking chunks have little to no performance impact. See the GUI and minecraft wiki for what each type represents."), false);
     }
 
     public void replyWithLocation(CommandSourceStack source, String word) throws CommandSyntaxException {
-        source.sendSuccess(CommandUtils.CreateTextComponent("Chunks with LocationType " + word), true);
+        source.sendSuccess(()->CommandUtils.CreateTextComponent("Chunks with LocationType " + word), true);
         Set<ChunkPos> chunkPos = chunksByLocationType.get(word);
         if (chunkPos != null) {
             sendChunkPositions(source, chunkPos);
@@ -141,7 +141,7 @@ public class LoadedChunkData {
     public void replyWithTicket(CommandSourceStack source, String word) throws CommandSyntaxException {
         Set<ChunkPos> chunks = chunksByTicketName.get(word);
         if (chunks == null) return;
-        source.sendSuccess(CommandUtils.CreateTextComponent("Chunks with " + word + " Ticket"), true);
+        source.sendSuccess(()->CommandUtils.CreateTextComponent("Chunks with " + word + " Ticket"), true);
         sendChunkPositions(source, chunks);
     }
 

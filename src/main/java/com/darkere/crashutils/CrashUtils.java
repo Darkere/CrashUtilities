@@ -36,6 +36,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,8 +64,9 @@ public class CrashUtils {
     public CrashUtils() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::common);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::configReload);
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> MinecraftForge.EVENT_BUS.register(new ClientEvents()));
-        //MinecraftForge.EVENT_BUS.register(new DeleteBlocks());
+        if(FMLEnvironment.dist == Dist.CLIENT) {
+            MinecraftForge.EVENT_BUS.register(new ClientEvents());
+        }
         MinecraftForge.EVENT_BUS.register(this);
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, ()->new IExtensionPoint.DisplayTest(()->"ANY", (remote, isServer)-> true));
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SERVER_CONFIG.getSpec());

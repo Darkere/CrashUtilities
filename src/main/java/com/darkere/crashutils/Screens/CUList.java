@@ -1,15 +1,14 @@
 package com.darkere.crashutils.Screens;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class CUList extends GuiComponent {
+public class CUList{
     List<CUOption> allOptions;
     List<CUOption> currentOptions = new ArrayList<>();
     private final int posX;
@@ -39,7 +38,7 @@ public class CUList extends GuiComponent {
         this.action = action;
     }
 
-    public void render(PoseStack stack, int mx, int my, float partialTicks) {
+    public void render(GuiGraphics guiGraphics, int mx, int my, float partialTicks) {
         if (!isEnabled) return;
         int x = posX;
         int y = posY + 1;
@@ -50,18 +49,18 @@ public class CUList extends GuiComponent {
             text.add(new FillMany.Text(x, y, currentOption.toString(), -1));
             seps.add(new FillMany.ColoredRectangle(x, y + lineHeight - 3, x + width, y + lineHeight - 2, -1));
             List<Button> buttons = currentOption.getButtons();
-            for (int i = 0, buttonsSize = buttons.size(); i < buttonsSize; i++) {
+            for (int i = 0; i < buttons.size(); i++) {
                 Button button = buttons.get(i);
                 button.setX(x + width - currentOption.getButtonWidth(i));
-                button.setY(y - 1);
-                button.isHovered = button.isMouseOver(mx, my);
-                button.renderButton(stack, button.getX(), button.getY(), partialTicks);
+                button.setY(y - 2);
+                //button.isHovered = button.isMouseOver(mx, my);
+                button.render(guiGraphics, mx, my, partialTicks);
             }
             y += lineHeight;
             if (j == currentOffset + fitOnScreen) break;
         }
-        FillMany.drawStrings(stack, Minecraft.getInstance().font, text);
-        FillMany.fillMany(stack.last().pose(), seps);
+        FillMany.fillMany(guiGraphics.pose().last().pose(), seps);
+        FillMany.drawStrings(guiGraphics, Minecraft.getInstance().font, text);
 
     }
 

@@ -131,6 +131,6 @@ public class RemoveEntitiesCommand {
     }
 
     private static void respond(CommandContext<CommandSourceStack> context) {
-        context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Removed " + counter + " Entities"), true);
+        context.getSource().sendSuccess(()->CommandUtils.CreateTextComponent("Removed " + counter + " Entities"), true);
     }
 }

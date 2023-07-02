@@ -77,11 +77,11 @@ public class TeleportCommand implements Command<CommandSourceStack> {
         ServerPlayer otherPlayer = context.getSource().getServer().getPlayerList().getPlayerByName(otherPlayerName);
         if (pos == null && !otherPlayerName.isEmpty()) {
             if (otherPlayer != null) {
-                pos = new BlockPos(otherPlayer.position());
+                pos = otherPlayer.getOnPos();
             } else {
                 AtomicReference<BlockPos> offlinePlayerPos = new AtomicReference<>();
                 if (!WorldUtils.applyToPlayer(otherPlayerName, context.getSource().getServer(), fakePlayer -> {
-                    offlinePlayerPos.set(new BlockPos(fakePlayer.position()));
+                    offlinePlayerPos.set(fakePlayer.getOnPos());
                 })) {
                     context.getSource().sendFailure(CommandUtils.CreateTextComponent("Unable to load target players data"));
                     return 0;
@@ -106,7 +106,9 @@ public class TeleportCommand implements Command<CommandSourceStack> {
             }
         }
 
-        context.getSource().sendSuccess(CommandUtils.CreateTextComponent("Teleported " + playerName + " to " + pos.toString()),true);
+        String finalPlayerName = playerName;
+        BlockPos finalPos1 = pos;
+        context.getSource().sendSuccess(()->CommandUtils.CreateTextComponent("Teleported " + finalPlayerName + " to " + finalPos1.toString()),true);
 
         return Command.SINGLE_SUCCESS;
     }

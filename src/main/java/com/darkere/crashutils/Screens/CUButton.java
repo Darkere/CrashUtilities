@@ -2,9 +2,9 @@ package com.darkere.crashutils.Screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.gui.ScreenUtils;
 
 import java.util.List;
 
@@ -20,17 +20,16 @@ public class CUButton extends Button {
     }
     //Copied from Extended Button
     @Override
-    public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         Minecraft mc = Minecraft.getInstance();
-        int k = this.getYImage(this.isHoveredOrFocused());
-        ScreenUtils.blitWithBorder(poseStack, WIDGETS_LOCATION, this.getX(), this.getY(), 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2, this.getBlitOffset());
-        this.renderBg(poseStack, mc, mouseX, mouseY);
+        int k = !this.active ? 0 : (this.isHoveredOrFocused() ? 2 : 1);
+        guiGraphics.blitWithBorder(WIDGETS_LOCATION, this.getX(), this.getY(), 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2);
 
         Component buttonText = this.getMessage();
 
-        drawCenteredString(poseStack, mc.font, buttonText, this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, getFGColor());
-        if(isHovered)
-            GuiTools.drawTextToolTip(poseStack,tooltips,mouseX,mouseY,Minecraft.getInstance().screen);
+        guiGraphics.drawCenteredString(mc.font, buttonText, this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, getFGColor());
+        if(isHovered())
+            GuiTools.drawTextToolTip(guiGraphics,tooltips,mouseX,mouseY);
     }
 
     @Override
@@ -38,17 +37,17 @@ public class CUButton extends Button {
        return this.isActive() ? 16777215 : 10526880; // White : Light Grey
     }
 
-    @Override
-    protected int getYImage(boolean p_93668_) {
-        int i = 1;
-        if (!this.isActive()) {
-            i = 0;
-        } else if (p_93668_) {
-            i = 2;
-        }
-
-        return i;
-    }
+//    @Override
+//    protected int getYImage(boolean p_93668_) {
+//        int i = 1;
+//        if (!this.isActive()) {
+//            i = 0;
+//        } else if (p_93668_) {
+//            i = 2;
+//        }
+//
+//        return i;
+//    }
 
     @Override
     public boolean mouseClicked(double p_93641_, double p_93642_, int p_93643_) {
