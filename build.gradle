@@ -177,8 +177,8 @@ tasks.named('jar', Jar).configure {
 task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
     apiToken = System.getenv('curseforge_token')
     def mainFile = upload(371813, jar)
-    mainFile.releaseType = "beta"
-    mainFile.changelog = '- fixed crash on launch'
+    mainFile.releaseType = "release"
+    mainFile.changelog = '- fixed entity count in remove entities command \n- fixed blockentity commands'
 }
 
 // Example configuration to allow publishing using the maven-publish plugin

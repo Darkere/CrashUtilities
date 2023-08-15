@@ -72,11 +72,11 @@ public class RemoveEntitiesCommand {
         worlds.forEach(world -> world.getEntities().getAll().forEach(entity -> {
             if (type == null) {
                 if(!entity.hasCustomName())
-                    entity.remove(Entity.RemovalReason.DISCARDED);
+                   removeEntity(entity);
             } else {
                 var resourceLocation = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
                 if (resourceLocation != null && resourceLocation.equals(type)) {
-                    entity.remove(Entity.RemovalReason.DISCARDED);
+                    removeEntity(entity);
                 }
             }
         }));
@@ -98,7 +98,7 @@ public class RemoveEntitiesCommand {
                 }
             }
             if (remove)
-                entity.remove(Entity.RemovalReason.DISCARDED);
+                removeEntity(entity);
         }));
         respond(context);
         return 1;
@@ -110,9 +110,9 @@ public class RemoveEntitiesCommand {
         worlds.forEach(world -> world.getEntities().getAll().forEach(entity -> {
             if (entity instanceof ItemEntity) {
                 if (type == null)
-                    entity.remove(Entity.RemovalReason.DISCARDED);
+                   removeEntity(entity);
                 else if (entity.getName().getString().contains(type))
-                    entity.remove(Entity.RemovalReason.DISCARDED);
+                   removeEntity(entity);
             }
         }));
         respond(context);
@@ -124,12 +124,16 @@ public class RemoveEntitiesCommand {
         List<ServerLevel> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
         worlds.forEach(world -> world.getEntities().getAll().forEach(entity -> {
             if (entity.getType().getCategory() == MobCategory.MONSTER && !entity.hasCustomName())
-                entity.remove(Entity.RemovalReason.DISCARDED);
+                removeEntity(entity);
         }));
         respond(context);
         return 1;
     }
 
+    private static void removeEntity(Entity e){
+        e.remove(Entity.RemovalReason.DISCARDED);
+        counter++;
+    }
     private static void respond(CommandContext<CommandSourceStack> context) {
         context.getSource().sendSuccess(()->CommandUtils.CreateTextComponent("Removed " + counter + " Entities"), true);
     }
