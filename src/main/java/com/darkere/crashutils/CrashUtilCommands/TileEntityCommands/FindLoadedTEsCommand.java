@@ -27,8 +27,8 @@ public class FindLoadedTEsCommand implements Command<CommandSourceStack> {
                 .then(Commands.argument("res", ResourceLocationArgument.id())
                         .suggests(sugg)
                         .executes(cmd)
-                        .then(Commands.argument("dim", DimensionArgument.dimension()))
-                        .executes(cmd));
+                        .then(Commands.argument("dim", DimensionArgument.dimension())
+                                .executes(cmd)));
 
 
     }

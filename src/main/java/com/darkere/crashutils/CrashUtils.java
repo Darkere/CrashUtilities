@@ -1,5 +1,6 @@
 package com.darkere.crashutils;
 
+import ca.weblite.objc.Client;
 import com.darkere.crashutils.CrashUtilCommands.EntityCommands.EntitiesCommands;
 import com.darkere.crashutils.CrashUtilCommands.HelpCommand;
 import com.darkere.crashutils.CrashUtilCommands.InventoryCommands.InventoryCommands;
@@ -66,6 +67,7 @@ public class CrashUtils {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::configReload);
         if(FMLEnvironment.dist == Dist.CLIENT) {
             MinecraftForge.EVENT_BUS.register(new ClientEvents());
+            FMLJavaModLoadingContext.get().getModEventBus().addListener(ClientEvents::registerKeybindings);
         }
         MinecraftForge.EVENT_BUS.register(this);
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, ()->new IExtensionPoint.DisplayTest(()->"ANY", (remote, isServer)-> true));

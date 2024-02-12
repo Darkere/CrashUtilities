@@ -37,7 +37,6 @@ public class ClientEvents {
 
     private static boolean renderslotnumbers;
 
-    @SubscribeEvent
     public static void registerKeybindings(RegisterKeyMappingsEvent event) {
         event.register(OPENSCREEN);
         event.register(COPYCLASS);

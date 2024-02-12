@@ -25,11 +25,11 @@ public class FindEntitiesCommand implements Command<CommandSourceStack> {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("find")
-            .then(Commands.argument("res", ResourceLocationArgument.id())
-                .suggests(sugg)
-                .executes(cmd)
-                .then(Commands.argument("dim", DimensionArgument.dimension()))
-                .executes(cmd));
+                .then(Commands.argument("res", ResourceLocationArgument.id())
+                        .suggests(sugg)
+                        .executes(cmd)
+                        .then(Commands.argument("dim", DimensionArgument.dimension())
+                                .executes(cmd)));
 
 
     }

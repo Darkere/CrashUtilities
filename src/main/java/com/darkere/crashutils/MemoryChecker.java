@@ -74,6 +74,8 @@ public class MemoryChecker extends TimerTask {
         }
         lastUsed = used;
         double usedPerc = (float) count.getFree() / (float) count.getMaximum();
+        if(!heapDumpEnabled)
+            return;
         if (usedPerc > 0.95F) {
             if (!ranHeapDump && CrashUtils.sparkLoaded) {
                 CrashUtils.LOGGER.info("Running Spark Heapdump! LagSpike incoming!");
