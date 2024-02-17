@@ -7,12 +7,9 @@ import com.darkere.crashutils.Network.DataRequestType;
 import com.darkere.crashutils.Network.Network;
 import com.darkere.crashutils.Network.TeleportMessage;
 import com.darkere.crashutils.Screens.Types.DropDownType;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -27,6 +24,7 @@ import java.util.Optional;
 
 
 public class CUScreen extends Screen {
+
     public static CUScreen stored;
     CUContentPane contentGUI;
     long doubleClickTimer;
@@ -90,9 +88,10 @@ public class CUScreen extends Screen {
         addWidget(backButton);
     }
 
+
     @Override
-    public void renderBackground(GuiGraphics guiGraphics) {
-        assert this.minecraft != null;
+    public void renderBackground(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+        super.renderBackground(guiGraphics,pMouseX,pMouseY,pPartialTick);
         int i = centerX - (400 / 2);
         int j = centerY - (216 / 2);
         guiGraphics.blit(WINDOW, i, j, 0, 0, 400, 216, 512, 512);
@@ -102,8 +101,7 @@ public class CUScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mx, int my, float partialTicks) {
-        renderBackground(guiGraphics);
-
+        super.render(guiGraphics, mx, my, partialTicks);
         centerX = width / 2;
         centerY = height / 2;
         guiGraphics.fill( centerX + 173, centerY - 105, centerX + 195, centerY - 93, contentGUI.shouldUpdate ? 0xff51f542 : 0xfff54242);
@@ -117,7 +115,6 @@ public class CUScreen extends Screen {
         contentGUI.render(guiGraphics, centerX, centerY, mx, my, partialTicks);
         topDropDowns.forEach(x -> x.render(guiGraphics, centerX, centerY));
         renderToolTips(guiGraphics, mx, my);
-        super.render(guiGraphics, mx, my, partialTicks);
     }
 
     private void renderToolTips(GuiGraphics guiGraphics, int mx, int my) {
@@ -285,32 +282,31 @@ public class CUScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
-        if (updateButton.isMouseOver(mx, my)) {
-            if (delta > 0 && contentGUI.updateSpeed < 5) {
+    public boolean mouseScrolled(double pMouseX, double pMouseY, double pScrollX, double pScrollY) {
+        if (updateButton.isMouseOver(pMouseX, pMouseY)) {
+            if (pScrollY > 0 && contentGUI.updateSpeed < 5) {
                 contentGUI.updateSpeed += 1;
-            } else if (delta > 0 && contentGUI.updateSpeed < 60) {
+            } else if (pScrollY > 0 && contentGUI.updateSpeed < 60) {
                 contentGUI.updateSpeed += 5;
-            } else if (delta < 0 && contentGUI.updateSpeed > 5) {
+            } else if (pScrollY < 0 && contentGUI.updateSpeed > 5) {
                 contentGUI.updateSpeed -= 5;
-            } else if (delta < 0 && contentGUI.updateSpeed <= 5 && contentGUI.updateSpeed > 1) {
+            } else if (pScrollY < 0 && contentGUI.updateSpeed <= 5 && contentGUI.updateSpeed > 1) {
                 contentGUI.updateSpeed -= 1;
             }
             updateButton.setMessage(CommandUtils.CreateTextComponent(String.valueOf(contentGUI.updateSpeed)));
             contentGUI.setUpdateSpeed();
             return true;
         }
-        if (contentGUI.isMouseOver(mx, my, centerX, centerY)) {
+        if (contentGUI.isMouseOver(pMouseX, pMouseY, centerX, centerY)) {
             for (CUDropDown dropDown : topDropDowns) {
-                if (dropDown.scroll(mx, my, delta)) {
+                if (dropDown.scroll(pMouseX, pMouseY, pScrollY)) {
                     return true;
                 }
             }
-            contentGUI.scroll(mx, my, delta, centerX, centerY);
+            contentGUI.scroll(pMouseX, pMouseY, pScrollY, centerX, centerY);
             return true;
         }
-        return super.mouseScrolled(mx, my, delta);
-
+        return super.mouseScrolled(pMouseX, pMouseY, pScrollX, pScrollY);
     }
 
     @Override

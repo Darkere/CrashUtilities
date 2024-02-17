@@ -3,12 +3,12 @@ package com.darkere.crashutils.DataStructures;
 import com.darkere.crashutils.CommandUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -18,7 +18,7 @@ import java.util.Map;
 public class EntityData extends LocationData {
 
     public EntityData() {
-        for (Map.Entry<ResourceKey<EntityType<?>>, EntityType<?>> entry : ForgeRegistries.ENTITY_TYPES.getEntries()) {
+        for (Map.Entry<ResourceKey<EntityType<?>>, EntityType<?>> entry : BuiltInRegistries.ENTITY_TYPE.entrySet()) {
             map.put(entry.getKey().location(), new ArrayList<>());
         }
     }
@@ -31,7 +31,8 @@ public class EntityData extends LocationData {
         List<Entity> entities = new ArrayList<>();
         worlds.forEach(x -> x.getEntities().getAll().forEach(entities::add));
         for (Entity entity : entities) {
-            map.get(ForgeRegistries.ENTITY_TYPES.getKey(entity.getType())).add(WorldPos.getPosFromEntity(entity));
+            var key = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+            map.get(key).add(WorldPos.getPosFromEntity(entity));
         }
         total = entities.size();
     }

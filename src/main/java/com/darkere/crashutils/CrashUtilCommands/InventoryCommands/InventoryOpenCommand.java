@@ -1,10 +1,6 @@
 package com.darkere.crashutils.CrashUtilCommands.InventoryCommands;
 
 import com.darkere.crashutils.CommandUtils;
-import com.darkere.crashutils.CrashUtils;
-import com.darkere.crashutils.Network.Network;
-import com.darkere.crashutils.Network.OpenPlayerInvMessage;
-import com.darkere.crashutils.Screens.PlayerInvContainer;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -22,14 +18,9 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.network.ConnectionData;
-import net.minecraftforge.network.NetworkHooks;
-import top.theillusivec4.curios.api.CuriosApi;
+import net.neoforged.neoforge.common.util.FakePlayer;
 
 import javax.annotation.Nullable;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 
 public class InventoryOpenCommand {
@@ -64,28 +55,27 @@ public class InventoryOpenCommand {
             otherPlayer.load(nbt);
         }
 
-        ConnectionData data = NetworkHooks.getConnectionData(sourcePlayer.connection.connection);
-        if (data != null && data.getModList().contains(CrashUtils.MODID)) {
-            sourcePlayer.doCloseContainer();
-            sourcePlayer.nextContainerCounter();
-            int id = sourcePlayer.containerCounter;
-
-            Map<String, Integer> curios = new LinkedHashMap<>();
-            if (CrashUtils.curiosLoaded) {
-                CuriosApi.getCuriosHelper().getCuriosHandler(otherPlayer).orElse(null).getCurios().forEach((s, handler) -> {
-                    curios.put(s, handler.getSlots());
-                });
-            }
-
-            Network.sendToPlayer(sourcePlayer, new OpenPlayerInvMessage(id, otherPlayer.getName().getString(), curios));
-            sourcePlayer.containerMenu = new PlayerInvContainer(sourcePlayer, otherPlayer, id, null, null, 0);
-            sourcePlayer.initMenu(sourcePlayer.containerMenu);
-
-            return Command.SINGLE_SUCCESS;
-        }
+//        if (data != null && data.getModList().contains(CrashUtils.MODID)) {
+//            sourcePlayer.doCloseContainer();
+//            sourcePlayer.nextContainerCounter();
+//            int id = sourcePlayer.containerCounter;
+//
+//            Map<String, Integer> curios = new LinkedHashMap<>();
+//            if (CrashUtils.curiosLoaded) {
+//                CuriosApi.getCuriosHelper().getCuriosHandler(otherPlayer).orElse(null).getCurios().forEach((s, handler) -> {
+//                    curios.put(s, handler.getSlots());
+//                });
+//            }
+//
+//            Network.sendToPlayer(sourcePlayer, new OpenPlayerInvMessage(id, otherPlayer.getName().getString(), curios));
+//            sourcePlayer.containerMenu = new PlayerInvContainer(sourcePlayer, otherPlayer, id, null, null, 0);
+//            sourcePlayer.initMenu(sourcePlayer.containerMenu);
+//
+//            return Command.SINGLE_SUCCESS;
+//        }
 
         Player finalOtherPlayer = otherPlayer;
-        NetworkHooks.openScreen(sourcePlayer, new MenuProvider() {
+        sourcePlayer.openMenu(new MenuProvider() {
             @Override
             public Component getDisplayName() {
                 return finalOtherPlayer.getDisplayName();

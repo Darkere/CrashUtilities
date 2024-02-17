@@ -7,9 +7,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.SlotItemHandler;
-import net.minecraftforge.items.wrapper.InvWrapper;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.SlotItemHandler;
+import net.neoforged.neoforge.items.wrapper.InvWrapper;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
@@ -103,11 +103,11 @@ public class PlayerInvContainer extends AbstractContainerMenu {
 
     private void layoutCurioSlots(Player player, int x, int y, Collection<Integer> curioSlots, IItemHandler curiosInv) {
         if (player != null) {
-            Map<String, ICurioStacksHandler> curios = CuriosApi.getCuriosHelper().getCuriosHandler(player).orElse(null).getCurios();
-            if (curios == null) return;
+            var cinventory = CuriosApi.getCuriosInventory(player).orElse(null);
+            if (cinventory == null) return;
             int temp = x;
             int g = 0;
-            for (Map.Entry<String, ICurioStacksHandler> entry : curios.entrySet()) {
+            for (Map.Entry<String, ICurioStacksHandler> entry : cinventory.getCurios().entrySet()) {
                 if (g == 4) {
                     y -= 120;
                 }

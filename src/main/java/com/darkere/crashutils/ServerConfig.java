@@ -1,7 +1,7 @@
 package com.darkere.crashutils;
 
 import com.electronwill.nightconfig.core.utils.StringUtils;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,21 +9,21 @@ import java.util.List;
 public class ServerConfig {
 
 
-    private ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
-    private ForgeConfigSpec.BooleanValue enabled;
-    private ForgeConfigSpec.IntValue timer;
-    private ForgeConfigSpec.IntValue maximum;
-    private ForgeConfigSpec.ConfigValue<String> warnings;
-    private ForgeConfigSpec.BooleanValue title;
-    private ForgeConfigSpec.ConfigValue<String> titletext;
-    private ForgeConfigSpec.ConfigValue<String> warningtext;
-    private ForgeConfigSpec.IntValue memoryLogTimer;
-    private ForgeConfigSpec.IntValue memoryWarnDelta;
-    private ForgeConfigSpec.IntValue memoryTimer;
-    private ForgeConfigSpec.BooleanValue memoryChecker;
-    private ForgeConfigSpec.BooleanValue heapDump;
-    private ForgeConfigSpec.IntValue chunkExpire;
-    private ForgeConfigSpec.BooleanValue shouldChunksExpire;
+    private ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+    private ModConfigSpec.BooleanValue enabled;
+    private ModConfigSpec.IntValue timer;
+    private ModConfigSpec.IntValue maximum;
+    private ModConfigSpec.ConfigValue<String> warnings;
+    private ModConfigSpec.BooleanValue title;
+    private ModConfigSpec.ConfigValue<String> titletext;
+    private ModConfigSpec.ConfigValue<String> warningtext;
+    private ModConfigSpec.IntValue memoryLogTimer;
+    private ModConfigSpec.IntValue memoryWarnDelta;
+    private ModConfigSpec.IntValue memoryTimer;
+    private ModConfigSpec.BooleanValue memoryChecker;
+    private ModConfigSpec.BooleanValue heapDump;
+    private ModConfigSpec.IntValue chunkExpire;
+    private ModConfigSpec.BooleanValue shouldChunksExpire;
 
     ServerConfig() {
 
@@ -74,7 +74,7 @@ public class ServerConfig {
         return title.get();
     }
 
-    public ForgeConfigSpec getSpec() {
+    public ModConfigSpec getSpec() {
 
         return builder.build();
     }

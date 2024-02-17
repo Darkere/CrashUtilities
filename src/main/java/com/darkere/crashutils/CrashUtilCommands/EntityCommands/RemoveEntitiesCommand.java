@@ -10,18 +10,18 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collections;
 import java.util.List;
 
 public class RemoveEntitiesCommand {
-    private static final SuggestionProvider<CommandSourceStack> sugg = (ctx, builder) -> SharedSuggestionProvider.suggestResource(ForgeRegistries.ENTITY_TYPES.getKeys().stream(), builder);
+    private static final SuggestionProvider<CommandSourceStack> sugg = (ctx, builder) -> SharedSuggestionProvider.suggestResource(BuiltInRegistries.ENTITY_TYPE.keySet(), builder);
     private static final SuggestionProvider<CommandSourceStack> boolsugg = (ctx, builder) -> SharedSuggestionProvider.suggest(Collections.singletonList("force"), builder);
     private static int counter = 0;
 
@@ -74,7 +74,7 @@ public class RemoveEntitiesCommand {
                 if(!entity.hasCustomName())
                    removeEntity(entity);
             } else {
-                var resourceLocation = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
+                var resourceLocation = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
                 if (resourceLocation != null && resourceLocation.equals(type)) {
                     removeEntity(entity);
                 }
@@ -92,7 +92,7 @@ public class RemoveEntitiesCommand {
             if (regex == null) {
                 remove = !entity.hasCustomName();
             } else {
-                var resourceLocation = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
+                var resourceLocation = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
                 if (resourceLocation != null) {
                     remove = resourceLocation.toString().matches(regex);
                 }

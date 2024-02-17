@@ -98,7 +98,7 @@ public class DataHolder {
 //---------------------------------------------------------------------------------
 
     private static Object getLatestData(LinkedList<?> list) {
-        if (list.size() > 0) {
+        if (!list.isEmpty()) {
             return list.peek();
         }
         return null;

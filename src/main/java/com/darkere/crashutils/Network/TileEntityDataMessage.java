@@ -1,32 +1,31 @@
 package com.darkere.crashutils.Network;
 
+import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.DataStructures.DataHolder;
 import com.darkere.crashutils.DataStructures.TileEntityData;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 
-import java.util.function.Supplier;
-
-public class TileEntityDataMessage {
-    TileEntityData list;
-
-    public TileEntityDataMessage(TileEntityData list) {
-        this.list = list;
-    }
-
-
-    public static void encode(TileEntityDataMessage data, FriendlyByteBuf buf) {
-        NetworkTools.writeRLWPMap(data.list.getMap(), buf);
-    }
-
+public record TileEntityDataMessage( TileEntityData list) implements CustomPacketPayload {
+    public static ResourceLocation ID = new ResourceLocation(CrashUtils.MODID,"tileentitydatamessage");
 
     public static TileEntityDataMessage decode(FriendlyByteBuf buf) {
         return new TileEntityDataMessage(new TileEntityData(NetworkTools.readRLWPMap(buf)));
     }
 
-    public static void handle(TileEntityDataMessage data, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(TileEntityDataMessage data, PlayPayloadContext ctx) {
+       ctx.workHandler().submitAsync(() -> DataHolder.addTileEntityData(data.list));
+    }
 
-        ctx.get().enqueueWork(() -> DataHolder.addTileEntityData(data.list));
-        ctx.get().setPacketHandled(true);
+    @Override
+    public void write(FriendlyByteBuf buf) {
+        NetworkTools.writeRLWPMap(list.getMap(), buf);
+    }
+
+    @Override
+    public ResourceLocation id() {
+        return ID;
     }
 }

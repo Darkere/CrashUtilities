@@ -8,23 +8,26 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ChunkHolder;
+import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.ITeleporter;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.common.util.ITeleporter;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -118,11 +121,12 @@ public class WorldUtils {
             Network.sendToServer(new RemoveEntitiesMessage(world.dimension(), rl, null, false, force));
             return;
         }
-        ((ServerLevel) world).getEntities().getAll().forEach(entity ->{
-            var rl2 = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
-            if(!Objects.equals(rl2, rl))
+        ((ServerLevel) world).getEntities().getAll().forEach(entity -> {
+
+            var rl2 = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+            if (!Objects.equals(rl2, rl))
                 return;
-            runnables.add(()-> entity.remove(Entity.RemovalReason.DISCARDED));
+            runnables.add(() -> entity.remove(Entity.RemovalReason.DISCARDED));
         });
 
         runnables.forEach(Runnable::run);
@@ -136,7 +140,7 @@ public class WorldUtils {
         }
         Vec3 start = new Vec3(pos.getMinBlockX(), 0, pos.getMinBlockZ());
         Vec3 end = new Vec3(pos.getMaxBlockX(), 255, pos.getMaxBlockZ());
-        world.getEntities((Entity) null, new AABB(start, end), entity -> Objects.equals(ForgeRegistries.ENTITY_TYPES.getKey(entity.getType()), rl)).forEach(e -> e.remove(Entity.RemovalReason.DISCARDED));
+        world.getEntities((Entity) null, new AABB(start, end), entity -> Objects.equals(BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()), rl)).forEach(e -> e.remove(Entity.RemovalReason.DISCARDED));
     }
 
     public static void removeTileEntity(Level world, UUID id, boolean force) {
@@ -145,7 +149,7 @@ public class WorldUtils {
             Network.sendToServer(new RemoveEntityMessage(world.dimension(), id, true, force));
             return;
         }
-        CrashUtils.runNextTick((wld)-> {
+        CrashUtils.runNextTick((wld) -> {
             if (force) {
                 world.removeBlockEntity(TileEntityData.TEID.get(id).pos);
                 world.removeBlock(TileEntityData.TEID.get(id).pos, false);
@@ -155,42 +159,49 @@ public class WorldUtils {
         });
     }
 
-    public static void removeTileEntityType(Level world, ResourceLocation rl, boolean force) {
-        if (NetworkTools.returnOnNull(world, rl)) return;
-        if (world.isClientSide) {
-            Network.sendToServer(new RemoveEntitiesMessage(world.dimension(), rl, null, true, force));
+    public static void removeTileEntityType(Level level, ResourceLocation rl, boolean force) {
+        if (NetworkTools.returnOnNull(level, rl)) return;
+        if (level.isClientSide) {
+            Network.sendToServer(new RemoveEntitiesMessage(level.dimension(), rl, null, true, force));
             return;
         }
-        for (TickingBlockEntity te : world.blockEntityTickers) {
-            if (Objects.equals(te.getType(), rl.toString())) {
-                CrashUtils.runNextTick((wld)->{
-                    if (force) {
-                        world.removeBlockEntity(te.getPos());
-                        world.removeBlock(te.getPos(), false);
-                    } else {
-                        world.removeBlockEntity(te.getPos());
+
+        for (ChunkHolder chunk : ((ServerLevel) level).getChunkSource().chunkMap.getChunks()) {
+            if (chunk.getFullStatus().isOrAfter(FullChunkStatus.BLOCK_TICKING)) {
+                chunk.getFullChunk().getBlockEntities().forEach((pos, e) -> {
+                    {
+                        if (BlockEntityType.getKey(e.getType()) == rl) {
+                            CrashUtils.runNextTick((wld) -> {
+                                if (force) {
+                                    level.removeBlockEntity(e.getBlockPos());
+                                    level.removeBlock(e.getBlockPos(), false);
+                                } else {
+                                    level.removeBlockEntity(e.getBlockPos());
+                                }
+                            });
+                        }
                     }
                 });
             }
         }
     }
 
-    public static void removeTileEntitiesInChunk(Level world, ChunkPos pos, ResourceLocation rl, boolean force) {
-        if (NetworkTools.returnOnNull(world, pos, rl)) return;
-        if (world.isClientSide) {
-            Network.sendToServer(new RemoveEntitiesMessage(world.dimension(), rl, pos, true, force));
+    public static void removeTileEntitiesInChunk(Level level, ChunkPos pos, ResourceLocation rl, boolean force) {
+        if (NetworkTools.returnOnNull(level, pos, rl)) return;
+        if (level.isClientSide) {
+            Network.sendToServer(new RemoveEntitiesMessage(level.dimension(), rl, pos, true, force));
             return;
         }
         Vec3 start = new Vec3(pos.getMinBlockX(), 0, pos.getMinBlockZ());
         Vec3 end = new Vec3(pos.getMaxBlockX(), 255, pos.getMaxBlockZ());
 
-        world.blockEntityTickers.stream().filter(te -> Objects.equals(te.getType(), rl.toString()) && new AABB(start, end).contains(Vec3.atCenterOf(te.getPos()))).forEach(te -> {
+        level.blockEntityTickers.stream().filter(te -> Objects.equals(te.getType(), rl.toString()) && new AABB(start, end).contains(Vec3.atCenterOf(te.getPos()))).forEach(te -> {
             CrashUtils.runNextTick((wld) -> {
                 if (force) {
-                    world.removeBlockEntity(te.getPos());
-                    world.removeBlock(te.getPos(), false);
+                    level.removeBlockEntity(te.getPos());
+                    level.removeBlock(te.getPos(), false);
                 } else {
-                    world.removeBlockEntity(te.getPos());
+                    level.removeBlockEntity(te.getPos());
                 }
             });
         });

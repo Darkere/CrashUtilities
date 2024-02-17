@@ -48,9 +48,9 @@ public class FillMany {
     }
 
     public static void fillMany(Matrix4f matrix, List<ColoredRectangle> rects) {
-        RenderSystem.enableBlend();
+//        RenderSystem.enableBlend();
 //        RenderSystem.disableTexture();
-        RenderSystem.defaultBlendFunc();
+//        RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
@@ -64,7 +64,7 @@ public class FillMany {
         BufferUploader.drawWithShader(bufferbuilder.end());
 
 //        RenderSystem.enableTexture();
-        RenderSystem.disableBlend();
+//        RenderSystem.disableBlend();
     }
 
     private static void addRectangle(BufferBuilder bufferbuilder, Matrix4f matrix, int x0, int y0, int x1, int y1, int color) {

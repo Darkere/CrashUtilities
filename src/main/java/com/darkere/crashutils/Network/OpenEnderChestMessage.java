@@ -1,10 +1,13 @@
 package com.darkere.crashutils.Network;
 
 import com.darkere.crashutils.CommandUtils;
+import com.darkere.crashutils.CrashUtils;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -13,33 +16,23 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkHooks;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.function.Supplier;
 
-public class OpenEnderChestMessage {
-    String playerName;
-    public OpenEnderChestMessage(String playerName) {
-        this.playerName = playerName;
-    }
+public record OpenEnderChestMessage(String playerName) implements CustomPacketPayload {
 
-
-    public static void encode(OpenEnderChestMessage data, FriendlyByteBuf buf) {
-        buf.writeUtf(data.playerName);
-    }
-
+    public static ResourceLocation ID = new ResourceLocation(CrashUtils.MODID,"openenderchestmessage");
 
     public static OpenEnderChestMessage decode(FriendlyByteBuf buf) {
         return new OpenEnderChestMessage(buf.readUtf(32000));
     }
 
-    public static boolean handle(OpenEnderChestMessage data, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            ServerPlayer player = ctx.get().getSender();
+    public static boolean handle(OpenEnderChestMessage data, PlayPayloadContext ctx) {
+       ctx.workHandler().submitAsync(() -> {
+            ServerPlayer player = (ServerPlayer) ctx.player().get();
             if(player == null|| player.getServer() == null || !player.hasPermissions(CommandUtils.PERMISSION_LEVEL)){
                 return;
             }
@@ -61,7 +54,7 @@ public class OpenEnderChestMessage {
 
             Player finalOtherPlayer = otherPlayer;
 
-            NetworkHooks.openScreen(player, new MenuProvider() {
+            player.openMenu( new MenuProvider() {
                 @Override
                 public Component getDisplayName() {
                     return finalOtherPlayer.getDisplayName();
@@ -87,5 +80,15 @@ public class OpenEnderChestMessage {
             });
         });
         return true;
+    }
+
+    @Override
+    public void write(FriendlyByteBuf buf) {
+        buf.writeUtf(playerName);
+    }
+
+    @Override
+    public ResourceLocation id() {
+        return ID;
     }
 }

@@ -1,36 +1,38 @@
 package com.darkere.crashutils.Network;
 
+import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.DataStructures.DataHolder;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 
-public class LoadedChunkDataStateMessage {
-    Map<String, Set<ChunkPos>> loadedChunkStateData;
-
-    LoadedChunkDataStateMessage(Map<String, Set<ChunkPos>> states) {
-        loadedChunkStateData = states;
-    }
-
-    public static void encode(LoadedChunkDataStateMessage data, FriendlyByteBuf buf) {
-        if (NetworkTools.returnOnNull(data.loadedChunkStateData)) return;
-        NetworkTools.writeSChPMap(buf, data.loadedChunkStateData);
-    }
+public record LoadedChunkDataStateMessage(Map<String, Set<ChunkPos>> loadedChunkStateData) implements CustomPacketPayload {
+    public static ResourceLocation ID = new ResourceLocation(CrashUtils.MODID, "loadedchunkdatastatemessage");
 
     public static LoadedChunkDataStateMessage decode(FriendlyByteBuf buf) {
         return new LoadedChunkDataStateMessage(NetworkTools.readSChPMap(buf));
     }
 
-    public static void handle(LoadedChunkDataStateMessage data, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+    public static void handle(LoadedChunkDataStateMessage data, PlayPayloadContext ctx) {
+       ctx.workHandler().submitAsync(() -> {
             DataHolder.addStateData(data.loadedChunkStateData);
         });
-        ctx.get().setPacketHandled(true);
     }
 
 
+    @Override
+    public void write(FriendlyByteBuf buf) {
+        if (NetworkTools.returnOnNull(loadedChunkStateData)) return;
+        NetworkTools.writeSChPMap(buf, loadedChunkStateData);
+    }
+
+    @Override
+    public ResourceLocation id() {
+        return ID;
+    }
 }

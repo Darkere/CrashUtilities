@@ -6,42 +6,33 @@ import com.darkere.crashutils.Screens.PlayerInvContainer;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 import top.theillusivec4.curios.api.CuriosApi;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 
-public class PlayerInventoryRequestMessage {
-    String playerName;
-
-    public PlayerInventoryRequestMessage(String s) {
-        playerName = s;
-    }
-
-    public static void encode(PlayerInventoryRequestMessage data, FriendlyByteBuf buf) {
-        buf.writeInt(data.playerName.length());
-        buf.writeUtf(data.playerName);
-
-    }
+public record PlayerInventoryRequestMessage(String playerName) implements CustomPacketPayload {
+    public static ResourceLocation ID = new ResourceLocation(CrashUtils.MODID, "playerinventoryrequestmessage");
 
     public static PlayerInventoryRequestMessage decode(FriendlyByteBuf buf) {
         return new PlayerInventoryRequestMessage(buf.readUtf(buf.readInt()));
     }
 
-    public static boolean handle(PlayerInventoryRequestMessage data, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            ServerPlayer player = ctx.get().getSender();
+    public static boolean handle(PlayerInventoryRequestMessage data, PlayPayloadContext ctx) {
+       ctx.workHandler().submitAsync(() -> {
+            ServerPlayer player = (ServerPlayer)ctx.player().get();
             MinecraftServer server = player.getServer();
             if(!player.hasPermissions(CommandUtils.PERMISSION_LEVEL)) return;
-            Player otherPlayer = ctx.get().getSender().getServer().getPlayerList().getPlayerByName(data.playerName);
+            Player otherPlayer =player.getServer().getPlayerList().getPlayerByName(data.playerName);
             if (otherPlayer == null) {
                 Optional<GameProfile> profile = server.getProfileCache().get(data.playerName);
                 if (profile.isEmpty()) {
@@ -59,7 +50,7 @@ public class PlayerInventoryRequestMessage {
 
             Map<String, Integer> curios = new LinkedHashMap<>();
             if (CrashUtils.curiosLoaded) {
-                CuriosApi.getCuriosHelper().getCuriosHandler(otherPlayer).orElse(null).getCurios().forEach((s, handler) -> {
+                CuriosApi.getCuriosInventory(otherPlayer).get().getCurios().forEach((s, handler) -> {
                     curios.put(s, handler.getSlots());
                 });
             }
@@ -68,12 +59,23 @@ public class PlayerInventoryRequestMessage {
             player.nextContainerCounter();
             int id = player.containerCounter;
 
-            Network.sendToPlayer(player, new OpenPlayerInvMessage(id, data.playerName, curios));
+            Network.sendToPlayer(player, new OpenPlayerInvMessage(curios, data.playerName, id));
             player.containerMenu = new PlayerInvContainer(player, otherPlayer, id, null, null, 0);
             player.initMenu(player.containerMenu);
 
 
         });
         return true;
+    }
+
+    @Override
+    public void write(FriendlyByteBuf buf) {
+        buf.writeInt(playerName.length());
+        buf.writeUtf(playerName);
+    }
+
+    @Override
+    public ResourceLocation id() {
+        return ID;
     }
 }

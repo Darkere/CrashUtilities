@@ -9,9 +9,10 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraftforge.common.util.LazyOptional;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
+
+import java.util.Optional;
 
 public class InventoryLookCommand {
 
@@ -44,7 +45,7 @@ public class InventoryLookCommand {
             }
             if (CrashUtils.curiosLoaded) {
                 context.getSource().sendSuccess(()->CommandUtils.coloredComponent("Curios", ChatFormatting.DARK_AQUA), true);
-                LazyOptional<ICuriosItemHandler> itemHandler = CuriosApi.getCuriosHelper().getCuriosHandler(playerEntity);
+                Optional<ICuriosItemHandler> itemHandler = CuriosApi.getCuriosInventory(playerEntity);
                 ICuriosItemHandler handler = itemHandler.orElse(null);
                 handler.getCurios().forEach((k, v) -> {
                     context.getSource().sendSuccess(()->CommandUtils.coloredComponent(k, ChatFormatting.DARK_AQUA), true);

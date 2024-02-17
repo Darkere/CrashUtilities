@@ -59,7 +59,7 @@ public class CUDropDown {
         }
         widget = new EditBox(Minecraft.getInstance().font, this.posX, this.posY, this.width, height, CommandUtils.CreateTextComponent(selected));
         widget.setValue(selected);
-        widget.moveCursorToStart();
+        widget.moveCursorToStart(false);
         maxOffset = options.size() - fitOnScreen;
         if (maxOffset < 0) maxOffset = 0;
 

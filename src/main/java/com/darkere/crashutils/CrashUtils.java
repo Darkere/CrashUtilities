@@ -1,6 +1,5 @@
 package com.darkere.crashutils;
 
-import ca.weblite.objc.Client;
 import com.darkere.crashutils.CrashUtilCommands.EntityCommands.EntitiesCommands;
 import com.darkere.crashutils.CrashUtilCommands.HelpCommand;
 import com.darkere.crashutils.CrashUtilCommands.InventoryCommands.InventoryCommands;
@@ -22,23 +21,21 @@ import net.minecraft.commands.Commands;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.IExtensionPoint;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.IExtensionPoint;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.config.ModConfigEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.TickEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -62,22 +59,18 @@ public class CrashUtils {
     public static boolean skipNext = false;
     public static boolean isServer = false;
 
-    public CrashUtils() {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::common);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::configReload);
+    public CrashUtils(IEventBus ModEventBus) {
+        ModEventBus.addListener(this::configReload);
+        ModEventBus.addListener(Network::register);
         if(FMLEnvironment.dist == Dist.CLIENT) {
-            MinecraftForge.EVENT_BUS.register(new ClientEvents());
-            FMLJavaModLoadingContext.get().getModEventBus().addListener(ClientEvents::registerKeybindings);
+            NeoForge.EVENT_BUS.register(new ClientEvents());
+            ModEventBus.addListener(ClientEvents::registerKeybindings);
         }
-        MinecraftForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.register(this);
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, ()->new IExtensionPoint.DisplayTest(()->"ANY", (remote, isServer)-> true));
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SERVER_CONFIG.getSpec());
         curiosLoaded = ModList.get().isLoaded("curios");
         sparkLoaded = ModList.get().isLoaded("spark");
-    }
-
-    public void common(FMLCommonSetupEvent event) {
-        Network.register();
     }
 
     public void configReload(ModConfigEvent.Reloading event) {
@@ -183,8 +176,7 @@ public class CrashUtils {
     @SubscribeEvent
     public void onWorldTick(TickEvent.LevelTickEvent event) {
         if ( event.phase != TickEvent.Phase.END) return;
-        if(event.level.isClientSide && !runnables.isEmpty()){
-            runnables.clear();
+        if(event.level.isClientSide()){
             return;
         }
 

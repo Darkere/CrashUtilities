@@ -19,8 +19,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.network.NetworkHooks;
+import net.neoforged.neoforge.common.util.FakePlayer;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -62,7 +61,7 @@ public class InventoryOpenEnderChestCommand {
 
         Player finalOtherPlayer = otherPlayer;
 
-        NetworkHooks.openScreen(sourcePlayer, new MenuProvider() {
+        sourcePlayer.openMenu(new MenuProvider() {
             @Override
             public Component getDisplayName() {
                 return finalOtherPlayer.getDisplayName();

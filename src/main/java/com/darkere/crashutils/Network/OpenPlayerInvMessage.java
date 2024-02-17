@@ -1,32 +1,22 @@
 package com.darkere.crashutils.Network;
 
 import com.darkere.crashutils.ClientEvents;
+import com.darkere.crashutils.CrashUtils;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
-public class OpenPlayerInvMessage {
-    Map<String, Integer> slotAmounts;
-    String otherPlayerName;
-    int windowID;
+public record OpenPlayerInvMessage(Map<String, Integer> slotAmounts, String otherPlayerName,int windowID) implements CustomPacketPayload {
 
-    public OpenPlayerInvMessage(int id, String playerName, Map<String, Integer> curios) {
-        this.windowID = id;
-        this.otherPlayerName = playerName;
-        this.slotAmounts = curios;
-    }
+
+    public static ResourceLocation ID = new ResourceLocation(CrashUtils.MODID,"openplayerinvmessage");
 
     public static void encode(OpenPlayerInvMessage data, FriendlyByteBuf buf) {
-        buf.writeInt(data.windowID);
-        buf.writeUtf(data.otherPlayerName);
-        buf.writeInt(data.slotAmounts.size());
-        data.slotAmounts.forEach((s, i) -> {
-            buf.writeUtf(s);
-            buf.writeInt(i);
-        });
+
 
     }
 
@@ -38,13 +28,29 @@ public class OpenPlayerInvMessage {
         for (int i = 0; i < size; i++) {
             curios.put(buf.readUtf(), buf.readInt());
         }
-        return new OpenPlayerInvMessage(id, name, curios);
+        return new OpenPlayerInvMessage(curios, name, id);
     }
 
-    public static boolean handle(OpenPlayerInvMessage data, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+    public static boolean handle(OpenPlayerInvMessage data, PlayPayloadContext ctx) {
+       ctx.workHandler().submitAsync(() -> {
             ClientEvents.openContainerAndScreen(data.windowID, data.otherPlayerName, data.slotAmounts);
         });
         return true;
+    }
+
+    @Override
+    public void write(FriendlyByteBuf buf) {
+        buf.writeInt(windowID);
+        buf.writeUtf(otherPlayerName);
+        buf.writeInt(slotAmounts.size());
+        slotAmounts.forEach((s, i) -> {
+            buf.writeUtf(s);
+            buf.writeInt(i);
+        });
+    }
+
+    @Override
+    public ResourceLocation id() {
+        return ID;
     }
 }

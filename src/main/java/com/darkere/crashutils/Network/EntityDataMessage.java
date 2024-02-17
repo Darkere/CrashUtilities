@@ -1,33 +1,35 @@
 package com.darkere.crashutils.Network;
 
+import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.DataStructures.DataHolder;
 import com.darkere.crashutils.DataStructures.EntityData;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 
-import java.util.function.Supplier;
-
-public class EntityDataMessage {
-    EntityData list;
-
-    public EntityDataMessage(EntityData list) {
-        this.list = list;
-    }
-
-
-    public static void encode(EntityDataMessage data, FriendlyByteBuf buf) {
-        NetworkTools.writeRLWPMap(data.list.getMap(), buf);
-    }
+public record EntityDataMessage( EntityData list) implements CustomPacketPayload {
+   
+    static ResourceLocation ID = new ResourceLocation(CrashUtils.MODID,"entitydatamessage");
 
     public static EntityDataMessage decode(FriendlyByteBuf buf) {
         return new EntityDataMessage(new EntityData(NetworkTools.readRLWPMap(buf)));
     }
 
-    public static void handle(EntityDataMessage data, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+    public static void handle(EntityDataMessage data, PlayPayloadContext ctx) {
+        
+       ctx.workHandler().submitAsync(() -> {
             DataHolder.addEntityData(data.list);
-
         });
-        ctx.get().setPacketHandled(true);
+    }
+
+    @Override
+    public void write(FriendlyByteBuf buf) {
+        NetworkTools.writeRLWPMap(list.getMap(), buf);
+    }
+
+    @Override
+    public ResourceLocation id() {
+        return ID;
     }
 }
