@@ -30,7 +30,7 @@ public class TileEntityData extends LocationData {
         for (ServerLevel level : worlds) {
             for (ChunkHolder chunk : level.getChunkSource().chunkMap.getChunks()) {
                 if (chunk.getFullStatus().isOrAfter(FullChunkStatus.BLOCK_TICKING)) {
-                    chunk.getFullChunk().getBlockEntities().forEach((pos,e) ->{
+                    chunk.getTickingChunk().getBlockEntities().forEach((pos,e) ->{
                         WorldPos wp = new WorldPos(pos, level.dimension(), UUID.randomUUID());
                         TEID.put(wp.getID(), wp);
                         map.get(BlockEntityType.getKey(e.getType())).add(wp);

@@ -11,13 +11,14 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.server.level.ServerLevel;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class AllEntitiesCommand implements Command<CommandSourceStack> {
     private static final AllEntitiesCommand cmd = new AllEntitiesCommand();
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
-        return Commands.literal("list")
+        return Commands.literal("entityData")
             .then(Commands.argument("dim", DimensionArgument.dimension())
                 .executes(cmd))
             .executes(cmd);

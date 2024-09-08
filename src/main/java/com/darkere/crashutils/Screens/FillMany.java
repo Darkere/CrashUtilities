@@ -53,15 +53,15 @@ public class FillMany {
 //        RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
         for (ColoredRectangle rect : rects) {
             addRectangle(bufferbuilder, matrix, rect.x0, rect.y0, rect.x1, rect.y1, rect.color);
         }
 
-
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        var result = bufferbuilder.build();
+        if(result != null)
+            BufferUploader.drawWithShader(result);
 
 //        RenderSystem.enableTexture();
 //        RenderSystem.disableBlend();
@@ -82,9 +82,9 @@ public class FillMany {
         float cr = (float) (color >> 16 & 255) / 255.0F;
         float cg = (float) (color >> 8 & 255) / 255.0F;
         float cb = (float) (color & 255) / 255.0F;
-        bufferbuilder.vertex(matrix, (float) x0, (float) y1, 0.0F).color(cr, cg, cb, ca).endVertex();
-        bufferbuilder.vertex(matrix, (float) x1, (float) y1, 0.0F).color(cr, cg, cb, ca).endVertex();
-        bufferbuilder.vertex(matrix, (float) x1, (float) y0, 0.0F).color(cr, cg, cb, ca).endVertex();
-        bufferbuilder.vertex(matrix, (float) x0, (float) y0, 0.0F).color(cr, cg, cb, ca).endVertex();
+        bufferbuilder.addVertex(matrix, (float) x0, (float) y1, 0.0F).setColor(cr, cg, cb, ca);
+        bufferbuilder.addVertex(matrix, (float) x1, (float) y1, 0.0F).setColor(cr, cg, cb, ca);
+        bufferbuilder.addVertex(matrix, (float) x1, (float) y0, 0.0F).setColor(cr, cg, cb, ca);
+        bufferbuilder.addVertex(matrix, (float) x0, (float) y0, 0.0F).setColor(cr, cg, cb, ca);
     }
 }

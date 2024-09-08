@@ -47,12 +47,12 @@ public class InventoryOpenCommand {
                 return 0;
             }
             otherPlayer = new FakePlayer(ctx.getSource().getServer().getLevel(Level.OVERWORLD), profile.get());
-            CompoundTag nbt = ctx.getSource().getServer().playerDataStorage.load(otherPlayer);
-            if (nbt == null) {
+            Optional<CompoundTag> nbt = ctx.getSource().getServer().playerDataStorage.load(otherPlayer);
+            if (nbt.isEmpty()) {
                 sourcePlayer.sendSystemMessage(CommandUtils.CreateTextComponent("Cannot load playerData"), false);
                 return 0;
             }
-            otherPlayer.load(nbt);
+            otherPlayer.load(nbt.get());
         }
 
 //        if (data != null && data.getModList().contains(CrashUtils.MODID)) {

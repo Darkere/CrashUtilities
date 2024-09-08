@@ -13,9 +13,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.ProtoChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 import java.util.*;
 
@@ -53,7 +53,7 @@ public class LoadedChunkData {
             total += chunkManager.size();
             Iterable<ChunkHolder> chunkHolders = chunkManager.getChunks();
             chunkHolders.forEach(chunkHolder -> {
-                ChunkAccess chunk = chunkHolder.getLastAvailable();
+                ChunkAccess chunk = chunkHolder.getLatestChunk();
                 LocationTickets ticketCounter = null;
                 if (chunk == null) {
                     chunksByLocationType.merge("PRIMED", new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (list, newer) -> {
@@ -78,15 +78,15 @@ public class LoadedChunkData {
                         ticketCounter = ticketsByLocation.get(actualChunk.getFullStatus().toString());
                     } else {
                         if (chunk instanceof ProtoChunk) {
-                            chunksByLocationType.merge(chunk.getStatus() == ChunkStatus.FULL ? "FULL" : "PARTIALLYGENERATED", new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (list, newer) -> {
+                            chunksByLocationType.merge(chunk.getPersistedStatus() == ChunkStatus.FULL ? "FULL" : "PARTIALLYGENERATED", new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (list, newer) -> {
                                 list.add(chunkHolder.getPos());
                                 return list;
                             });
-                            ticketsByLocation.merge(chunk.getStatus() == ChunkStatus.FULL  ? "FULL" : "PARTIALLYGENERATED", new LocationTickets(), (x, y) -> {
+                            ticketsByLocation.merge(chunk.getPersistedStatus() == ChunkStatus.FULL  ? "FULL" : "PARTIALLYGENERATED", new LocationTickets(), (x, y) -> {
                                 x.count++;
                                 return x;
                             });
-                            ticketCounter = ticketsByLocation.get(chunk.getStatus() == ChunkStatus.FULL  ? "FULL" : "PARTIALLYGENERATED");
+                            ticketCounter = ticketsByLocation.get(chunk.getPersistedStatus() == ChunkStatus.FULL  ? "FULL" : "PARTIALLYGENERATED");
                         }
 
                     }

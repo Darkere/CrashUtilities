@@ -51,12 +51,12 @@ public class InventoryOpenEnderChestCommand {
                 return 0;
             }
             otherPlayer = new FakePlayer(Objects.requireNonNull(server.getLevel(Level.OVERWORLD)), profile.get());
-            CompoundTag nbt = server.playerDataStorage.load(otherPlayer);
-            if (nbt == null) {
+            Optional<CompoundTag> nbt = server.playerDataStorage.load(otherPlayer);
+            if (nbt.isEmpty()) {
                 CommandUtils.sendMessageToPlayer(sourcePlayer, "Cannot load playerData");
                 return 0;
             }
-            otherPlayer.load(nbt);
+            otherPlayer.load(nbt.get());
         }
 
         Player finalOtherPlayer = otherPlayer;

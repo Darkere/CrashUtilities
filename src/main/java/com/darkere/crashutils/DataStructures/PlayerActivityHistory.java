@@ -28,7 +28,7 @@ public class PlayerActivityHistory {
     public PlayerActivityHistory(ServerLevel world) {
         long current = Instant.now().getEpochSecond();
         try {
-            Files.list(world.getServer().playerDataStorage.getPlayerDataFolder().toPath()).forEach(x -> {
+            Files.list(world.getServer().playerDataStorage.getPlayerDir().toPath()).forEach(x -> {
                 if (x.toFile().isDirectory()
                         || x.getFileName().toString().endsWith("old")
                         || !x.getFileName().toString().endsWith("dat")) {

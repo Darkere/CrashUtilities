@@ -37,7 +37,7 @@ public class DeleteBlocks {
     }
 
     private void deleteBlock(BlockPos pos, ChunkAccess chunk) {
-        LevelAccessor world = chunk.getWorldForge();
+        LevelAccessor world = chunk.getLevel();
         if (world != null) {
             world.setBlock(pos, Blocks.AIR.defaultBlockState(), 01);
             //  BlockState block = world.getBlockState(pos);

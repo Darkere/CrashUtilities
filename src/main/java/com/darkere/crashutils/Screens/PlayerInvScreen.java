@@ -15,7 +15,7 @@ import java.awt.*;
 
 public class PlayerInvScreen extends AbstractContainerScreen<PlayerInvContainer> {
     Rectangle doubleinv = new Rectangle(7, 14, 213, 229);
-    private static final ResourceLocation texture = new ResourceLocation(CrashUtils.MODID, "textures/gui/doubleinv.png");
+    private static final ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(CrashUtils.MODID, "textures/gui/doubleinv.png");
     PlayerInvContainer container;
 
     int centerX;

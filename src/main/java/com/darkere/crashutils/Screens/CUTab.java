@@ -15,7 +15,7 @@ public enum CUTab {
     INVSEETABICON(0, 52, 63, 115),
     LISTTABICON(64, 52, 127, 115),
     MAPTABICON(128, 52, 191, 115);
-    private static final ResourceLocation TABS = new ResourceLocation(CrashUtils.MODID, "textures/gui/tabs.png");
+    private static final ResourceLocation TABS = ResourceLocation.fromNamespaceAndPath(CrashUtils.MODID, "textures/gui/tabs.png");
     int x, y, cx, cy;
 
     CUTab(int x, int y, int cx, int cy) {

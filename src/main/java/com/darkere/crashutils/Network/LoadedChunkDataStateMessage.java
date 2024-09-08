@@ -2,37 +2,30 @@ package com.darkere.crashutils.Network;
 
 import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.DataStructures.DataHolder;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.ChunkPos;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public record LoadedChunkDataStateMessage(Map<String, Set<ChunkPos>> loadedChunkStateData) implements CustomPacketPayload {
-    public static ResourceLocation ID = new ResourceLocation(CrashUtils.MODID, "loadedchunkdatastatemessage");
+    public static final Type<LoadedChunkDataStateMessage> TYPE = new Type<>(CrashUtils.ResourceLocation( "loadedchunkdatastatemessage"));
+    public static final StreamCodec<? super RegistryFriendlyByteBuf,LoadedChunkDataStateMessage> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.map(HashMap::new,ByteBufCodecs.STRING_UTF8,ByteBufCodecs.VAR_LONG.map(ChunkPos::new,ChunkPos::toLong).apply(ByteBufCodecs.list()).map(HashSet::new,x -> x.stream().toList())),
+            LoadedChunkDataStateMessage::loadedChunkStateData,
+                    LoadedChunkDataStateMessage::new);
 
-    public static LoadedChunkDataStateMessage decode(FriendlyByteBuf buf) {
-        return new LoadedChunkDataStateMessage(NetworkTools.readSChPMap(buf));
-    }
 
-    public static void handle(LoadedChunkDataStateMessage data, PlayPayloadContext ctx) {
-       ctx.workHandler().submitAsync(() -> {
+    public static void handle(LoadedChunkDataStateMessage data, IPayloadContext ctx) {
             DataHolder.addStateData(data.loadedChunkStateData);
-        });
-    }
-
-
-    @Override
-    public void write(FriendlyByteBuf buf) {
-        if (NetworkTools.returnOnNull(loadedChunkStateData)) return;
-        NetworkTools.writeSChPMap(buf, loadedChunkStateData);
     }
 
     @Override
-    public ResourceLocation id() {
-        return ID;
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

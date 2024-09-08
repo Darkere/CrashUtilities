@@ -18,23 +18,23 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.IExtensionPoint;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
-import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import net.neoforged.neoforge.event.TickEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,7 +45,7 @@ import java.util.TimerTask;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
-// The value here should match an entry in the META-INF/mods.toml file
+// The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(CrashUtils.MODID)
 public class CrashUtils {
     // Directly reference a log4j logger.
@@ -59,22 +59,25 @@ public class CrashUtils {
     public static boolean skipNext = false;
     public static boolean isServer = false;
 
-    public CrashUtils(IEventBus ModEventBus) {
+    public static ResourceLocation ResourceLocation(String Path){
+        return ResourceLocation.fromNamespaceAndPath(MODID,Path);
+    }
+
+    public CrashUtils(IEventBus ModEventBus, ModContainer modContainer) {
         ModEventBus.addListener(this::configReload);
         ModEventBus.addListener(Network::register);
-        if(FMLEnvironment.dist == Dist.CLIENT) {
+        if (FMLEnvironment.dist == Dist.CLIENT) {
             NeoForge.EVENT_BUS.register(new ClientEvents());
             ModEventBus.addListener(ClientEvents::registerKeybindings);
         }
         NeoForge.EVENT_BUS.register(this);
-        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, ()->new IExtensionPoint.DisplayTest(()->"ANY", (remote, isServer)-> true));
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SERVER_CONFIG.getSpec());
+        modContainer.registerConfig(ModConfig.Type.SERVER, SERVER_CONFIG.getSpec());
         curiosLoaded = ModList.get().isLoaded("curios");
         sparkLoaded = ModList.get().isLoaded("spark");
     }
 
     public void configReload(ModConfigEvent.Reloading event) {
-        if(isServer){
+        if (isServer) {
             ClearItemTask.restart();
             MemoryChecker.restart();
         }
@@ -121,9 +124,9 @@ public class CrashUtils {
                 .then(Commands.literal("tileentity")
                         .redirect(tileEntitiesCommands))
                 .then(Commands.literal("be")
-                    .redirect(tileEntitiesCommands))
+                        .redirect(tileEntitiesCommands))
                 .then(Commands.literal("blockentities")
-                    .redirect(tileEntitiesCommands))
+                        .redirect(tileEntitiesCommands))
                 .then(inventoryCommands)
                 .then(Commands.literal("inventory")
                         .redirect(inventoryCommands))
@@ -174,18 +177,14 @@ public class CrashUtils {
     }
 
     @SubscribeEvent
-    public void onWorldTick(TickEvent.LevelTickEvent event) {
-        if ( event.phase != TickEvent.Phase.END) return;
-        if(event.level.isClientSide()){
-            return;
-        }
-
+    public void onWorldTick(ServerTickEvent.Post event) {
         if (!runnables.isEmpty()) {
             if (skipNext) {
                 skipNext = false;
                 return;
             }
-            runnables.forEach(c -> c.accept((ServerLevel) event.level));
+            var level = event.getServer().getLevel(Level.OVERWORLD);
+            runnables.forEach(c -> c.accept(level));
             runnables.clear();
         }
     }

@@ -5,24 +5,29 @@ import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 public record TeleportToPlayerMessage(String name) implements CustomPacketPayload {
-    public static ResourceLocation ID = new ResourceLocation(CrashUtils.MODID,"teleporttoplayermessage");
+    public static final Type<TeleportToPlayerMessage> TYPE = new Type<>(CrashUtils.ResourceLocation("teleporttoplayermessage"));
+    public static final StreamCodec<? super RegistryFriendlyByteBuf, TeleportToPlayerMessage> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.STRING_UTF8,TeleportToPlayerMessage::name,
+            TeleportToPlayerMessage::new
+    );
 
     public static TeleportToPlayerMessage decode(FriendlyByteBuf buf) {
         return new TeleportToPlayerMessage(buf.readUtf(100));
     }
 
-    public static void handle(TeleportToPlayerMessage data, PlayPayloadContext ctx) {
-       ctx.workHandler().submitAsync(() -> {
-            ServerPlayer player = (ServerPlayer) ctx.player().get();
+    public static void handle(TeleportToPlayerMessage data, IPayloadContext ctx) {
+            ServerPlayer player = (ServerPlayer) ctx.player();
             if (!player.hasPermissions(CommandUtils.PERMISSION_LEVEL)) return;
             Level ori = player.getCommandSenderWorld();
             AtomicReference<Level> dest = new AtomicReference<>();
@@ -35,16 +40,10 @@ public record TeleportToPlayerMessage(String name) implements CustomPacketPayloa
                 CommandUtils.sendMessageToPlayer(player,"Failed to load Player");
             }
             WorldUtils.teleportPlayer(player, ori, dest.get(), otherPos.get());
-        });
     }
 
     @Override
-    public void write(FriendlyByteBuf buf) {
-        buf.writeUtf(name);
-    }
-
-    @Override
-    public ResourceLocation id() {
-        return ID;
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

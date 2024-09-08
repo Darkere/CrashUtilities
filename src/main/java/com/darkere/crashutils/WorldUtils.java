@@ -21,13 +21,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.common.util.ITeleporter;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -60,19 +59,7 @@ public class WorldUtils {
             int y = chunk.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, newPos.getX(), newPos.getZ());
             newPos = new BlockPos(newPos.getX(), y, newPos.getZ());
         }
-        if (startWorld != destWorld) {
-            BlockPos finalNewPos = newPos;
-            player.changeDimension((ServerLevel) destWorld, new ITeleporter() {
-                @Override
-                public Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
-                    Entity entity1 = repositionEntity.apply(false);
-                    entity1.teleportTo(finalNewPos.getX(), finalNewPos.getY() + 1, finalNewPos.getZ());
-                    return entity1;
-                }
-            });
-        } else {
-            player.teleportTo(newPos.getX(), newPos.getY() + 1, newPos.getZ());
-        }
+        player.teleportTo((ServerLevel) destWorld,newPos.getX() +1 ,newPos.getY(),newPos.getZ(),Set.of(), player.getYRot(), player.getXRot());
     }
 
     public static boolean applyToPlayer(String playerName, MinecraftServer server, Consumer<ServerPlayer> consumer) {
@@ -84,9 +71,9 @@ public class WorldUtils {
             }
 
             FakePlayer fakePlayer = new CustomFakePlayer(server.getLevel(Level.OVERWORLD), profile.get());
-            CompoundTag nbt = server.playerDataStorage.load(fakePlayer);
-            if (nbt == null) return false;
-            fakePlayer.load(nbt);
+            Optional<CompoundTag> nbt = server.playerDataStorage.load(fakePlayer);
+            if (nbt.isEmpty()) return false;
+            fakePlayer.load(nbt.get());
             consumer.accept(fakePlayer);
             server.playerDataStorage.save(fakePlayer);
 
@@ -118,7 +105,7 @@ public class WorldUtils {
         if (NetworkTools.returnOnNull(world, rl)) return;
         List<Runnable> runnables = new ArrayList<>();
         if (world.isClientSide) {
-            Network.sendToServer(new RemoveEntitiesMessage(world.dimension(), rl, null, false, force));
+            Network.sendToServer(new RemoveEntitiesMessage(world.dimension(), rl, ChunkPos.ZERO, false, force,true));
             return;
         }
         ((ServerLevel) world).getEntities().getAll().forEach(entity -> {
@@ -135,7 +122,7 @@ public class WorldUtils {
     public static void removeEntitiesInChunk(Level world, ChunkPos pos, ResourceLocation rl, boolean force) {
         if (NetworkTools.returnOnNull(world, pos, rl)) return;
         if (world.isClientSide) {
-            Network.sendToServer(new RemoveEntitiesMessage(world.dimension(), rl, pos, false, force));
+            Network.sendToServer(new RemoveEntitiesMessage(world.dimension(), rl, pos, false, force, false));
             return;
         }
         Vec3 start = new Vec3(pos.getMinBlockX(), 0, pos.getMinBlockZ());
@@ -151,10 +138,10 @@ public class WorldUtils {
         }
         CrashUtils.runNextTick((wld) -> {
             if (force) {
-                world.removeBlockEntity(TileEntityData.TEID.get(id).pos);
-                world.removeBlock(TileEntityData.TEID.get(id).pos, false);
+                world.removeBlockEntity(TileEntityData.TEID.get(id).pos());
+                world.removeBlock(TileEntityData.TEID.get(id).pos(), false);
             } else {
-                world.removeBlockEntity(TileEntityData.TEID.get(id).pos);
+                world.removeBlockEntity(TileEntityData.TEID.get(id).pos());
             }
         });
     }
@@ -162,15 +149,15 @@ public class WorldUtils {
     public static void removeTileEntityType(Level level, ResourceLocation rl, boolean force) {
         if (NetworkTools.returnOnNull(level, rl)) return;
         if (level.isClientSide) {
-            Network.sendToServer(new RemoveEntitiesMessage(level.dimension(), rl, null, true, force));
+            Network.sendToServer(new RemoveEntitiesMessage(level.dimension(), rl, ChunkPos.ZERO, true, force, true));
             return;
         }
 
         for (ChunkHolder chunk : ((ServerLevel) level).getChunkSource().chunkMap.getChunks()) {
             if (chunk.getFullStatus().isOrAfter(FullChunkStatus.BLOCK_TICKING)) {
-                chunk.getFullChunk().getBlockEntities().forEach((pos, e) -> {
+                chunk.getTickingChunk().getBlockEntities().forEach((pos, e) -> {
                     {
-                        if (BlockEntityType.getKey(e.getType()) == rl) {
+                        if (BlockEntityType.getKey(e.getType()).equals(rl)) {
                             CrashUtils.runNextTick((wld) -> {
                                 if (force) {
                                     level.removeBlockEntity(e.getBlockPos());
@@ -189,7 +176,7 @@ public class WorldUtils {
     public static void removeTileEntitiesInChunk(Level level, ChunkPos pos, ResourceLocation rl, boolean force) {
         if (NetworkTools.returnOnNull(level, pos, rl)) return;
         if (level.isClientSide) {
-            Network.sendToServer(new RemoveEntitiesMessage(level.dimension(), rl, pos, true, force));
+            Network.sendToServer(new RemoveEntitiesMessage(level.dimension(), rl, pos, true, force,false));
             return;
         }
         Vec3 start = new Vec3(pos.getMinBlockX(), 0, pos.getMinBlockZ());

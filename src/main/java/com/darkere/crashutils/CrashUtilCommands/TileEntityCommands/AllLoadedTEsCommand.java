@@ -17,7 +17,7 @@ public class AllLoadedTEsCommand implements Command<CommandSourceStack> {
     private static final AllLoadedTEsCommand cmd = new AllLoadedTEsCommand();
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
-        return Commands.literal("list")
+        return Commands.literal("entityData")
                 .then(Commands.argument("dim", DimensionArgument.dimension())
                         .executes(cmd))
                 .executes(cmd);

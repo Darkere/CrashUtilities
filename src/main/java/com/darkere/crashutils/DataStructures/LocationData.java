@@ -16,14 +16,24 @@ public abstract class LocationData {
     int total = 0;
     String lastFill = "";
 
+    public LocationData(Map<ResourceLocation, List<WorldPos>> map) {
+        this.map = map;
+    }
+
+    public LocationData() {
+    }
+
     public Map<ResourceLocation, List<WorldPos>> getMap() {
         return map;
+    }
+    public HashMap<ResourceLocation, List<WorldPos>> getHashMap() {
+        return (HashMap<ResourceLocation, List<WorldPos>>) map;
     }
 
     public void fillChunkMaps(String rl) {
         if (lastFill.equals(rl)) return;
         lastFill = rl;
-        ResourceLocation resourceLocation = new ResourceLocation(rl);
+        ResourceLocation resourceLocation = ResourceLocation.parse(rl);
         chunkMap.clear();
         tpPos.clear();
         List<WorldPos> positions = new ArrayList<>();
@@ -33,7 +43,7 @@ public abstract class LocationData {
             positions.addAll(map.get(resourceLocation));
         }
         for (WorldPos pos : positions) {
-            ChunkPos chunkPos = new ChunkPos(pos.pos);
+            ChunkPos chunkPos = new ChunkPos(pos.pos());
             if (!chunkMap.containsKey(chunkPos)) {
                 chunkMap.put(chunkPos, new ArrayList<>());
             }
@@ -70,7 +80,7 @@ public abstract class LocationData {
     public List<CUOption> getInChunkAsCUOptions(ChunkPos chunkPos, ResourceLocation name) {
         List<CUOption> list = new ArrayList<>();
         fillChunkMaps(name.toString());
-        chunkMap.get(chunkPos).forEach(pos -> list.add(new CUOption(pos.pos, pos.id)));
+        chunkMap.get(chunkPos).forEach(pos -> list.add(new CUOption(pos.pos(), pos.id())));
         return list;
     }
 

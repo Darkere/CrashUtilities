@@ -3,33 +3,30 @@ package com.darkere.crashutils.Network;
 import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.DataStructures.DataHolder;
 import com.darkere.crashutils.DataStructures.EntityData;
-import net.minecraft.network.FriendlyByteBuf;
+import com.darkere.crashutils.DataStructures.WorldPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record EntityDataMessage( EntityData list) implements CustomPacketPayload {
+import java.util.HashMap;
+
+public record EntityDataMessage( EntityData entityData)  implements CustomPacketPayload{
    
-    static ResourceLocation ID = new ResourceLocation(CrashUtils.MODID,"entitydatamessage");
+    // Map<ResourceLocation, List<WorldPos>>
+    public static final Type<EntityDataMessage> TYPE = new Type<>(CrashUtils.ResourceLocation("entitydatamessage"));
+    public static final StreamCodec< ? super RegistryFriendlyByteBuf, EntityDataMessage> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.map(HashMap::new, ResourceLocation.STREAM_CODEC, WorldPos.STREAM_CODEC.apply(ByteBufCodecs.list())).map(EntityData::new,EntityData::getHashMap),EntityDataMessage::entityData,
+            EntityDataMessage::new);
 
-    public static EntityDataMessage decode(FriendlyByteBuf buf) {
-        return new EntityDataMessage(new EntityData(NetworkTools.readRLWPMap(buf)));
-    }
-
-    public static void handle(EntityDataMessage data, PlayPayloadContext ctx) {
-        
-       ctx.workHandler().submitAsync(() -> {
-            DataHolder.addEntityData(data.list);
-        });
+    public static void handle(EntityDataMessage data, IPayloadContext ctx) {
+            DataHolder.addEntityData(data.entityData);
     }
 
     @Override
-    public void write(FriendlyByteBuf buf) {
-        NetworkTools.writeRLWPMap(list.getMap(), buf);
-    }
-
-    @Override
-    public ResourceLocation id() {
-        return ID;
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

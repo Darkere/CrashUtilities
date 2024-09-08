@@ -17,11 +17,7 @@ import java.util.Map;
 
 public class EntityData extends LocationData {
 
-    public EntityData() {
-        for (Map.Entry<ResourceKey<EntityType<?>>, EntityType<?>> entry : BuiltInRegistries.ENTITY_TYPE.entrySet()) {
-            map.put(entry.getKey().location(), new ArrayList<>());
-        }
-    }
+    public EntityData(){}
 
     public EntityData(Map<ResourceLocation, List<WorldPos>> map) {
         this.map = map;
@@ -32,7 +28,9 @@ public class EntityData extends LocationData {
         worlds.forEach(x -> x.getEntities().getAll().forEach(entities::add));
         for (Entity entity : entities) {
             var key = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
-            map.get(key).add(WorldPos.getPosFromEntity(entity));
+            var list = map.getOrDefault(key,new ArrayList<>());
+            list.add(WorldPos.getPosFromEntity(entity));
+            map.put(key,list);
         }
         total = entities.size();
     }
@@ -53,6 +51,6 @@ public class EntityData extends LocationData {
     private void sendEntityChunkMapCommand(CommandSourceStack source, ResourceLocation res) {
         fillChunkMaps(res.toString());
         CommandUtils.sendNormalMessage(source, res.toString(), ChatFormatting.DARK_BLUE);
-        chunkMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.comparingInt(List::size))).forEach((k) -> CommandUtils.sendChunkEntityMessage(source, k.getValue().size(), tpPos.get(k.getKey()).pos, tpPos.get(k.getKey()).type, true));
+        chunkMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.comparingInt(List::size))).forEach((k) -> CommandUtils.sendChunkEntityMessage(source, k.getValue().size(), tpPos.get(k.getKey()).pos(), tpPos.get(k.getKey()).type(), true));
     }
 }

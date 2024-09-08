@@ -35,7 +35,7 @@ public class CUScreen extends Screen {
     int centerY;
     int activeTab = 0;
     int tabs = 2;
-    private static final ResourceLocation WINDOW = new ResourceLocation(CrashUtils.MODID, "textures/gui/cuscreen.png");
+    private static final ResourceLocation WINDOW = ResourceLocation.fromNamespaceAndPath(CrashUtils.MODID, "textures/gui/cuscreen.png");
 
     public List<CUDropDown> topDropDowns = new ArrayList<>();
     CUButton updateButton;
