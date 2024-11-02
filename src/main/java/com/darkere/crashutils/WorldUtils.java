@@ -26,7 +26,12 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.CapabilityHooks;
+import net.neoforged.neoforge.capabilities.CapabilityRegistry;
+import net.neoforged.neoforge.capabilities.EntityCapability;
 import net.neoforged.neoforge.common.util.FakePlayer;
+import top.theillusivec4.curios.api.CuriosApi;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -53,6 +58,7 @@ public class WorldUtils {
     public static void teleportPlayer(Player player, Level startWorld, Level destWorld, BlockPos newPos) {
         if (player.getCommandSenderWorld().isClientSide()) {
             Network.sendToServer(new TeleportMessage(startWorld.dimension(), destWorld.dimension(), newPos));
+            return;
         }
         if (newPos.getY() == 0) {
             ChunkAccess chunk = destWorld.getChunkAt(newPos);
@@ -74,6 +80,8 @@ public class WorldUtils {
             Optional<CompoundTag> nbt = server.playerDataStorage.load(fakePlayer);
             if (nbt.isEmpty()) return false;
             fakePlayer.load(nbt.get());
+            //hackfix to solve curios not getting initialised for fakeplayers
+            CuriosApi.getCuriosInventory(fakePlayer);
             consumer.accept(fakePlayer);
             server.playerDataStorage.save(fakePlayer);
 

@@ -80,7 +80,9 @@ public abstract class LocationData {
     public List<CUOption> getInChunkAsCUOptions(ChunkPos chunkPos, ResourceLocation name) {
         List<CUOption> list = new ArrayList<>();
         fillChunkMaps(name.toString());
-        chunkMap.get(chunkPos).forEach(pos -> list.add(new CUOption(pos.pos(), pos.id())));
+        var chunks = chunkMap.get(chunkPos);
+        if(chunks == null) return List.of();
+        chunks.forEach(pos -> list.add(new CUOption(pos.pos(), pos.id())));
         return list;
     }
 

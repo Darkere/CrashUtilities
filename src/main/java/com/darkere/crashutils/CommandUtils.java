@@ -47,7 +47,7 @@ public class CommandUtils {
     }
 
     public static void sendTEMessage(CommandSourceStack source, WorldPos worldPos, boolean runDirectly) {
-        BlockPos pos = worldPos.pos;
+        BlockPos pos = worldPos.pos();
         String position = " - " + "[" + pos.getX() + "," + pos.getY() + "," + pos.getZ() + "]";
         MutableComponent text = CommandUtils.CreateTextComponent(position).withStyle(ChatFormatting.GREEN);
         ServerPlayer player = null;
@@ -56,7 +56,7 @@ public class CommandUtils {
         } catch (CommandSyntaxException e) {
             e.printStackTrace();
         }
-        sendCommandMessage(source, text, "/cu tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + worldPos.type.location(), runDirectly);
+        sendCommandMessage(source, text, "/cu tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + worldPos.type().location(), runDirectly);
     }
 
     public static void sendFindTEMessage(CommandSourceStack source, ResourceLocation res, int count, boolean ticking) {

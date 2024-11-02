@@ -4,7 +4,7 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id 'net.neoforged.moddev' version '1.0.17'
-    id 'net.darkhax.curseforgegradle' version '1.1.24'
+    id 'net.darkhax.curseforgegradle' version '1.1.25'
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -127,6 +127,28 @@ repositories {
         name = "OctoStudios"
         url = uri("https://maven.octo-studios.com/releases")
     }
+    maven {
+        url = "https://www.cursemaven.com"
+    }
+    maven { url 'https://maven.blamejared.com' }
+    maven {
+        name = 'GeckoLib'
+        url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+        content {
+            includeGroup("software.bernie.geckolib")
+        }
+    }
+    maven {
+        // location of the maven that hosts JEI files since January 2023
+        name = "Jared's maven"
+        url = "https://maven.blamejared.com/"
+    }
+    maven {
+        // location of a maven mirror for JEI files, as a fallback
+        name = "ModMaven"
+        url = "https://modmaven.dev"
+    }
+
 }
 configurations {
     runtimeClasspath.extendsFrom localRuntime
@@ -136,7 +158,17 @@ dependencies {
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    implementation 'top.theillusivec4.curios:curios-neoforge:' + project.curios_version
+    compileOnly "curse.maven:adorned-1036809:${project.curio_fildId}"
+    runtimeOnly "curse.maven:adorned-1036809:${project.curio_fildId}"
+    //compileOnly "curse.maven:spyglass-of-curios-941332:${project.curio_test}"
+    //runtimeOnly "curse.maven:spyglass-of-curios-941332:${project.curio_test}"
+   // implementation ("com.hollingsworth.ars_nouveau:ars_nouveau-${project.minecraft_version}:${project.ars_version}"){transitive=false}
+    implementation "curse.maven:just-potion-rings-1113500:5850062"
+    // Ars dependencies
+   // implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
+    compileOnly("mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}")
+    // at runtime, use the full JEI jar for NeoForge
+    runtimeOnly("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
 }
 
 
