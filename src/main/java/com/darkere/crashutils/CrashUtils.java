@@ -16,6 +16,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.resources.ResourceLocation;
@@ -31,6 +32,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
@@ -56,7 +58,9 @@ public class CrashUtils {
     Timer chunkcleaner;
     public static boolean sparkLoaded = false;
     public static List<Consumer<ServerLevel>> runnables = new CopyOnWriteArrayList<>();
+    public static List<Runnable> runnablesClient = new CopyOnWriteArrayList<>();
     public static boolean skipNext = false;
+    public static boolean skipNextClient = false;
     public static boolean isServer = false;
 
     public static ResourceLocation ResourceLocation(String Path){
@@ -175,6 +179,14 @@ public class CrashUtils {
         runnables.add(run);
         skipNext = true;
     }
+    public static void runNextTickClient(Runnable run) {
+        runnablesClient.add(run);
+    }
+
+    public static void runInTwoTicksClient(Runnable run) {
+        runnablesClient.add(run);
+        skipNextClient = true;
+    }
 
     @SubscribeEvent
     public void onWorldTick(ServerTickEvent.Post event) {
@@ -186,6 +198,17 @@ public class CrashUtils {
             var level = event.getServer().getLevel(Level.OVERWORLD);
             runnables.forEach(c -> c.accept(level));
             runnables.clear();
+        }
+    }
+    @SubscribeEvent
+    public void onWorldTick(ClientTickEvent.Post event) {
+        if (!runnables.isEmpty()) {
+            if (skipNext) {
+                skipNext = false;
+                return;
+            }
+            runnablesClient.forEach(Runnable::run);
+            runnablesClient.clear();
         }
     }
 }

@@ -162,10 +162,10 @@ dependencies {
     runtimeOnly "curse.maven:adorned-1036809:${project.curio_fildId}"
     //compileOnly "curse.maven:spyglass-of-curios-941332:${project.curio_test}"
     //runtimeOnly "curse.maven:spyglass-of-curios-941332:${project.curio_test}"
-   // implementation ("com.hollingsworth.ars_nouveau:ars_nouveau-${project.minecraft_version}:${project.ars_version}"){transitive=false}
+   //
     implementation "curse.maven:just-potion-rings-1113500:5850062"
     // Ars dependencies
-   // implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
+   //
     compileOnly("mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}")
     // at runtime, use the full JEI jar for NeoForge
     runtimeOnly("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
@@ -207,7 +207,7 @@ task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge)
     apiToken = System.getenv('curseforge_token')
     def mainFile = upload(371813, jar)
     mainFile.releaseType = "beta"
-    mainFile.changelog = '- port to 1.21.1'
+    mainFile.changelog = '- fix rareish crash'
 }
 
 // Example configuration to allow publishing using the maven-publish plugin
