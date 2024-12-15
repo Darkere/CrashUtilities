@@ -178,6 +178,7 @@ public class PlayerInvContainer extends AbstractContainerMenu {
         super.removed(playerIn);
 
         if (!world.isClientSide() && !playerIn.getServer().getPlayerList().getPlayers().contains(otherPlayer)) {
+            CuriosApi.getCuriosInventory(otherPlayer);
             ((ServerLevel) world).getServer().playerDataStorage.save(otherPlayer);
         }
     }
