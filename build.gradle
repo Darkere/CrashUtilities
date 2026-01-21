@@ -206,8 +206,9 @@ neoForge.ideSyncTask generateModMetadata
 task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
     apiToken = System.getenv('curseforge_token')
     def mainFile = upload(371813, jar)
-    mainFile.releaseType = "beta"
-    mainFile.changelog = '- fix rareish crash'
+    mainFile.releaseType = "release"
+    mainFile.addModLoader("NeoForge")
+    mainFile.changelog = '- fix another curios deletion bug'
 }
 
 // Example configuration to allow publishing using the maven-publish plugin
