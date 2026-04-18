@@ -7,13 +7,17 @@ import com.darkere.crashutils.Network.DataRequestType;
 import com.darkere.crashutils.Network.Network;
 import com.darkere.crashutils.Network.TeleportMessage;
 import com.darkere.crashutils.Screens.Types.DropDownType;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
@@ -35,8 +39,8 @@ public class CUScreen extends Screen {
     int centerY;
     int activeTab = 0;
     int tabs = 2;
-    private static final ResourceLocation WINDOW = ResourceLocation.fromNamespaceAndPath(CrashUtils.MODID, "textures/gui/cuscreen.png");
-
+    private static final Identifier WINDOW = Identifier.fromNamespaceAndPath(CrashUtils.MODID, "textures/gui/cuscreen.png");
+    private static final CUTexture WINDOWTEXTURE = new CUTexture(WINDOW,0,0,400,216,512,512);
     public List<CUDropDown> topDropDowns = new ArrayList<>();
     CUButton updateButton;
     CUButton backButton;
@@ -88,42 +92,38 @@ public class CUScreen extends Screen {
         addWidget(backButton);
     }
 
-
     @Override
-    public void renderBackground(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
-        super.renderBackground(guiGraphics,pMouseX,pMouseY,pPartialTick);
-        int i = centerX - (400 / 2);
-        int j = centerY - (216 / 2);
-        guiGraphics.blit(WINDOW, i, j, 0, 0, 400, 216, 512, 512);
-        renderTabs(guiGraphics);
-
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractBackground(graphics, mouseX, mouseY, a);
+        GuiTools.blit(graphics, WINDOWTEXTURE, centerX,centerY, DrawPosition.Centered);
+        renderTabs(graphics);
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mx, int my, float partialTicks) {
-        super.render(guiGraphics, mx, my, partialTicks);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mx, int my, float partialTicks) {
+        super.extractRenderState(graphics, mx, my, partialTicks);
         centerX = width / 2;
         centerY = height / 2;
-        guiGraphics.fill( centerX + 173, centerY - 105, centerX + 195, centerY - 93, contentGUI.shouldUpdate ? 0xff51f542 : 0xfff54242);
+        graphics.fill( centerX + 173, centerY - 105, centerX + 195, centerY - 93, contentGUI.shouldUpdate ? 0xff51f542 : 0xfff54242);
         updateButton.setX(centerX + 174);
         updateButton.setY(centerY - 104);
         backButton.setX(centerX + 145);
         backButton.setY(centerY - 103);
 
-        updateButton.render(guiGraphics, mx, my, partialTicks);
-        backButton.render(guiGraphics, mx, my, partialTicks);
-        contentGUI.render(guiGraphics, centerX, centerY, mx, my, partialTicks);
-        topDropDowns.forEach(x -> x.render(guiGraphics, centerX, centerY));
-        renderToolTips(guiGraphics, mx, my);
+        updateButton.extractRenderState(graphics, mx, my, partialTicks);
+        backButton.extractRenderState(graphics, mx, my, partialTicks);
+        contentGUI.render(graphics, centerX, centerY, mx, my, partialTicks);
+        topDropDowns.forEach(x -> x.render(graphics, centerX, centerY));
+        renderToolTips(graphics, mx, my);
     }
 
-    private void renderToolTips(GuiGraphics guiGraphics, int mx, int my) {
+    private void renderToolTips(GuiGraphicsExtractor guiGraphics, int mx, int my) {
         List<Component> tooltips = new ArrayList<>();
+//        tooltips.add(CommandUtils.CreateTextComponent("X:"+ mx + " Y:" + my));
         if (contentGUI.isMouseOver(mx, my, centerX, centerY)) {
-            if (contentGUI instanceof MapGUI) {
-                MapGUI gui = (MapGUI) contentGUI;
+            if (contentGUI instanceof MapGUI gui) {
                 ChunkPos chunkPos = gui.getChunkFor(mx, my);
-                tooltips.add(CommandUtils.CreateTextComponent("Chunk: X: " + chunkPos.x + " Z: " + chunkPos.z));
+                tooltips.add(CommandUtils.CreateTextComponent("Chunk: X: " + chunkPos.x() + " Z: " + chunkPos.z()));
                 String loc = gui.getLocFor(mx, my);
                 tooltips.add(CommandUtils.CreateTextComponent("State: " + gui.getNameForLocationType(loc)));
                 StringBuilder builder = new StringBuilder();
@@ -152,13 +152,13 @@ public class CUScreen extends Screen {
         }
 
         if (!tooltips.isEmpty()) {
-            guiGraphics.renderTooltip( Minecraft.getInstance().font,tooltips, Optional.empty(), mx, my);
+            guiGraphics.setTooltipForNextFrame( Minecraft.getInstance().font,tooltips, Optional.empty(), mx, my);
         }
     }
 
-    private void renderTabs(GuiGraphics guiGraphics) {
-        int x = centerX - (400 / 2);
-        int y = centerY - (216 / 2) - 22;
+    private void renderTabs(GuiGraphicsExtractor guiGraphics) {
+        int x = centerX - (WINDOWTEXTURE.Width / 2);
+        int y = centerY - (WINDOWTEXTURE.Height / 2) - 22;
 //        RenderSystem.setShader(GameRenderer::getPositionTexShader);
 //        RenderSystem.setShaderTexture(0, TABS);
         float iconScale = 3.75f;
@@ -198,48 +198,50 @@ public class CUScreen extends Screen {
     }
 
     @Override
-    public boolean mouseDragged(double XStart, double YStart, int Button, double XDif, double YDif) {
+    public boolean mouseDragged(MouseButtonEvent event, double XDif, double YDif) {
         if (dragging) {
             contentGUI.addOffset(-XDif, -YDif);
             return true;
         }
-        return super.mouseDragged(XStart, YStart, Button, XDif, YDif);
+        return super.mouseDragged(event,XDif, YDif);
     }
 
     @Override
-    public boolean mouseReleased(double p_mouseReleased_1_, double p_mouseReleased_3_, int p_mouseReleased_5_) {
-        if (p_mouseReleased_5_ == 0) {
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             dragging = false;
         }
-        return super.mouseReleased(p_mouseReleased_1_, p_mouseReleased_3_, p_mouseReleased_5_);
+        return super.mouseReleased(event);
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int mouseButton) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleclick) {
+        double mx = event.x();
+        double my = event.y();
         for (CUDropDown dropDown : topDropDowns) {
             if (dropDown.checkClick((int) mx, (int) my)) {
                 return true;
             }
         }
-        if (contentGUI.mouseClickedOutside(mx, my, centerX, centerY, mouseButton)) {
+        if (contentGUI.mouseClickedOutside(event,doubleclick)) {
             return true;
         }
 
         if (contentGUI.isMouseOver(mx, my, centerX, centerY)) {
             dragging = true;
-            if ((contentGUI.mouseClicked(mx, my, mouseButton))) {
+            if ((contentGUI.mouseClicked(event,doubleclick))) {
                 return true;
             }
         }
         if (my > centerY - 126 && my < centerY - 107) {
-            return clickedTabArea(mx, my, mouseButton);
+            return clickedTabArea(mx, my, event.button());
         }
         if (Instant.now().getEpochSecond() - doubleClickTimer < 1) {
 
             //TODO: move to GridChunkGUI
             if (contentGUI.isMouseOver(mx, my, centerX, centerY)) {
                 if (Math.sqrt(((oldClickX - mx) * (oldClickX - mx)) + ((OldClickY - my) * (OldClickY - my))) > 5)
-                    return super.mouseClicked(mx, my, mouseButton);
+                    return super.mouseClicked(event, doubleclick);
                 if (contentGUI instanceof MapGUI gui) {
                     BlockPos pos = gui.getChunkFor((int) mx, (int) my).getWorldPosition();
                     Network.sendToServer(new TeleportMessage(dim, dim, pos));
@@ -251,7 +253,7 @@ public class CUScreen extends Screen {
             oldClickX = mx;
             OldClickY = my;
         }
-        return super.mouseClicked(mx, my, mouseButton);
+        return super.mouseClicked(event, doubleclick);
 
     }
 
@@ -310,19 +312,19 @@ public class CUScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (contentGUI.keyPressed(keyCode, scanCode, modifiers)) {
+    public boolean keyPressed(KeyEvent event) {
+        if (contentGUI.keyPressed(event)) {
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override
-    public boolean charTyped(char p_charTyped_1_, int p_charTyped_2_) {
-        if (contentGUI.charTyped(p_charTyped_1_, p_charTyped_2_)) {
+    public boolean charTyped(CharacterEvent event) {
+        if (contentGUI.charTyped(event)) {
             return true;
         }
-        return super.charTyped(p_charTyped_1_, p_charTyped_2_);
+        return super.charTyped(event);
     }
 
     public void updateSelection(DropDownType ddtype, String s) {

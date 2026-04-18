@@ -4,7 +4,7 @@ import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.Screens.Types.DropDownType;
 import com.mojang.math.Transformation;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import org.apache.commons.lang3.StringUtils;
 
@@ -69,14 +69,14 @@ public class CUDropDown {
         this.fitOnScreen = fitOnScreen;
     }
 
-    public void render(GuiGraphics guiGraphics, int centerX, int centerY) {
-        guiGraphics.pose().pushPose();
+    public void render(GuiGraphicsExtractor guiGraphics, int centerX, int centerY) {
+        guiGraphics.pose().pushMatrix();
         posX = centerX + defaultXRenderOffset + 1;
         posY = centerY + defaultYRenderOffset + 1;
         if (!isEnabled) return;
         List<FillMany.ColoredRectangle> list = new ArrayList<>();
         strings = new ArrayList<>();
-        widget.render(guiGraphics, posX, posY, 0);
+        widget.extractRenderState(guiGraphics, posX, posY, 0);
 
         if (expanded) {
             boolean colored = false;
@@ -94,9 +94,9 @@ public class CUDropDown {
                 colored = !colored;
             }
         }
-        FillMany.fillMany(Transformation.identity().getMatrix(), list);
+        FillMany.fillMany(guiGraphics, list);
         FillMany.drawStrings(guiGraphics, Minecraft.getInstance().font, strings);
-        guiGraphics.pose().popPose();
+        guiGraphics.pose().popMatrix();
     }
 
     public void setSortByName(boolean sortByname) {

@@ -5,8 +5,9 @@ import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.DataStructures.DataHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.UUID;
 
 public class CUOption {
 
-    ResourceLocation rl;
+    Identifier rl;
     int number;
     ChunkPos chunkPos;
     BlockPos blockPos;
@@ -37,19 +38,19 @@ public class CUOption {
         this.string = string;
     }
 
-    public CUOption(ResourceLocation rl, int number) {
+    public CUOption(Identifier rl, int number) {
         this.rl = rl;
         this.number = number;
     }
 
 
-    public CUOption(ChunkPos chunkPos, int number, ResourceLocation rl) {
+    public CUOption(ChunkPos chunkPos, int number, Identifier rl) {
         this.chunkPos = chunkPos;
         this.number = number;
         this.rl = rl;
     }
 
-    public CUOption(ResourceLocation rl) {
+    public CUOption(Identifier rl) {
         this.rl = rl;
     }
 
@@ -66,7 +67,7 @@ public class CUOption {
         this.id = id;
     }
 
-    public ResourceLocation getRl() {
+    public Identifier getRl() {
         return rl;
     }
 
@@ -117,10 +118,10 @@ public class CUOption {
         return rl != null && !rl.toString().startsWith(filter) && !rl.getPath().startsWith(filter);
     }
 
-    public boolean checkClick(int mx, int my, CUScreen screen) {
+    public boolean checkClick(MouseButtonEvent event, CUScreen screen) {
         for (Button x : buttons) {
-            if (x.isMouseOver(mx, my)) {
-                x.onPress();
+            if (x.isMouseOver(event.x(), event.y())) {
+                x.onPress(event);
                 CrashUtils.runInTwoTicksClient(() ->
                     DataHolder.requestImmediateUpdate(screen.dim)
                 );

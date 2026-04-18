@@ -3,9 +3,8 @@ package com.darkere.crashutils.DataStructures;
 import com.darkere.crashutils.CommandUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -13,36 +12,37 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import java.util.*;
 
 public class TileEntityData extends LocationData {
-    Map<ResourceLocation, Boolean> tickmap = new HashMap<>();
+    Map<Identifier, Boolean> tickmap = new HashMap<>();
     public static Map<UUID, WorldPos> TEID = new HashMap<>();
 
     public TileEntityData() {
         for (Map.Entry<ResourceKey<BlockEntityType<?>>, BlockEntityType<?>> entry : BuiltInRegistries.BLOCK_ENTITY_TYPE.entrySet()) {
-            map.put(entry.getKey().location(), new ArrayList<>());
+            map.put(entry.getKey().identifier(), new ArrayList<>());
         }
     }
 
-    public TileEntityData(Map<ResourceLocation, List<WorldPos>> map) {
+    public TileEntityData(Map<Identifier, List<WorldPos>> map) {
         this.map = map;
     }
 
     public void createLists(List<ServerLevel> worlds) {
         for (ServerLevel level : worlds) {
-            for (ChunkHolder chunk : level.getChunkSource().chunkMap.getChunks()) {
+            level.getChunkSource().chunkMap.forEachBlockTickingChunk(chunk ->{
                 if (chunk.getFullStatus().isOrAfter(FullChunkStatus.BLOCK_TICKING)) {
-                    chunk.getTickingChunk().getBlockEntities().forEach((pos,e) ->{
+                    chunk.getBlockEntities().forEach((pos,e) ->{
                         WorldPos wp = new WorldPos(pos, level.dimension(), UUID.randomUUID());
                         TEID.put(wp.getID(), wp);
-                        map.get(BlockEntityType.getKey(e.getType())).add(wp);
+                        map.get(e.typeHolder().getKey()).add(wp);
                     });
                 }
-            }
+            });
+
         }
 
        // total = ticking.size();
     }
 
-    public void reply(ResourceLocation res, CommandSourceStack source) {
+    public void reply(Identifier res, CommandSourceStack source) {
         if (res == null) {
             map.entrySet().stream().filter(x -> !x.getValue().isEmpty()).sorted(Comparator.comparingInt(e -> e.getValue().size())).forEach((e) -> {
                 CommandUtils.sendFindTEMessage(source, e.getKey(), e.getValue().size(), tickmap.containsKey(e.getKey()));

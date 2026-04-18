@@ -16,12 +16,15 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -62,17 +65,21 @@ public class CrashUtils {
     public static boolean skipNext = false;
     public static boolean skipNextClient = false;
     public static boolean isServer = false;
-
-    public static ResourceLocation ResourceLocation(String Path){
-        return ResourceLocation.fromNamespaceAndPath(MODID,Path);
+    public static ProblemReporter.Collector PROBLEM_COLLECTOR = new  ProblemReporter.Collector();
+    public static Permission.HasCommandLevel GAMEMASTER_PERMISSIONS = new Permission.HasCommandLevel(PermissionLevel.GAMEMASTERS);
+    public static boolean HasCUPerms(Player player) { return player.permissions().hasPermission(GAMEMASTER_PERMISSIONS); }
+    public static boolean HasCUPerms(CommandSourceStack Stack) { return  !Stack.isPlayer() || CrashUtils.HasCUPerms(Stack.getPlayer());}
+    public static Identifier Identifier(String Path){
+        return Identifier.fromNamespaceAndPath(MODID,Path);
     }
 
     public CrashUtils(IEventBus ModEventBus, ModContainer modContainer) {
         ModEventBus.addListener(this::configReload);
         ModEventBus.addListener(Network::register);
-        if (FMLEnvironment.dist == Dist.CLIENT) {
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
             NeoForge.EVENT_BUS.register(new ClientEvents());
             ModEventBus.addListener(ClientEvents::registerKeybindings);
+            ModEventBus.addListener(ClientEvents::registerClientNetworking);
         }
         NeoForge.EVENT_BUS.register(this);
         modContainer.registerConfig(ModConfig.Type.SERVER, SERVER_CONFIG.getSpec());
@@ -105,7 +112,7 @@ public class CrashUtils {
         CommandNode<CommandSourceStack> inventoryCommands = InventoryCommands.register();
 
         LiteralCommandNode<CommandSourceStack> cmd = dispatcher.register(LiteralArgumentBuilder.<CommandSourceStack>literal(MODID)
-                .requires(x -> x.hasPermission(CommandUtils.PERMISSION_LEVEL))
+                .requires(CrashUtils::HasCUPerms)
                 .then(TeleportCommand.register())
                 .then(UnstuckCommand.register())
                 .then(MemoryCommand.register())
@@ -137,7 +144,7 @@ public class CrashUtils {
 
         );
         dispatcher.register(Commands.literal("cu")
-                .requires(x -> x.hasPermission(CommandUtils.PERMISSION_LEVEL))
+                .requires(CrashUtils::HasCUPerms)
                 .redirect(cmd)
         );
 

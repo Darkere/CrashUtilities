@@ -4,6 +4,7 @@ import com.darkere.crashutils.CrashUtils;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
@@ -33,6 +34,6 @@ public class Network {
     }
 
     public static void sendToServer(CustomPacketPayload message) {
-        PacketDistributor.sendToServer(message);
+        ClientPacketDistributor.sendToServer(message);
     }
 }

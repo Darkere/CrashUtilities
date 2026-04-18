@@ -9,6 +9,7 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.world.entity.player.Inventory;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 
@@ -25,22 +26,16 @@ public class InventoryLookCommand {
 
     public static int printInventory(CommandContext<CommandSourceStack> context, String name) {
         WorldUtils.applyToPlayer(name, context.getSource().getServer(), (playerEntity) -> {
-            context.getSource().sendSuccess(()->CommandUtils.coloredComponent("Offhand", ChatFormatting.DARK_AQUA), true);
-            for (int i = 0; i < playerEntity.getInventory().offhand.size(); i++) {
-                if (!playerEntity.getInventory().offhand.get(i).isEmpty()) {
-                    CommandUtils.sendItemInventoryRemovalMessage(context.getSource(), name, playerEntity.getInventory().offhand.get(i), "offhand", i);
-                }
-            }
-            context.getSource().sendSuccess(()->CommandUtils.coloredComponent("Armor", ChatFormatting.DARK_AQUA), true);
-            for (int i = 0; i < playerEntity.getInventory().armor.size(); i++) {
-                if (!playerEntity.getInventory().armor.get(i).isEmpty()) {
-                    CommandUtils.sendItemInventoryRemovalMessage(context.getSource(), name, playerEntity.getInventory().armor.get(i), "armor", i);
-                }
-            }
+            context.getSource().sendSuccess(()->CommandUtils.coloredComponent("Equipment", ChatFormatting.DARK_AQUA), true);
+            Inventory.EQUIPMENT_SLOT_MAPPING.forEach((slot, equipmentSlot) -> {
+                var Item = playerEntity.getInventory().getItem(equipmentSlot.getIndex(Inventory.INVENTORY_SIZE));
+                if(!Item.isEmpty())
+                    CommandUtils.sendItemInventoryRemovalMessage(context.getSource(),name,Item,"equipment",slot);
+            });
             context.getSource().sendSuccess(()->CommandUtils.coloredComponent("Inventory", ChatFormatting.DARK_AQUA), true);
-            for (int i = 0; i < playerEntity.getInventory().items.size(); i++) {
-                if (!playerEntity.getInventory().items.get(i).isEmpty()) {
-                    CommandUtils.sendItemInventoryRemovalMessage(context.getSource(), name, playerEntity.getInventory().items.get(i), "inventory", i);
+            for (int i = 0; i < playerEntity.getInventory().getNonEquipmentItems().size(); i++) {
+                if (!playerEntity.getInventory().getNonEquipmentItems().get(i).isEmpty()) {
+                    CommandUtils.sendItemInventoryRemovalMessage(context.getSource(), name, playerEntity.getInventory().getNonEquipmentItems().get(i), "inventory", i);
                 }
             }
             if (CrashUtils.curiosLoaded) {

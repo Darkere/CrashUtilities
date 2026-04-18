@@ -1,7 +1,7 @@
 package com.darkere.crashutils.DataStructures;
 
 import com.darkere.crashutils.Screens.CUOption;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.ArrayList;
@@ -12,38 +12,38 @@ import java.util.Map;
 public abstract class LocationData {
     Map<ChunkPos, List<WorldPos>> chunkMap = new HashMap<>();
     Map<ChunkPos, WorldPos> tpPos = new HashMap<>();
-    Map<ResourceLocation, List<WorldPos>> map = new HashMap<>();
+    Map<Identifier, List<WorldPos>> map = new HashMap<>();
     int total = 0;
     String lastFill = "";
 
-    public LocationData(Map<ResourceLocation, List<WorldPos>> map) {
+    public LocationData(Map<Identifier, List<WorldPos>> map) {
         this.map = map;
     }
 
     public LocationData() {
     }
 
-    public Map<ResourceLocation, List<WorldPos>> getMap() {
+    public Map<Identifier, List<WorldPos>> getMap() {
         return map;
     }
-    public HashMap<ResourceLocation, List<WorldPos>> getHashMap() {
-        return (HashMap<ResourceLocation, List<WorldPos>>) map;
+    public HashMap<Identifier, List<WorldPos>> getHashMap() {
+        return (HashMap<Identifier, List<WorldPos>>) map;
     }
 
     public void fillChunkMaps(String rl) {
         if (lastFill.equals(rl)) return;
         lastFill = rl;
-        ResourceLocation resourceLocation = ResourceLocation.parse(rl);
+        Identifier id = Identifier.parse(rl);
         chunkMap.clear();
         tpPos.clear();
         List<WorldPos> positions = new ArrayList<>();
         if (rl.isEmpty()) {
             map.values().forEach(positions::addAll);
         } else {
-            positions.addAll(map.get(resourceLocation));
+            positions.addAll(map.get(id));
         }
         for (WorldPos pos : positions) {
-            ChunkPos chunkPos = new ChunkPos(pos.pos());
+            ChunkPos chunkPos = ChunkPos.containing(pos.pos());
             if (!chunkMap.containsKey(chunkPos)) {
                 chunkMap.put(chunkPos, new ArrayList<>());
             }
@@ -67,7 +67,7 @@ public abstract class LocationData {
         return list;
     }
 
-    public List<CUOption> getAsCUOptionsOfType(ResourceLocation name) {
+    public List<CUOption> getAsCUOptionsOfType(Identifier name) {
         List<CUOption> list = new ArrayList<>();
         fillChunkMaps(name.toString());
         chunkMap.forEach((chunk, listPos) -> {
@@ -77,7 +77,7 @@ public abstract class LocationData {
     }
 
 
-    public List<CUOption> getInChunkAsCUOptions(ChunkPos chunkPos, ResourceLocation name) {
+    public List<CUOption> getInChunkAsCUOptions(ChunkPos chunkPos, Identifier name) {
         List<CUOption> list = new ArrayList<>();
         fillChunkMaps(name.toString());
         var chunks = chunkMap.get(chunkPos);

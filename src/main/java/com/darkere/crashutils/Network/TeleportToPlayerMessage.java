@@ -16,7 +16,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import java.util.concurrent.atomic.AtomicReference;
 
 public record TeleportToPlayerMessage(String name) implements CustomPacketPayload {
-    public static final Type<TeleportToPlayerMessage> TYPE = new Type<>(CrashUtils.ResourceLocation("teleporttoplayermessage"));
+    public static final Type<TeleportToPlayerMessage> TYPE = new Type<>(CrashUtils.Identifier("teleporttoplayermessage"));
     public static final StreamCodec<? super RegistryFriendlyByteBuf, TeleportToPlayerMessage> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8,TeleportToPlayerMessage::name,
             TeleportToPlayerMessage::new
@@ -28,12 +28,13 @@ public record TeleportToPlayerMessage(String name) implements CustomPacketPayloa
 
     public static void handle(TeleportToPlayerMessage data, IPayloadContext ctx) {
             ServerPlayer player = (ServerPlayer) ctx.player();
-            if (!player.hasPermissions(CommandUtils.PERMISSION_LEVEL)) return;
-            Level ori = player.getCommandSenderWorld();
+            if (!CrashUtils.HasCUPerms(player))
+                return;
+            Level ori = player.level();
             AtomicReference<Level> dest = new AtomicReference<>();
             AtomicReference<BlockPos> otherPos = new AtomicReference<>();
-            WorldUtils.applyToPlayer(data.name, player.server, o -> {
-                dest.set(o.getCommandSenderWorld());
+            WorldUtils.applyToPlayer(data.name, player.level().getServer(), o -> {
+                dest.set(o.level());
                 otherPos.set(o.blockPosition());
             });
             if (otherPos.get() == null) {

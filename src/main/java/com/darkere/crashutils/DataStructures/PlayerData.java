@@ -1,9 +1,9 @@
 package com.darkere.crashutils.DataStructures;
 
+import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.Screens.CUOption;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -11,14 +11,13 @@ import net.minecraft.server.level.ServerLevel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class PlayerData {
     public List<String> playerNames = new ArrayList<>();
     public static final StreamCodec<ByteBuf, PlayerData> STREAM_CODEC = ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()).map(PlayerData::new, PlayerData::getData);
 
     public void createLists(List<ServerLevel> worlds) {
-        playerNames = worlds.get(0).getServer().getProfileCache().getTopMRUProfiles(1000).map(e -> e.getProfile().getName()).collect(Collectors.toList());
+        playerNames = CommandUtils.GetPlayerNames(worlds.get(0).getServer()).toList();
     }
 
     public static List<String> getData(PlayerData data) {

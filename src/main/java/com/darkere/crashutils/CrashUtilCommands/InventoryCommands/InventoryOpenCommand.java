@@ -1,6 +1,8 @@
 package com.darkere.crashutils.CrashUtilCommands.InventoryCommands;
 
 import com.darkere.crashutils.CommandUtils;
+import com.darkere.crashutils.CrashUtils;
+import com.darkere.crashutils.WorldUtils;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -10,6 +12,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -18,6 +21,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.TagValueInput;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
 import javax.annotation.Nullable;
@@ -41,18 +45,9 @@ public class InventoryOpenCommand {
         ServerPlayer sourcePlayer = (ServerPlayer) ctx.getSource().getEntity();
         Player otherPlayer = ctx.getSource().getServer().getPlayerList().getPlayerByName(playerName);
         if (otherPlayer == null) {
-            Optional<GameProfile> profile = ctx.getSource().getServer().getProfileCache().get(playerName);
-            if (profile.isEmpty()) {
-                CommandUtils.sendMessageToPlayer(sourcePlayer, "Cannot find Player");
+            otherPlayer = WorldUtils.loadFakePlayer(playerName, sourcePlayer.level().getServer(), sourcePlayer);
+            if (otherPlayer == null)
                 return 0;
-            }
-            otherPlayer = new FakePlayer(ctx.getSource().getServer().getLevel(Level.OVERWORLD), profile.get());
-            Optional<CompoundTag> nbt = ctx.getSource().getServer().playerDataStorage.load(otherPlayer);
-            if (nbt.isEmpty()) {
-                sourcePlayer.sendSystemMessage(CommandUtils.CreateTextComponent("Cannot load playerData"), false);
-                return 0;
-            }
-            otherPlayer.load(nbt.get());
         }
 
 //        if (data != null && data.getModList().contains(CrashUtils.MODID)) {
@@ -102,4 +97,6 @@ public class InventoryOpenCommand {
 
         return Command.SINGLE_SUCCESS;
     }
+
+
 }

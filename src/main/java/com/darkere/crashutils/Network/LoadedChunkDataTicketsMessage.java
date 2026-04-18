@@ -2,7 +2,6 @@ package com.darkere.crashutils.Network;
 
 import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.DataStructures.DataHolder;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -17,9 +16,9 @@ import java.util.Set;
 
 public record LoadedChunkDataTicketsMessage(Map<String, Set<ChunkPos>> data) implements CustomPacketPayload {
 
-    public static final Type<LoadedChunkDataTicketsMessage> TYPE = new Type<>(CrashUtils.ResourceLocation( "loadedchunkdataticketsmessage"));
+    public static final Type<LoadedChunkDataTicketsMessage> TYPE = new Type<>(CrashUtils.Identifier( "loadedchunkdataticketsmessage"));
     public static final StreamCodec<? super RegistryFriendlyByteBuf, LoadedChunkDataTicketsMessage> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.map(HashMap::new,ByteBufCodecs.STRING_UTF8,ByteBufCodecs.VAR_LONG.map(ChunkPos::new,ChunkPos::toLong).apply(ByteBufCodecs.list()).map(HashSet::new, x -> x.stream().toList())),
+            ByteBufCodecs.map(HashMap::new,ByteBufCodecs.STRING_UTF8,ByteBufCodecs.VAR_LONG.map(ChunkPos::unpack,ChunkPos::pack).apply(ByteBufCodecs.list()).map(HashSet::new, x -> x.stream().toList())),
             LoadedChunkDataTicketsMessage::data,
             LoadedChunkDataTicketsMessage::new
     );

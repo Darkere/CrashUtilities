@@ -8,20 +8,24 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.*;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.CachedUserNameToIdResolver;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.net.URI;
+import java.util.stream.Stream;
+
 public class CommandUtils {
-    public static final int PERMISSION_LEVEL = 2;
     private static final Logger LOGGER = LogManager.getLogger();
     public static final SuggestionProvider<CommandSourceStack> PROFILEPROVIDER = (ctx, builder) ->
-        SharedSuggestionProvider.suggest(ctx.getSource().getServer().getProfileCache().getTopMRUProfiles(1000).map(e -> e.getProfile().getName()), builder);
+        SharedSuggestionProvider.suggest(GetPlayerNames(ctx.getSource().getServer()), builder);
 
     public static void sendNormalMessage(CommandSourceStack source, String msg, ChatFormatting color) {
         MutableComponent text = CommandUtils.CreateTextComponent(msg);
@@ -36,10 +40,10 @@ public class CommandUtils {
     public static void sendCommandMessage(CommandSourceStack source, MutableComponent text, String command, boolean runDirectly) {
 
         Style style = text.getStyle();
-        ClickEvent click = new ClickEvent(runDirectly ? ClickEvent.Action.RUN_COMMAND : ClickEvent.Action.SUGGEST_COMMAND, command);
+        ClickEvent click = runDirectly ? new ClickEvent.RunCommand(command) : new ClickEvent.SuggestCommand(command);
         style = style.applyTo(style.withClickEvent(click));
 
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, CommandUtils.CreateTextComponent("Click to execute \u00A76" + command + "\u00A7r"));
+        HoverEvent hoverEvent = new HoverEvent.ShowText(CommandUtils.CreateTextComponent("Click to execute \u00A76" + command + "\u00A7r"));
         style = style.applyTo(style.withHoverEvent(hoverEvent));
         MutableComponent tex = text.setStyle(style);
         source.sendSuccess(()->tex, false);
@@ -56,10 +60,10 @@ public class CommandUtils {
         } catch (CommandSyntaxException e) {
             e.printStackTrace();
         }
-        sendCommandMessage(source, text, "/cu tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + worldPos.type().location(), runDirectly);
+        sendCommandMessage(source, text, "/cu tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + worldPos.type().identifier(), runDirectly);
     }
 
-    public static void sendFindTEMessage(CommandSourceStack source, ResourceLocation res, int count, boolean ticking) {
+    public static void sendFindTEMessage(CommandSourceStack source, Identifier res, int count, boolean ticking) {
         MutableComponent text = CommandUtils.CreateTextComponent(res.toString()).withStyle(ChatFormatting.AQUA);
         text.append(CommandUtils.CreateTextComponent(" Count ").withStyle(ChatFormatting.DARK_RED));
         text.append(CommandUtils.CreateTextComponent(Integer.toString(count)).withStyle(ChatFormatting.GREEN));
@@ -79,10 +83,10 @@ public class CommandUtils {
         } catch (CommandSyntaxException e) {
 
         }
-        sendCommandMessage(source, text, "/cu tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + type.location(), runDirectly);
+        sendCommandMessage(source, text, "/cu tp " + (player != null ? player.getName().getString() : "Console") + " " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " " + type.identifier(), runDirectly);
     }
 
-    public static void sendFindEMessage(CommandSourceStack source, ResourceLocation res, int count) {
+    public static void sendFindEMessage(CommandSourceStack source, Identifier res, int count) {
         MutableComponent text = CommandUtils.CreateTextComponent(String.valueOf(count)).withStyle(ChatFormatting.BLUE);
         text.append(CommandUtils.CreateTextComponent("x ").withStyle(ChatFormatting.YELLOW));
         text.append(CommandUtils.CreateTextComponent(res.toString()).withStyle(ChatFormatting.AQUA));
@@ -103,8 +107,8 @@ public class CommandUtils {
 
     public static MutableComponent createURLComponent(String display, String url) {
         MutableComponent text = CommandUtils.CreateTextComponent(display);
-        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.OPEN_URL, url);
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, CommandUtils.CreateTextComponent("Go to " + url));
+        ClickEvent clickEvent = new ClickEvent.OpenUrl(URI.create(url));
+        HoverEvent hoverEvent = new HoverEvent.ShowText(CommandUtils.CreateTextComponent("Go to " + url));
         Style style = Style.EMPTY;
         style = style.applyTo(style.withClickEvent(clickEvent));
         style = style.applyTo(style.withHoverEvent(hoverEvent));
@@ -115,8 +119,8 @@ public class CommandUtils {
     public static MutableComponent createCopyComponent(String display, String toCopy) {
         MutableComponent text = CommandUtils.CreateTextComponent(display);
         Style style = Style.EMPTY;
-        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, toCopy);
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, CommandUtils.CreateTextComponent("Copy Contents to Clipboard"));
+        ClickEvent clickEvent = new ClickEvent.CopyToClipboard(toCopy);
+        HoverEvent hoverEvent = new HoverEvent.ShowText(CommandUtils.CreateTextComponent("Copy Contents to Clipboard"));
         style = style.applyTo(style.withClickEvent(clickEvent));
         style = style.applyTo(style.withHoverEvent(hoverEvent));
         text.setStyle(style);
@@ -127,8 +131,8 @@ public class CommandUtils {
     public static MutableComponent getCommandTextComponent(String display, String command) {
         MutableComponent text = CommandUtils.CreateTextComponent(display);
         Style style = Style.EMPTY;
-        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, command);
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, CommandUtils.CreateTextComponent("Click to execute \u00A76" + command + "\u00A7r"));
+        ClickEvent clickEvent = new ClickEvent.RunCommand(command);
+        HoverEvent hoverEvent = new HoverEvent.ShowText(CommandUtils.CreateTextComponent("Click to execute \u00A76" + command + "\u00A7r"));
         style = style.applyTo(style.withClickEvent(clickEvent));
         style = style.applyTo(style.withHoverEvent(hoverEvent));
         text.setStyle(style);
@@ -141,5 +145,9 @@ public class CommandUtils {
     }
     public static MutableComponent CreateTextComponent(String text){
         return Component.literal(text);
+    }
+
+    public static Stream<String> GetPlayerNames(MinecraftServer server) {
+        return ((CachedUserNameToIdResolver)server.services().nameToIdCache()).getTopMRUProfiles(1000).map((gameProfileInfo -> gameProfileInfo.nameAndId().name()));
     }
 }

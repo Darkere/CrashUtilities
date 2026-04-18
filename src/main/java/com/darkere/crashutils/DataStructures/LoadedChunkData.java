@@ -7,8 +7,11 @@ import com.darkere.crashutils.Screens.CUOption;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.*;
-import net.minecraft.util.SortedArraySet;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -18,6 +21,8 @@ import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class LoadedChunkData {
     Map<String, Set<ChunkPos>> chunksByTicketName = new HashMap<>();
@@ -51,7 +56,7 @@ public class LoadedChunkData {
             ChunkMap chunkManager = ((ServerChunkCache) world.getChunkSource()).chunkMap;
             DistanceManager ticketManager = chunkManager.getDistanceManager();
             total += chunkManager.size();
-            Iterable<ChunkHolder> chunkHolders = chunkManager.getChunks();
+            Stream<ChunkHolder> chunkHolders = chunkManager.allChunksWithAtLeastStatus(ChunkStatus.LIGHT);
             chunkHolders.forEach(chunkHolder -> {
                 ChunkAccess chunk = chunkHolder.getLatestChunk();
                 LocationTickets ticketCounter = null;
@@ -91,15 +96,15 @@ public class LoadedChunkData {
 
                     }
                 }
-                SortedArraySet<Ticket<?>> tickets = ticketManager.getTickets(chunkHolder.getPos().toLong());
+                List<Ticket> tickets = ticketManager.ticketStorage.getTickets(chunkHolder.getPos().pack());
                 if (tickets.isEmpty()) {
-                    chunksByTicketName.merge("no_ticket", new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (old, nothing) -> {
+                    chunksByTicketName.merge("", new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (old, nothing) -> {
                         old.add(chunkHolder.getPos());
                         return old;
                     });
                 } else {
-                    for (Ticket<?> ticket : tickets) {
-                        chunksByTicketName.merge(ticket.getType().toString(), new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (old, nothing) -> {
+                    for (Ticket ticket : tickets) {
+                        chunksByTicketName.merge(Util.getRegisteredName(BuiltInRegistries.TICKET_TYPE, ticket.getType()), new HashSet<>(Collections.singletonList(chunkHolder.getPos())), (old, nothing) -> {
                             old.add(chunkHolder.getPos());
                             return old;
                         });

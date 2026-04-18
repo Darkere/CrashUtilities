@@ -1,6 +1,8 @@
 package com.darkere.crashutils.CrashUtilCommands.InventoryCommands;
 
 import com.darkere.crashutils.CommandUtils;
+import com.darkere.crashutils.CrashUtils;
+import com.darkere.crashutils.WorldUtils;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -19,6 +21,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.TagValueInput;
 import net.neoforged.neoforge.common.util.FakePlayer;
 
 import javax.annotation.Nullable;
@@ -43,21 +46,8 @@ public class InventoryOpenEnderChestCommand {
         Player otherPlayer = ctx.getSource().getServer().getPlayerList().getPlayerByName(playerName);
 
 
-        if (otherPlayer == null) {
-            MinecraftServer server = sourcePlayer.getServer();
-            Optional<GameProfile> profile = server.getProfileCache().get(playerName);
-            if (profile.isEmpty()) {
-                CommandUtils.sendMessageToPlayer(sourcePlayer, "Cannot find Player");
-                return 0;
-            }
-            otherPlayer = new FakePlayer(Objects.requireNonNull(server.getLevel(Level.OVERWORLD)), profile.get());
-            Optional<CompoundTag> nbt = server.playerDataStorage.load(otherPlayer);
-            if (nbt.isEmpty()) {
-                CommandUtils.sendMessageToPlayer(sourcePlayer, "Cannot load playerData");
-                return 0;
-            }
-            otherPlayer.load(nbt.get());
-        }
+        if (otherPlayer == null)
+           otherPlayer = WorldUtils.loadFakePlayer(playerName,ctx.getSource().getServer(),sourcePlayer);
 
         Player finalOtherPlayer = otherPlayer;
 

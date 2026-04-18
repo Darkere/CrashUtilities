@@ -14,7 +14,7 @@ import java.util.Map;
 public record OpenPlayerInvMessage(Map<String, Integer> slotAmounts, String otherPlayerName,int windowID) implements CustomPacketPayload {
 
 
-    public static final Type<OpenPlayerInvMessage> TYPE = new Type<>(CrashUtils.ResourceLocation("openplayerinvmessage"));
+    public static final Type<OpenPlayerInvMessage> TYPE = new Type<>(CrashUtils.Identifier("openplayerinvmessage"));
     public static final StreamCodec<? super RegistryFriendlyByteBuf, OpenPlayerInvMessage> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.map(LinkedHashMap::new,ByteBufCodecs.STRING_UTF8,ByteBufCodecs.INT),OpenPlayerInvMessage::slotAmounts,
             ByteBufCodecs.STRING_UTF8,OpenPlayerInvMessage::otherPlayerName,

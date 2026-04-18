@@ -4,11 +4,9 @@ import com.darkere.crashutils.CommandUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -19,7 +17,7 @@ public class EntityData extends LocationData {
 
     public EntityData(){}
 
-    public EntityData(Map<ResourceLocation, List<WorldPos>> map) {
+    public EntityData(Map<Identifier, List<WorldPos>> map) {
         this.map = map;
     }
 
@@ -35,7 +33,7 @@ public class EntityData extends LocationData {
         total = entities.size();
     }
 
-    public void reply(ResourceLocation res, CommandSourceStack source) {
+    public void reply(Identifier res, CommandSourceStack source) {
         if (res == null) {
             map.entrySet().stream().filter(x -> x.getValue().size() != 0).sorted(Comparator.comparingInt(e -> e.getValue().size())).forEach((e) -> {
                 CommandUtils.sendFindEMessage(source, e.getKey(), e.getValue().size());
@@ -48,7 +46,7 @@ public class EntityData extends LocationData {
     }
 
 
-    private void sendEntityChunkMapCommand(CommandSourceStack source, ResourceLocation res) {
+    private void sendEntityChunkMapCommand(CommandSourceStack source, Identifier res) {
         fillChunkMaps(res.toString());
         CommandUtils.sendNormalMessage(source, res.toString(), ChatFormatting.DARK_BLUE);
         chunkMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.comparingInt(List::size))).forEach((k) -> CommandUtils.sendChunkEntityMessage(source, k.getValue().size(), tpPos.get(k.getKey()).pos(), tpPos.get(k.getKey()).type(), true));

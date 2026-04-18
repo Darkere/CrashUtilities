@@ -4,11 +4,13 @@ import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.DataStructures.DataHolder;
 import com.darkere.crashutils.Network.DataRequestType;
 import com.darkere.crashutils.Screens.Types.DropDownType;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
@@ -31,43 +33,43 @@ public class DataListGUI extends CUContentPane {
         loader.loadOrderedEntityList(false);
         filterWidget = new EditBox(Minecraft.getInstance().font, centerX - 107, centerY - 104, 150, Minecraft.getInstance().font.lineHeight + 2, CommandUtils.CreateTextComponent("Filter")){
             @Override
-            public boolean mouseClicked(double p_94125_, double p_94126_, int p_94127_) {
-                if(p_94127_ == 1)
+            public boolean mouseClicked(MouseButtonEvent event,boolean doubleclick) {
+                if(event.button() == InputConstants.MOUSE_BUTTON_RIGHT)
                     filterWidget.setValue("");
                 setFocused(true);
-                return super.mouseClicked(p_94125_, p_94126_, p_94127_);
+                return super.mouseClicked(event, doubleclick);
             }
         };
         filterWidget.setResponder(r -> loader.currentList.updateFilter(r));
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int centerX, int centerY, int mx, int my, float partialTicks) {
-        filterWidget.render(guiGraphics, mx, my, partialTicks);
+    public void render(GuiGraphicsExtractor guiGraphics, int centerX, int centerY, int mx, int my, float partialTicks) {
+        filterWidget.extractRenderState(guiGraphics, mx, my, partialTicks);
         super.render(guiGraphics, centerX, centerY, mx, my, partialTicks);
         loader.currentList.render(guiGraphics, mx, my, partialTicks);
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int mouseButton) {
-        return loader.currentList.checkClick((int) mx, (int) my);
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleclick) {
+        return loader.currentList.checkClick(event);
     }
 
     @Override
-    public boolean mouseClickedOutside(double mx, double my, int centerX, int centerY, int mouseButton) {
-        if(filterWidget.isMouseOver(mx,my))
-            return filterWidget.mouseClicked(mx, my, mouseButton);
+    public boolean mouseClickedOutside(MouseButtonEvent event, boolean doubleclick) {
+        if(filterWidget.isMouseOver(event.x(),event.y()))
+            return filterWidget.mouseClicked(event, doubleclick);
         return false;
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        return filterWidget.keyPressed(keyCode, scanCode, modifiers);
+    public boolean keyPressed(KeyEvent  keyEvent) {
+        return filterWidget.keyPressed(keyEvent);
     }
 
     @Override
-    public boolean charTyped(char p_charTyped_1_, int p_charTyped_2_) {
-        return filterWidget.charTyped(p_charTyped_1_, p_charTyped_2_);
+    public boolean charTyped(CharacterEvent characterEvent) {
+        return filterWidget.charTyped(characterEvent);
     }
 
     @Override

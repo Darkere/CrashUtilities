@@ -9,9 +9,9 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobCategory;
@@ -29,18 +29,18 @@ public class RemoveEntitiesCommand {
         return Commands.literal("remove")
             .executes(ctx -> removeEntities(ctx, null))
             .then(Commands.literal("byType")
-                .then(Commands.argument("type", ResourceLocationArgument.id())
+                .then(Commands.argument("type", IdentifierArgument.id())
                     .suggests(sugg)
-                    .executes(ctx -> removeEntities(ctx, ResourceLocationArgument.getId(ctx, "type")))
+                    .executes(ctx -> removeEntities(ctx, IdentifierArgument.getId(ctx, "type")))
                     .then(Commands.argument("force", StringArgumentType.word())
                         .suggests(boolsugg)
-                        .executes(ctx -> removeEntities(ctx, ResourceLocationArgument.getId(ctx, "type"))))))
-            .then(Commands.argument("type", ResourceLocationArgument.id())
+                        .executes(ctx -> removeEntities(ctx, IdentifierArgument.getId(ctx, "type"))))))
+            .then(Commands.argument("type", IdentifierArgument.id())
                 .suggests(sugg)
-                .executes(ctx -> removeEntities(ctx, ResourceLocationArgument.getId(ctx, "type")))
+                .executes(ctx -> removeEntities(ctx, IdentifierArgument.getId(ctx, "type")))
                 .then(Commands.argument("force", StringArgumentType.word())
                     .suggests(boolsugg)
-                    .executes(ctx -> removeEntities(ctx, ResourceLocationArgument.getId(ctx, "type")))))
+                    .executes(ctx -> removeEntities(ctx, IdentifierArgument.getId(ctx, "type")))))
             .then(Commands.literal("items")
                 .executes(ctx -> removeItems(ctx, null))
                 .then(Commands.argument("force", StringArgumentType.word())
@@ -66,7 +66,7 @@ public class RemoveEntitiesCommand {
 
     }
 
-    private static int removeEntities(CommandContext<CommandSourceStack> context, ResourceLocation type) {
+    private static int removeEntities(CommandContext<CommandSourceStack> context, Identifier type) {
         counter = 0;
         List<ServerLevel> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
         worlds.forEach(world -> world.getEntities().getAll().forEach(entity -> {
@@ -74,8 +74,8 @@ public class RemoveEntitiesCommand {
                 if(!entity.hasCustomName())
                    removeEntity(entity);
             } else {
-                var resourceLocation = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
-                if (resourceLocation != null && resourceLocation.equals(type)) {
+                var Identifier = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+                if (Identifier != null && Identifier.equals(type)) {
                     removeEntity(entity);
                 }
             }
@@ -92,9 +92,9 @@ public class RemoveEntitiesCommand {
             if (regex == null) {
                 remove = !entity.hasCustomName();
             } else {
-                var resourceLocation = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
-                if (resourceLocation != null) {
-                    remove = resourceLocation.toString().matches(regex);
+                var Identifier = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+                if (Identifier != null) {
+                    remove = Identifier.toString().matches(regex);
                 }
             }
             if (remove)

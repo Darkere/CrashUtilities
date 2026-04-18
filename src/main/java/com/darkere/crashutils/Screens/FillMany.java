@@ -1,29 +1,17 @@
 package com.darkere.crashutils.Screens;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.render.TextureSetup;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.state.gui.ColoredRectangleRenderState;
 import org.joml.Matrix4f;
 
 import java.util.List;
 
 public class FillMany {
-    public static final class ColoredRectangle {
-        public final int x0;
-        public final int y0;
-        public final int x1;
-        public final int y1;
-        public final int color;
-
-        public ColoredRectangle(int x0, int y0, int x1, int y1, int color) {
-            this.x0 = x0;
-            this.y0 = y0;
-            this.x1 = x1;
-            this.y1 = y1;
-            this.color = color;
-        }
+    public record ColoredRectangle(int x0, int y0, int x1, int y1, int color) {
     }
 
     public static final class Text {
@@ -40,31 +28,17 @@ public class FillMany {
         }
     }
 
-    public static void drawStrings(GuiGraphics guiGraphics, Font renderer, List<Text> texts) {
+    public static void drawStrings(GuiGraphicsExtractor guiGraphics, Font renderer, List<Text> texts) {
         for (Text text : texts) {
-            guiGraphics.drawString(renderer,text.text,text.x,text.y,text.color, false);
-//            renderer.drawInBatch(guiGraphics, text.text, text.x, text.y, text.color);
+            guiGraphics.text(renderer,text.text,text.x,text.y,text.color, false);
         }
     }
 
-    public static void fillMany(Matrix4f matrix, List<ColoredRectangle> rects) {
-//        RenderSystem.enableBlend();
-//        RenderSystem.disableTexture();
-//        RenderSystem.defaultBlendFunc();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-
-        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-
-        for (ColoredRectangle rect : rects) {
-            addRectangle(bufferbuilder, matrix, rect.x0, rect.y0, rect.x1, rect.y1, rect.color);
-        }
-
-        var result = bufferbuilder.build();
-        if(result != null)
-            BufferUploader.drawWithShader(result);
-
-//        RenderSystem.enableTexture();
-//        RenderSystem.disableBlend();
+    public static void fillMany(GuiGraphicsExtractor graphics, List<ColoredRectangle> rects) {
+        var matrix = graphics.pose().pushMatrix();
+        graphics.submitGuiElementRenderState( new MultiColoredRectangleRenderState(
+                RenderPipelines.GUI, TextureSetup.noTexture(), matrix,rects, graphics.peekScissorStack()));
+        matrix.popMatrix();
     }
 
     private static void addRectangle(BufferBuilder bufferbuilder, Matrix4f matrix, int x0, int y0, int x1, int y1, int color) {

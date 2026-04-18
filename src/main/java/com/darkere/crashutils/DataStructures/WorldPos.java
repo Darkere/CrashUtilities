@@ -21,7 +21,7 @@ public record WorldPos(BlockPos pos, ResourceKey<Level> type, UUID id) {
     );
 
     public static WorldPos getPosFromEntity(Entity entity) {
-        return new WorldPos(entity.getOnPos(), entity.getCommandSenderWorld().dimension(), entity.getUUID());
+        return new WorldPos(entity.getOnPos(), entity.level().dimension(), entity.getUUID());
     }
 
     public static WorldPos getPosFromTileEntity(TickingBlockEntity entity, Level level) {

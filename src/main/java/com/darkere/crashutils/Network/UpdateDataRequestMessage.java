@@ -1,6 +1,5 @@
 package com.darkere.crashutils.Network;
 
-import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.CrashUtils;
 import com.darkere.crashutils.DataStructures.EntityData;
 import com.darkere.crashutils.DataStructures.LoadedChunkData;
@@ -20,12 +19,11 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 public record UpdateDataRequestMessage(DataRequestType RequestType, ResourceKey<Level> worldKey) implements CustomPacketPayload {
 
-    public static final Type<UpdateDataRequestMessage> TYPE = new Type<>(CrashUtils.ResourceLocation("updatedatarequestmessage"));
+    public static final Type<UpdateDataRequestMessage> TYPE = new Type<>(CrashUtils.Identifier("updatedatarequestmessage"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, UpdateDataRequestMessage> STREAM_CODEC = StreamCodec.composite(
             NeoForgeStreamCodecs.enumCodec(DataRequestType.class), UpdateDataRequestMessage::RequestType,
@@ -34,8 +32,9 @@ public record UpdateDataRequestMessage(DataRequestType RequestType, ResourceKey<
 
     public static void handle(UpdateDataRequestMessage data, IPayloadContext ctx) {
         var player = (ServerPlayer) ctx.player();
-        if (!player.hasPermissions(CommandUtils.PERMISSION_LEVEL)) return;
-        MinecraftServer server = player.getServer();
+        if (!CrashUtils.HasCUPerms(player))
+            return;
+        MinecraftServer server = player.level().getServer();
         if (server == null) return;
         ServerLevel world = server.getLevel(data.worldKey);
         List<ServerLevel> worlds = Collections.singletonList(world);

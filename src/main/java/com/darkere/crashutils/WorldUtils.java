@@ -10,32 +10,26 @@ import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.CapabilityHooks;
-import net.neoforged.neoforge.capabilities.CapabilityRegistry;
-import net.neoforged.neoforge.capabilities.EntityCapability;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import top.theillusivec4.curios.api.CuriosApi;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class WorldUtils {
 
@@ -56,7 +50,7 @@ public class WorldUtils {
     }
 
     public static void teleportPlayer(Player player, Level startWorld, Level destWorld, BlockPos newPos) {
-        if (player.getCommandSenderWorld().isClientSide()) {
+        if (player.level().isClientSide()) {
             Network.sendToServer(new TeleportMessage(startWorld.dimension(), destWorld.dimension(), newPos));
             return;
         }
@@ -65,21 +59,21 @@ public class WorldUtils {
             int y = chunk.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, newPos.getX(), newPos.getZ());
             newPos = new BlockPos(newPos.getX(), y, newPos.getZ());
         }
-        player.teleportTo((ServerLevel) destWorld,newPos.getX() +1 ,newPos.getY(),newPos.getZ(),Set.of(), player.getYRot(), player.getXRot());
+        player.teleportTo((ServerLevel) destWorld,newPos.getX() +1 ,newPos.getY(),newPos.getZ(),Set.of(), player.getYRot(), player.getXRot(),true);
     }
 
     public static boolean applyToPlayer(String playerName, MinecraftServer server, Consumer<ServerPlayer> consumer) {
         ServerPlayer player = server.getPlayerList().getPlayerByName(playerName);
         if (player == null) {
-            Optional<GameProfile> profile = server.getProfileCache().get(playerName);
+            Optional<GameProfile> profile = server.services().profileResolver().fetchByName(playerName);
             if (profile.isEmpty()) {
                 return false;
             }
 
             FakePlayer fakePlayer = new CustomFakePlayer(server.getLevel(Level.OVERWORLD), profile.get());
-            Optional<CompoundTag> nbt = server.playerDataStorage.load(fakePlayer);
+            Optional<CompoundTag> nbt = server.playerDataStorage.load(new NameAndId(profile.get()));
             if (nbt.isEmpty()) return false;
-            fakePlayer.load(nbt.get());
+            fakePlayer.load(TagValueInput.create(CrashUtils.PROBLEM_COLLECTOR,fakePlayer.registryAccess(),nbt.get()));
             //hackfix to solve curios not getting initialised for fakeplayers
             CuriosApi.getCuriosInventory(fakePlayer);
             consumer.accept(fakePlayer);
@@ -100,7 +94,7 @@ public class WorldUtils {
 
     public static void removeEntity(Level world, UUID id) {
         if (NetworkTools.returnOnNull(world, id)) return;
-        if (world.isClientSide) {
+        if (world.isClientSide()) {
             Network.sendToServer(new RemoveEntityMessage(world.dimension(), id, false, false));
             return;
         }
@@ -109,10 +103,10 @@ public class WorldUtils {
         e.remove(Entity.RemovalReason.DISCARDED);
     }
 
-    public static void removeEntityType(Level world, ResourceLocation rl, boolean force) {
+    public static void removeEntityType(Level world, Identifier rl, boolean force) {
         if (NetworkTools.returnOnNull(world, rl)) return;
         List<Runnable> runnables = new ArrayList<>();
-        if (world.isClientSide) {
+        if (world.isClientSide()) {
             Network.sendToServer(new RemoveEntitiesMessage(world.dimension(), rl, ChunkPos.ZERO, false, force,true));
             return;
         }
@@ -127,9 +121,9 @@ public class WorldUtils {
         runnables.forEach(Runnable::run);
     }
 
-    public static void removeEntitiesInChunk(Level world, ChunkPos pos, ResourceLocation rl, boolean force) {
+    public static void removeEntitiesInChunk(Level world, ChunkPos pos, Identifier rl, boolean force) {
         if (NetworkTools.returnOnNull(world, pos, rl)) return;
-        if (world.isClientSide) {
+        if (world.isClientSide()) {
             Network.sendToServer(new RemoveEntitiesMessage(world.dimension(), rl, pos, false, force, false));
             return;
         }
@@ -140,7 +134,7 @@ public class WorldUtils {
 
     public static void removeTileEntity(Level world, UUID id, boolean force) {
         if (NetworkTools.returnOnNull(world, id)) return;
-        if (world.isClientSide) {
+        if (world.isClientSide()) {
             Network.sendToServer(new RemoveEntityMessage(world.dimension(), id, true, force));
             return;
         }
@@ -154,18 +148,18 @@ public class WorldUtils {
         });
     }
 
-    public static void removeTileEntityType(Level level, ResourceLocation rl, boolean force) {
+    public static void removeTileEntityType(Level level, Identifier rl, boolean force) {
         if (NetworkTools.returnOnNull(level, rl)) return;
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             Network.sendToServer(new RemoveEntitiesMessage(level.dimension(), rl, ChunkPos.ZERO, true, force, true));
             return;
         }
-
-        for (ChunkHolder chunk : ((ServerLevel) level).getChunkSource().chunkMap.getChunks()) {
+        ((ServerLevel) level).getChunkSource().chunkMap.forEachBlockTickingChunk((chunk ->
+        {
             if (chunk.getFullStatus().isOrAfter(FullChunkStatus.BLOCK_TICKING)) {
-                chunk.getTickingChunk().getBlockEntities().forEach((pos, e) -> {
+                chunk.getBlockEntities().forEach((pos, e) -> {
                     {
-                        if (BlockEntityType.getKey(e.getType()).equals(rl)) {
+                        if (e.typeHolder().getKey().identifier().equals(rl)) {
                             CrashUtils.runNextTick((wld) -> {
                                 if (force) {
                                     level.removeBlockEntity(e.getBlockPos());
@@ -178,12 +172,13 @@ public class WorldUtils {
                     }
                 });
             }
-        }
+
+        }));
     }
 
-    public static void removeTileEntitiesInChunk(Level level, ChunkPos pos, ResourceLocation rl, boolean force) {
+    public static void removeTileEntitiesInChunk(Level level, ChunkPos pos, Identifier rl, boolean force) {
         if (NetworkTools.returnOnNull(level, pos, rl)) return;
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             Network.sendToServer(new RemoveEntitiesMessage(level.dimension(), rl, pos, true, force,false));
             return;
         }
@@ -200,5 +195,23 @@ public class WorldUtils {
                 }
             });
         });
+    }
+    public static @org.jspecify.annotations.Nullable Player loadFakePlayer(String playerName, MinecraftServer Server, ServerPlayer sourcePlayer) {
+        Player otherPlayer;
+        NameAndId profile = Server.services().nameToIdCache().get(playerName).orElse(null);
+        if (profile == null) {
+            if(sourcePlayer != null)
+                CommandUtils.sendMessageToPlayer(sourcePlayer, "Cannot find Player");
+            return null;
+        }
+        otherPlayer = new FakePlayer(Server.getLevel(Level.OVERWORLD), new GameProfile(profile.id(), profile.name()));
+        Optional<CompoundTag> nbt = Server.playerDataStorage.load(otherPlayer.nameAndId());
+        if (nbt.isEmpty()) {
+            if(sourcePlayer != null)
+                sourcePlayer.sendSystemMessage(CommandUtils.CreateTextComponent("Cannot load playerData"), false);
+            return null;
+        }
+        otherPlayer.load(TagValueInput.create(CrashUtils.PROBLEM_COLLECTOR,otherPlayer.registryAccess(),nbt.get()));
+        return otherPlayer;
     }
 }

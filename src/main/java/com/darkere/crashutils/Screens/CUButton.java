@@ -2,10 +2,13 @@ package com.darkere.crashutils.Screens;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 
+import java.awt.*;
 import java.util.List;
 
 public class CUButton extends Button {
@@ -18,24 +21,10 @@ public class CUButton extends Button {
         super(xPos, yPos, width, height, displayString, handler,DEFAULT_NARRATION);
         tooltips = tooltip;
     }
-    //Copied from Extended Button
-    @Override
-    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        Minecraft mc = Minecraft.getInstance();
-        int k = !this.active ? 0 : (this.isHoveredOrFocused() ? 2 : 1);
-        guiGraphics.blitSprite(SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
-//        guiGraphics.blitWithBorder(SPRITES.enabled(), this.getX(), this.getY(), 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2);
-
-        Component buttonText = this.getMessage();
-
-        guiGraphics.drawCenteredString(mc.font, buttonText, this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, getFGColor());
-        if(isHovered())
-            GuiTools.drawTextToolTip(guiGraphics,tooltips,mouseX,mouseY);
-    }
 
     @Override
     public int getFGColor() {
-       return this.isActive() ? 16777215 : 10526880; // White : Light Grey
+       return this.isActive() ? Color.WHITE.getRGB() : 10526880; // White : Light Grey
     }
 
 //    @Override
@@ -51,13 +40,13 @@ public class CUButton extends Button {
 //    }
 
     @Override
-    public boolean mouseClicked(double p_93641_, double p_93642_, int p_93643_) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleclick) {
         if (this.isActive() && this.visible) {
-            if (this.isValidClickButton(p_93643_)) {
-                boolean flag = this.clicked(p_93641_, p_93642_);
+            if (this.isValidClickButton(event.buttonInfo())) {
+                boolean flag = this.isActive();
                 if (flag) {
                     this.playDownSound(Minecraft.getInstance().getSoundManager());
-                    this.onClick(p_93641_, p_93642_);
+                    this.onClick(event,doubleclick);
                     return true;
                 }
             }
@@ -68,7 +57,16 @@ public class CUButton extends Button {
         }
     }
 
-    public interface OnTooltip {
-        void onTooltip(Button p_93753_, PoseStack p_93754_, int p_93755_, int p_93756_);
+    @Override
+    protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        Minecraft mc = Minecraft.getInstance();
+        int k = !this.active ? 0 : (this.isHoveredOrFocused() ? 2 : 1);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED,SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
+        //        guiGraphics.blitWithBorder(SPRITES.enabled(), this.getX(), this.getY(), 0, 46 + k * 20, this.width, this.height, 200, 20, 2, 3, 2, 2);
+
+        Component buttonText = this.getMessage();
+        graphics.centeredText(mc.font, buttonText, this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, getFGColor());
+        if(isHovered())
+            GuiTools.drawTextToolTip(graphics,tooltips,mouseX,mouseY);
     }
 }

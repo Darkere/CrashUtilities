@@ -51,9 +51,9 @@ public class PlayerActivityHistory {
                         return;
                     }
 
-                    Optional<GameProfile> profile = world.getServer().getProfileCache().get(uuid);
+                    Optional<GameProfile> profile = world.getServer().services().profileResolver().fetchById(uuid);
                     if (profile.isEmpty()) return;
-                    String playerName = profile.get().getName();
+                    String playerName = profile.get().name();
                     month.add(playerName);
                     if (diff < weekTime) {
                         week.add(playerName);

@@ -1,8 +1,9 @@
 package com.darkere.crashutils.Screens;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.input.MouseButtonEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +39,7 @@ public class CUList{
         this.action = action;
     }
 
-    public void render(GuiGraphics guiGraphics, int mx, int my, float partialTicks) {
+    public void render(GuiGraphicsExtractor guiGraphics, int mx, int my, float partialTicks) {
         if (!isEnabled) return;
         int x = posX;
         int y = posY + 1;
@@ -54,12 +55,12 @@ public class CUList{
                 button.setX(x + width - currentOption.getButtonWidth(i));
                 button.setY(y - 2);
                 //button.isHovered = button.isMouseOver(mx, my);
-                button.render(guiGraphics, mx, my, partialTicks);
+                button.extractRenderState(guiGraphics, mx, my, partialTicks);
             }
             y += lineHeight;
             if (j == currentOffset + fitOnScreen) break;
         }
-        FillMany.fillMany(guiGraphics.pose().last().pose(), seps);
+        FillMany.fillMany(guiGraphics, seps);
         FillMany.drawStrings(guiGraphics, Minecraft.getInstance().font, text);
 
     }
@@ -104,8 +105,10 @@ public class CUList{
         return false;
     }
 
-    public boolean checkClick(int mx, int my) {
+    public boolean checkClick(MouseButtonEvent event) {
         if (!isEnabled) return false;
+        var mx = (int)event.x();
+        var my = (int)event.y();
         if (!GuiTools.inArea(mx, my, posX, posY, posX + width, posY + height)) return false;
         int selected = (my - posY) / lineHeight;
         CUOption selectedOption;
@@ -114,7 +117,7 @@ public class CUList{
         } catch (IndexOutOfBoundsException e) {
             return false;
         }
-        if (!selectedOption.checkClick(mx, my, parent)) {
+        if (!selectedOption.checkClick(event, parent)) {
             if (action != null) action.accept(selectedOption);
         }
         return true;

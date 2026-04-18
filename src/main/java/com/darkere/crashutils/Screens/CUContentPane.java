@@ -3,7 +3,10 @@ package com.darkere.crashutils.Screens;
 import com.darkere.crashutils.DataStructures.DataHolder;
 import com.darkere.crashutils.Network.DataRequestType;
 import com.darkere.crashutils.Screens.Types.DropDownType;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
@@ -50,14 +53,14 @@ public abstract class CUContentPane {
         return (mx >= XTopLeft && mx <= XTopLeft + XAcross && my >= YTopLeft && my <= YTopLeft + YAcross);
     }
 
-    public void render(GuiGraphics guiGraphics, int centerX, int centerY, int mx, int my, float partialTicks) {
+    public void render(GuiGraphicsExtractor guiGraphics, int centerX, int centerY, int mx, int my, float partialTicks) {
         updateRenderValues(centerX, centerY);
         guiGraphics.fill( XTopLeft, YTopLeft, XAcross + XTopLeft, YAcross + YTopLeft, 0xFF000000);
     }
 
     public abstract void updateSelection(DropDownType ddtype, String s);
 
-    public abstract boolean mouseClicked(double mx, double my, int mouseButton);
+    public abstract boolean mouseClicked(MouseButtonEvent event, boolean doubleclick);
 
     public void updateRenderValues(int centerX, int centerY) {
         this.centerX = centerX;
@@ -66,10 +69,10 @@ public abstract class CUContentPane {
         YTopLeft = centerY + defaultRenderOffsetY;
     }
 
-    public abstract boolean mouseClickedOutside(double mx, double my, int centerX, int centerY, int mouseButton);
+    public abstract boolean mouseClickedOutside(MouseButtonEvent event, boolean doubleclick);
 
-    public abstract boolean keyPressed(int keyCode, int scanCode, int modifiers);
+    public abstract boolean keyPressed(KeyEvent event);
 
-    public abstract boolean charTyped(char p_charTyped_1_, int p_charTyped_2_);
+    public abstract boolean charTyped(CharacterEvent event);
 
 }

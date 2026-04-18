@@ -4,16 +4,19 @@ import com.darkere.crashutils.DataStructures.DataHolder;
 import com.darkere.crashutils.Network.DataRequestType;
 import com.darkere.crashutils.Screens.Types.DropDownType;
 import com.darkere.crashutils.Screens.Types.GridRenderType;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
 import java.awt.*;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class MapGUI extends CUContentPane {
@@ -50,8 +53,8 @@ public class MapGUI extends CUContentPane {
         colormap.put("no_ticket", -6250336);//lighter Gray
         RENDERTYPES = new CUDropDown(DropDownType.RENDERTYPES, screen, Arrays.stream(GridRenderType.values()).map(x -> x.type).collect(Collectors.toList()), GridRenderType.LOCATIONTYPE.type, -192, -105, 75);
         TICKETS = new CUDropDown(DropDownType.TICKETS, screen, DataHolder.getLatestChunkData() == null ? new ArrayList<>() : new ArrayList<>(DataHolder.getLatestChunkData().getChunksByTicketName().keySet()), "all", -106, -105, 0);
-        ENTITIES = new CUDropDown(DropDownType.ENTITIES, screen, DataHolder.getLatestEntityData() == null ? new ArrayList<>() : DataHolder.getLatestEntityData().getMap().keySet().stream().map(ResourceLocation::toString).collect(Collectors.toList()), "all", -106, -105, 0);
-        TILEENTITIES = new CUDropDown(DropDownType.TILEENTITIES, screen, DataHolder.getLatestTileEntityData() == null ? new ArrayList<>() : DataHolder.getLatestTileEntityData().getMap().keySet().stream().map(ResourceLocation::toString).collect(Collectors.toList()), "all", -106, -105, 0);
+        ENTITIES = new CUDropDown(DropDownType.ENTITIES, screen, DataHolder.getLatestEntityData() == null ? new ArrayList<>() : DataHolder.getLatestEntityData().getMap().keySet().stream().map(Identifier::toString).collect(Collectors.toList()), "all", -106, -105, 0);
+        TILEENTITIES = new CUDropDown(DropDownType.TILEENTITIES, screen, DataHolder.getLatestTileEntityData() == null ? new ArrayList<>() : DataHolder.getLatestTileEntityData().getMap().keySet().stream().map(Identifier::toString).collect(Collectors.toList()), "all", -106, -105, 0);
         screen.topDropDowns.add(RENDERTYPES);
         screen.topDropDowns.add(TICKETS);
         screen.topDropDowns.add(ENTITIES);
@@ -59,13 +62,13 @@ public class MapGUI extends CUContentPane {
         RENDERTYPES.setEnabled(true);
         DataHolder.setListener(() -> {
             TICKETS.updateOptions(DataHolder.getLatestChunkData() == null ? new ArrayList<>() : new ArrayList<>(DataHolder.getLatestChunkData().getChunksByTicketName().keySet()));
-            ENTITIES.updateOptions(DataHolder.getLatestEntityData() == null ? new ArrayList<>() : DataHolder.getLatestEntityData().getMap().keySet().stream().map(ResourceLocation::toString).collect(Collectors.toList()));
-            TILEENTITIES.updateOptions(DataHolder.getLatestTileEntityData() == null ? new ArrayList<>() : DataHolder.getLatestTileEntityData().getMap().keySet().stream().map(ResourceLocation::toString).collect(Collectors.toList()));
+            ENTITIES.updateOptions(DataHolder.getLatestEntityData() == null ? new ArrayList<>() : DataHolder.getLatestEntityData().getMap().keySet().stream().map(Identifier::toString).collect(Collectors.toList()));
+            TILEENTITIES.updateOptions(DataHolder.getLatestTileEntityData() == null ? new ArrayList<>() : DataHolder.getLatestTileEntityData().getMap().keySet().stream().map(Identifier::toString).collect(Collectors.toList()));
             DataHolder.resetFilters();
         });
     }
 
-    public void render(GuiGraphics guiGraphics, int centerX, int centerY, int mx, int my, float partialTicks) {
+    public void render(GuiGraphicsExtractor guiGraphics, int centerX, int centerY, int mx, int my, float partialTicks) {
         super.render(guiGraphics, centerX, centerY, mx, my, partialTicks);
         List<FillMany.ColoredRectangle> list = new ArrayList<>();
         for (int i = 0; i < XAcross; i++) {
@@ -75,13 +78,13 @@ public class MapGUI extends CUContentPane {
                 list.add(new FillMany.ColoredRectangle(i + XTopLeft, j + YTopLeft, i + 1 + XTopLeft, j + 1 + YTopLeft, x));
             }
         }
-        FillMany.fillMany(guiGraphics.pose().last().pose(), list);
+        FillMany.fillMany(guiGraphics, list);
     }
 
     public void goTo(BlockPos pos) {
-        ChunkPos chunkPos = new ChunkPos(pos);
-        XOffset = -170 + chunkPos.x;
-        YOffset = -90 + chunkPos.z;
+        ChunkPos chunkPos = ChunkPos.containing(pos);
+        XOffset = -170 + chunkPos.x();
+        YOffset = -90 + chunkPos.z();
     }
 
     public void setRenderType(GridRenderType type) {
@@ -137,7 +140,7 @@ public class MapGUI extends CUContentPane {
         }
         if (loc == null || loc.isEmpty() || loc.equals("[]")) return 0;
         if (renderFilter != null && !renderFilter.isEmpty()) {
-            if (!loc.equals(renderFilter)) return 0;
+            if (!loc.contains(renderFilter)) return 0;
         }
         if (colormap.containsKey(loc)) {
             return colormap.get(loc);
@@ -287,22 +290,22 @@ public class MapGUI extends CUContentPane {
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int mouseButton) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleclick) {
         return false;
     }
 
     @Override
-    public boolean mouseClickedOutside(double mx, double my, int centerX, int centerY, int mouseButton) {
+    public boolean mouseClickedOutside(MouseButtonEvent mouseButtonEvent, boolean doubleclick) {
         return false;
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         return false;
     }
 
     @Override
-    public boolean charTyped(char p_charTyped_1_, int p_charTyped_2_) {
+    public boolean charTyped(CharacterEvent event) {
         return false;
     }
 

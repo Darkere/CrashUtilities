@@ -35,14 +35,14 @@ public class UnstuckCommand implements Command<CommandSourceStack> {
         if (player == null) {
             success.set(WorldUtils.applyToPlayer(name, context.getSource().getServer(), (fakePlayer) -> {
                 ServerLevel overworld = context.getSource().getServer().getLevel(Level.OVERWORLD);
-                BlockPos spawn = overworld.getSharedSpawnPos();
+                BlockPos spawn = overworld.getRespawnData().pos();
                 fakePlayer.setLevel(overworld);
                 fakePlayer.setPos(spawn.getX(), spawn.getY(), spawn.getZ());
             }));
 
         } else {
-            BlockPos p = context.getSource().getServer().getLevel(Level.OVERWORLD).getSharedSpawnPos();
-            WorldUtils.teleportPlayer(player, player.getCommandSenderWorld(), player.getServer().getLevel(Level.OVERWORLD), p);
+            BlockPos p = context.getSource().getServer().getLevel(Level.OVERWORLD).getRespawnData().pos();
+            WorldUtils.teleportPlayer(player, player.level(), player.level().getServer().getLevel(Level.OVERWORLD), p);
         }
 
         if (success.get()) {

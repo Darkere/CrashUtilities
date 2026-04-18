@@ -10,7 +10,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 
 public record PlayerDataMessage( PlayerData data) implements CustomPacketPayload {
-    public static final Type<PlayerDataMessage> TYPE = new Type<>(CrashUtils.ResourceLocation("playerdatamessage"));
+    public static final Type<PlayerDataMessage> TYPE = new Type<>(CrashUtils.Identifier("playerdatamessage"));
     public static final StreamCodec<? super RegistryFriendlyByteBuf, PlayerDataMessage> STREAM_CODEC = StreamCodec.composite(
             PlayerData.STREAM_CODEC,PlayerDataMessage::data,
             PlayerDataMessage::new

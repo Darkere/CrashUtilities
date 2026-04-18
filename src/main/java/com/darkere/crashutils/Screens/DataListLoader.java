@@ -4,8 +4,8 @@ import com.darkere.crashutils.DataStructures.*;
 import com.darkere.crashutils.Network.*;
 import com.darkere.crashutils.WorldUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -31,7 +31,7 @@ public class DataListLoader {
     Consumer<CUOption> tpAction = option -> {
         Player player = Minecraft.getInstance().player;
         if (player == null) return;
-        WorldUtils.teleportPlayer(player, player.getCommandSenderWorld(), player.getCommandSenderWorld(), option.blockPos);
+        WorldUtils.teleportPlayer(player, player.level(), player.level(), option.blockPos);
     };
     List<Consumer<Boolean>> history = new ArrayList<>();
 
@@ -95,7 +95,7 @@ public class DataListLoader {
         setCurrentList(list, numberComparer, action, isUpdate);
     }
 
-    public void loadChunkListForEntity(ResourceLocation name, boolean isUpdate) {
+    public void loadChunkListForEntity(Identifier name, boolean isUpdate) {
 
         if (!isUpdate){
             setReloadListener(DataRequestType.ENTITYDATA, () -> loadChunkListForEntity(name, true));
@@ -113,7 +113,7 @@ public class DataListLoader {
         setCurrentList(list, numberComparer, action, isUpdate);
     }
 
-    public void loadEntitiesInChunkAsList(ChunkPos chunkPos, ResourceLocation name, boolean isUpdate) {
+    public void loadEntitiesInChunkAsList(ChunkPos chunkPos, Identifier name, boolean isUpdate) {
         if (!isUpdate){
             setReloadListener(DataRequestType.ENTITYDATA, () -> loadEntitiesInChunkAsList(chunkPos, name, true));
             addToHistory((newUpdate) -> loadEntitiesInChunkAsList(chunkPos, name, newUpdate));
@@ -152,7 +152,7 @@ public class DataListLoader {
         setCurrentList(list, numberComparer, action, isUpdate);
     }
 
-    public void loadChunkListForTileEntity(ResourceLocation name, boolean isUpdate) {
+    public void loadChunkListForTileEntity(Identifier name, boolean isUpdate) {
         if (!isUpdate){
             setReloadListener(DataRequestType.TILEENTITYDATA, () -> loadChunkListForTileEntity(name, true));
             addToHistory((newUpdate) -> loadChunkListForTileEntity(name, newUpdate));
@@ -163,7 +163,7 @@ public class DataListLoader {
         list.forEach(option -> {
             option.addButton("Teleport",
                  "Teleport to the center of the chunk",
-                (x) -> WorldUtils.teleportPlayer(Minecraft.getInstance().player, Minecraft.getInstance().player.getCommandSenderWorld(), Minecraft.getInstance().player.getCommandSenderWorld(), WorldUtils.getChunkCenter(option.chunkPos)));
+                (x) -> WorldUtils.teleportPlayer(Minecraft.getInstance().player, Minecraft.getInstance().player.level(), Minecraft.getInstance().player.level(), WorldUtils.getChunkCenter(option.chunkPos)));
             option.addButton("Remove",
                  "Remove all " + option.rl + " in this chunk",
                 x -> WorldUtils.removeTileEntitiesInChunk(Minecraft.getInstance().level, option.chunkPos, option.rl, false));
@@ -175,7 +175,7 @@ public class DataListLoader {
         setCurrentList(list, numberComparer, action, isUpdate);
     }
 
-    public void loadTileEntitiesInChunkList(ChunkPos chunkPos, ResourceLocation name, boolean isUpdate) {
+    public void loadTileEntitiesInChunkList(ChunkPos chunkPos, Identifier name, boolean isUpdate) {
 
         if (!isUpdate){
             setReloadListener(DataRequestType.TILEENTITYDATA, () -> loadTileEntitiesInChunkList(chunkPos, name, true));
@@ -224,7 +224,7 @@ public class DataListLoader {
         list.forEach(option ->
             option.addButton("Teleport",
                  "Teleport to the center of the chunk",
-                (x) -> WorldUtils.teleportPlayer(Minecraft.getInstance().player, Minecraft.getInstance().player.getCommandSenderWorld(), Minecraft.getInstance().player.getCommandSenderWorld(), WorldUtils.getChunkCenter(option.chunkPos))));
+                (x) -> WorldUtils.teleportPlayer(Minecraft.getInstance().player, Minecraft.getInstance().player.level(), Minecraft.getInstance().player.level(), WorldUtils.getChunkCenter(option.chunkPos))));
         setCurrentList(list, null, null, isUpdate);
     }
 
@@ -253,7 +253,7 @@ public class DataListLoader {
         list.forEach(option ->
             option.addButton("Teleport",
                  "Teleport to the center of the chunk",
-                (x) -> WorldUtils.teleportPlayer(Minecraft.getInstance().player, Minecraft.getInstance().player.getCommandSenderWorld(), Minecraft.getInstance().player.getCommandSenderWorld(), WorldUtils.getChunkCenter(option.chunkPos))));
+                (x) -> WorldUtils.teleportPlayer(Minecraft.getInstance().player, Minecraft.getInstance().player.level(), Minecraft.getInstance().player.level(), WorldUtils.getChunkCenter(option.chunkPos))));
         setCurrentList(list, null, null, isUpdate);
     }
 

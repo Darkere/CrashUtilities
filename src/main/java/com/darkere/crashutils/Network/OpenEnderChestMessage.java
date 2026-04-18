@@ -2,16 +2,17 @@ package com.darkere.crashutils.Network;
 
 import com.darkere.crashutils.CommandUtils;
 import com.darkere.crashutils.CrashUtils;
+import com.darkere.crashutils.WorldUtils;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -19,6 +20,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.TagValueInput;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
@@ -27,30 +29,19 @@ import java.util.Optional;
 
 public record OpenEnderChestMessage(String playerName) implements CustomPacketPayload {
 
-    public static final Type<OpenEnderChestMessage> TYPE = new Type<>(CrashUtils.ResourceLocation("openenderchestmessage"));
+    public static final Type<OpenEnderChestMessage> TYPE = new Type<>(CrashUtils.Identifier("openenderchestmessage"));
     public static final StreamCodec<RegistryFriendlyByteBuf, OpenEnderChestMessage> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.STRING_UTF8,OpenEnderChestMessage::playerName,OpenEnderChestMessage::new);
 
 
     public static boolean handle(OpenEnderChestMessage data, IPayloadContext ctx) {
             ServerPlayer player = (ServerPlayer) ctx.player();
-            if(player.getServer() == null || !player.hasPermissions(CommandUtils.PERMISSION_LEVEL)){
+            Permission.HasCommandLevel GameMasterPerms = new Permission.HasCommandLevel(PermissionLevel.GAMEMASTERS);
+            if(ctx.player().level().getServer() == null || !player.permissions().hasPermission(GameMasterPerms)){
                 return true;
             }
-            Player otherPlayer = player.getServer().getPlayerList().getPlayerByName(data.playerName);
-            if (otherPlayer == null) {
-                Optional<GameProfile> profile = player.getServer().getProfileCache().get(data.playerName);
-                if (profile.isEmpty()) {
-                    CommandUtils.sendMessageToPlayer(player,"Cannot find Player" );
-                    return true;
-                }
-                otherPlayer = new FakePlayer(player.getServer().getLevel(Level.OVERWORLD), profile.get());
-                Optional<CompoundTag> nbt = player.getServer().playerDataStorage.load(otherPlayer);
-                if (nbt.isEmpty()) {
-                    CommandUtils.sendMessageToPlayer(player,"Cannot load playerData");
-                    return true;
-                }
-                otherPlayer.load(nbt.get());
-            }
+            Player otherPlayer = player.level().getServer().getPlayerList().getPlayerByName(data.playerName);
+            if (otherPlayer == null)
+                otherPlayer = WorldUtils.loadFakePlayer(data.playerName,player.level().getServer(),player);
 
             Player finalOtherPlayer = otherPlayer;
 
@@ -68,7 +59,7 @@ public record OpenEnderChestMessage(String playerName) implements CustomPacketPa
                         public void removed(Player p_75134_1_) {
                             super.removed(p_75134_1_);
 
-                            player.getServer().playerDataStorage.save(finalOtherPlayer);
+                            player.level().getServer().playerDataStorage.save(finalOtherPlayer);
                         }
 
                         @Override

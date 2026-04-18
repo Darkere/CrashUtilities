@@ -11,7 +11,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.server.level.ServerLevel;
 
-import java.util.HashMap;
 import java.util.List;
 
 public class AllEntitiesCommand implements Command<CommandSourceStack> {

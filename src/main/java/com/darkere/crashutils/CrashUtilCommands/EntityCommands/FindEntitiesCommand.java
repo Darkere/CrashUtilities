@@ -11,9 +11,9 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public class FindEntitiesCommand implements Command<CommandSourceStack> {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("find")
-                .then(Commands.argument("res", ResourceLocationArgument.id())
+                .then(Commands.argument("res", IdentifierArgument.id())
                         .suggests(sugg)
                         .executes(cmd)
                         .then(Commands.argument("dim", DimensionArgument.dimension())
@@ -39,7 +39,7 @@ public class FindEntitiesCommand implements Command<CommandSourceStack> {
         EntityData list = new EntityData();
         List<ServerLevel> worlds = WorldUtils.getWorldsFromDimensionArgument(context);
         list.createLists(worlds);
-        ResourceLocation res = ResourceLocationArgument.getId(context, "res");
+        Identifier res = IdentifierArgument.getId(context, "res");
         list.reply(res, context.getSource());
         return Command.SINGLE_SUCCESS;
     }
